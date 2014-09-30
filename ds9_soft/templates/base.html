@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+	   <link rel="stylesheet" href="/media/css/style.css" />
+	   <title>{% block title %}ds9 web application{% endblock %}</title>
+	</head>
+
+	<body>
+
+		<header><h1>DS9 WEB APPLICATION</h1></header>
+		<nav>
+			{% block nav %}
+		        <ul>
+			   <li><a href="/">Home</a></li>
+		       </ul>
+		       {% endblock %}
+		   </nav>
+
+	   <section id="content">
+	       {% block content %}{% endblock %}
+	   </section>
+
+	<footer>ds9 web application</footer>
+	</body>
+</html>
