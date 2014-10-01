@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+	<h1>Ajouter un nouveau contact</h1>
+
+	{% if save %}
+	    <p>User saved.</p>
+	{% endif %}
+	   
+	<p>
+	    <form method="post" enctype="multipart/form-data" action=".">
+	       {% csrf_token %}
+	       {{ form.as_p }}
+	       <input type="submit" value="Create"/>
+	    </form>
+	</p>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+	{% for u in users %}
+		<div class="users">
+			<h1>{{u.FIRSTNAME_USER}} {{u.LASTNAME_USER}}</h1>
+			<p>{{u.EMAIL_USER}}</p>
+			<a href="/ds9s/view/{{u.id}}">See more</a>
+		</div>
+	{% endfor %}
+{% endblock %}

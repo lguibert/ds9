@@ -1,0 +1,55 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+header, footer, body{
+	width:1000px;
+	margin: auto;
+}
+
+header{
+	height:100px;
+	text-align: center;
+}
+
+nav{
+	height: 50px;
+	text-align: center;
+}
+
+nav li{
+	text-decoration: none;
+	list-style: none;
+	padding:5px;
+	margin:5px;
+	display:inline-block;
+}
+
+nav li:hover{
+	background-color: lightgray;
+}
+
+header, footer, nav{
+	background-color: lightblue;
+}
+
+footer{
+	clear:both;
+}
+
+#content{
+	background-color:lightgray;
+	border-left: solid black 1px;
+	border-right: solid black 1px;
+}
+
+.users{
+	width: 150px;
+	float:left;
+	padding:15px;
+}
+
+.users:hover{
+	background-color: darkgray;
+	color:white;
+}
