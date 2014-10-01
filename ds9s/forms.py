@@ -37,8 +37,3 @@ class CreateUserForm(forms.Form):
 				del cleaned_data['password']
 
 		return cleaned_data
-
-		
-
-
-

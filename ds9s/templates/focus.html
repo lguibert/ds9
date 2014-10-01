@@ -1,7 +1,17 @@
 {% extends "base.html" %}
+
+{% block headTitle%}
+	{{user.FIRSTNAME_USER}} {{user.LASTNAME_USER}}
+{% endblock %}
+
+{% block contentHeadTitle%}
+	Soon, same page for edit.
+{% endblock %}
+
+
 {% block content %}
-	<h1>{{user.FIRSTNAME_USER}} {{user.LASTNAME_USER}}</h1>
+	<p>{{user.FIRSTNAME_USER}} {{user.LASTNAME_USER}}</p>
 	<p>{{user.EMAIL_USER}}</p>
 	<p>{{user.PASSWORD_USER}}</p>
-	<img src="{{MEDIA_URL}}{{user.PHOTO_USER}}"/>
+	<img class="focusImg" src="{{MEDIA_URL}}{{user.PHOTO_USER}}"/>
 {% endblock %}

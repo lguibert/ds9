@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 	{% for u in users %}
-		<div class="users">
+		<div class="col-md-4">
 			<h1>{{u.FIRSTNAME_USER}} {{u.LASTNAME_USER}}</h1>
 			<p>{{u.EMAIL_USER}}</p>
-			<a href="/ds9s/view/{{u.id}}">See more</a>
+			<a class="btn btn-default" href="/ds9s/view/{{u.id}}">See more</a>
 		</div>
 	{% endfor %}
 {% endblock %}

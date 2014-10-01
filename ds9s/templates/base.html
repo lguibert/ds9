@@ -1,30 +1,64 @@
 <!DOCTYPE html>
-<html lang="fr">
-	<head>
-		{% load static %}
-	   <link rel="stylesheet" href="{% static 'main.css' %}" />
-	   <title>{% block title %}ds9 web application{% endblock %}</title>
-	</head>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<body>
-		<header><h1>DS9 WEB APPLICATION</h1></header>
-		<nav>
-			{% block nav %}
-		    	<ul>
-			   		<li>
-			   			<a href="/ds9s/">Home</a>			   			
-			   		</li>
-			   		<li>
-			   			<a href="/ds9s/newUser/">New user</a>
-			   		</li>
-		       	</ul>
-		    {% endblock %}
-		</nav>
+    <title>{% block title %}ds9 web application{% endblock %}</title>
 
-	   <section id="content">
+   	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+    <!-- Custom styles for this template 
+    <link href="jumbotron.css" rel="stylesheet">-->
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/ds9s/">Home</a>
+          <a class="navbar-brand" href="/ds9s/newUser">New user</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <form class="navbar-form navbar-right" role="form">
+            <div class="form-group">
+              <input type="text" placeholder="Email" class="form-control">
+            </div>
+            <div class="form-group">
+              <input type="password" placeholder="Password" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-success">Sign in</button>
+          </form>
+        </div><!--/.navbar-collapse -->
+      </div>
+    </div>
+
+    <div class="jumbotron">
+      <div class="container">
+        <h1>{% block headTitle%}Hello, welcome on DS9 Web Application{% endblock %}</h1>
+        <p>{% block contentHeadTitle%}We'll be able to work here very soon!{% endblock %}</p>        
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Example row of columns -->
+      <div class="row">
+        <section id="content">
 	       {% block content %}{% endblock %}
 	   </section>
+      </div>
 
-	<footer>ds9 web application</footer>
-	</body>
+      <hr>
+
+      <footer>
+        <p>ds9 web application</p>
+      </footer>
+    </div> <!-- /container -->
+
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+  </body>
 </html>

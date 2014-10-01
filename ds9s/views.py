@@ -5,6 +5,7 @@ from django.shortcuts import render, get_object_or_404
 from ds9s.models import Users
 from ds9s.forms import LoginForm, CreateUserForm
 import hashlib
+from django.db import IntegrityError
 # Create your views here.
 
 def home(request):
@@ -36,9 +37,13 @@ def newUser(request):
 			user.FIRSTNAME_USER = form.cleaned_data['fName']
 			user.LASTNAME_USER = form.cleaned_data['lName']
 			user.PHOTO_USER = form.cleaned_data['photo']
-			user.save()
 
-			save = True
+			try:
+				user.save()
+				save = True
+			except IntegrityError as e:
+				error = "Email already in our database."
+				return render(request, 'newUser.html',locals())
 	else:
 		form = CreateUserForm()
 
