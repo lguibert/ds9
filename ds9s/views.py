@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 from django.http import HttpResponse
 from datetime import datetime
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from ds9s.models import Users
 from ds9s.forms import LoginForm, CreateUserForm
 import hashlib
@@ -14,8 +14,13 @@ def home(request):
 	return render(request, 'home.html', {'users': users})
 
 def focus(request, id):
-	user = get_object_or_404(Users, id=id)
-	return render(request, 'focus.html', {'user': user})
+	save = request.GET
+	if save:
+		user = get_object_or_404(Users, id=id)
+		return render(request, 'focus.html', {'user': user, 'save':save['save']})
+	else:
+		user = get_object_or_404(Users, id=id)
+		return render(request, 'focus.html', {'user': user})
 
 def tpl(request):
 	return render(request, 'tpl.html', {'current_date': datetime.now()})
@@ -41,6 +46,8 @@ def newUser(request):
 			try:
 				user.save()
 				save = True
+				u = Users.objects.latest('id') #get the id of the user
+				return redirect("/ds9s/view/"+str(u.id)+"?save=1") #redirect to the userpage
 			except IntegrityError as e:
 				error = "Email already in our database."
 				return render(request, 'newUser.html',locals())

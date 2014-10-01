@@ -1,86 +1,18 @@
 .success{
 	background-color:green;
-	height:20px;
 	width: 100%;
 }
 
 .success p{
 	padding:5px;
-	color:darkgreen;
-}
-
-.errorlist{
-	background-color:lightred;
-	width: 100%;
-}
-
-.errorlist li{
-	padding:5px;
-	color:darkred;
-}
-
-*{
-	margin: 0;
-	padding: 0;
-}
-
-header, footer, body{
-	width:1000px;
-	margin: auto;
-}
-
-header{
-	height:100px;
-	text-align: center;
-}
-
-nav{
-	height: 50px;
-	text-align: center;
-}
-
-nav li{
-	text-decoration: none;
-	list-style: none;
-	padding:5px;
-	margin:5px;
-	display:inline-block;
-}
-
-nav li:hover{
-	background-color: lightgray;
-}
-
-header, footer, nav{
-	background-color: lightblue;
-}
-
-footer{
-	clear:both;
-}
-
-#content{
-	background-color:lightgray;
-}
-
-.users{
-	width: 200px;
-	float:left;
-	height:150px;
-	overflow: hidden;
-}
-
-.users .datas{
-	padding-top: 25px;
-	margin-left: 15px;	
-}
-
-.users:hover{
-	background-color: darkgray;
 	color:white;
 }
 
-.focusImg{
-	height:150px;
-	height:150px;
+.errorlist{
+	width: 100%;
+	color:#a94442
+}
+
+.errorlist li{
+	list-style: none;
 }

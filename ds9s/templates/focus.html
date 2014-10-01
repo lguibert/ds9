@@ -10,6 +10,12 @@
 
 
 {% block content %}
+	{% if save == '1' %}
+		<div class='has-success success'>
+		    <p>User saved.</p>
+		</div>
+	{% endif %}
+
 	<p>{{user.FIRSTNAME_USER}} {{user.LASTNAME_USER}}</p>
 	<p>{{user.EMAIL_USER}}</p>
 	<p>{{user.PASSWORD_USER}}</p>
