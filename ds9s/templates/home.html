@@ -2,9 +2,23 @@
 {% block content %}
 	{% for u in users %}
 		<div class="col-md-4">
-			<h1>{{u.FIRSTNAME_USER}} {{u.LASTNAME_USER}}</h1>
-			<p>{{u.EMAIL_USER}}</p>
+			<h1>{{u.first_name}} {{u.last_name}}</h1>
+			<p>{{u.email}}</p>
 			<a class="btn btn-default" href="/ds9s/view/{{u.id}}">See more</a>
+			<a class="btn btn-default" href="/ds9s/delete/{{u.id}}">Delete</a>
 		</div>
 	{% endfor %}
+
+	{% if is_paginated %}
+		<div class="pagination">
+	    {% if page_obj.has_previous %}
+	    	<a href="?page={{ page_obj.previous_page_number }}">Previous</a> —
+	    {% endif %}
+	    Page {{ page_obj.number }} on {{ page_obj.paginator.num_pages }} 
+	    {% if page_obj.has_next %}
+	    	— <a href="?page={{ page_obj.next_page_number }}">Next</a>
+	    {% endif %}
+	    </div>
+	{% endif %}
 {% endblock %}
+

@@ -1,5 +1,5 @@
 from django.db import models
-
+"""
 class Users(models.Model):
 	EMAIL_USER = models.EmailField(max_length=254,unique=True)
 	PASSWORD_USER = models.CharField(max_length=100)
@@ -19,3 +19,4 @@ class Roles(models.Model):
 
 	def __unicode__(self):
 		return self.NAME_ROLE
+"""

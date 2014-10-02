@@ -13,7 +13,12 @@
 	{% if user.is_authenticated %}
 		Welcome, {{ user.first_name }} {{ user.last_name }}. 
 	{% else %}
-		<form class="form" method="post" action=".">
+	{% if next %}
+		<form class="form" method="post" action="/ds9s/login/?next={{next}}">
+	{%else%}
+		<form class="form" method="post" action="/ds9s/login/">
+	{% endif %}
+		<form class="form" method="post" action="/ds9s/login/">
 		 	   {% csrf_token %}
 		 	   {{ form.as_p }}
 		    <button type="submit" class="btn btn-success">Sign in</button>

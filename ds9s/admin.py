@@ -1,5 +1,5 @@
 from django.contrib import admin
-from ds9s.models import Users, Roles
+"""from ds9s.models import Users, Roles
 
 
 
@@ -21,4 +21,4 @@ class UsersAdmin(admin.ModelAdmin):
 	)
 
 admin.site.register(Users, UsersAdmin)
-admin.site.register(Roles)
+admin.site.register(Roles)"""

@@ -16,3 +16,9 @@
 .errorlist li{
 	list-style: none;
 }
+
+.pagination{
+	clear:both;
+	display:block;
+	padding-top:55px;
+}

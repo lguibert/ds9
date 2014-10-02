@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block headTitle%}
-	{{user.FIRSTNAME_USER}} {{user.LASTNAME_USER}}
+	{{user.first_name}} {{user.last_name}}
 {% endblock %}
 
 {% block contentHeadTitle%}
@@ -16,8 +16,8 @@
 		</div>
 	{% endif %}
 
-	<p>{{user.FIRSTNAME_USER}} {{user.LASTNAME_USER}}</p>
-	<p>{{user.EMAIL_USER}}</p>
-	<p>{{user.PASSWORD_USER}}</p>
-	<img class="focusImg" src="{{MEDIA_URL}}{{user.PHOTO_USER}}"/>
+	<p>{{user.first_name}} {{user.last_name}}</p>
+	<p>{{user.email}}</p>
+	<p>{{user.password}}</p>
+	<!--<img class="focusImg" src="{{MEDIA_URL}}{{user.PHOTO_USER}}"/>-->
 {% endblock %}

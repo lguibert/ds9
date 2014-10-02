@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Are you sure to delete this user?</h1>
+
+	<p>{{ u.EMAIL_USER }} -> {{ u.FIRSTNAME_USER }} {{ u.LASTNAME_USER }} (created on {{ u.REGISTRATIONDATE_USER|date:"DATE_FORMAT" }})</p>
+
+	<form method="post" action="">
+	   {% csrf_token %}  <!-- Nous prenons bien soin d'ajouter le csrf_token -->
+	   <input type="submit" value="Yes" /> - <a href="{% url "ds9s_home" %}">No</a>
+	</form>
+{% endblock %}
