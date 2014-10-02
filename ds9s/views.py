@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
@@ -63,16 +63,24 @@ def newUser(request):
 
 def connect(request):
 	error = False
+	next = ''
+
+	if request.GET:
+		next = request.GET['next']
+
 	if request.method == 'POST':
 		to = request.POST.get('next')
 		form = ConnectForm(request.POST)
-		if form.is_valid():			
+		if form.is_valid():	
 			username = form.cleaned_data['username']
 			password = form.cleaned_data['password']
 			user = authenticate(username=username, password=password)
 			if user:
 				login(request, user)
-				return render(request,'test.html',locals())
+				if next == '':
+					return render(request,'test.html',locals())
+				else:
+					return HttpResponseRedirect(next)		
 			else:
 				error = True
 	else:
