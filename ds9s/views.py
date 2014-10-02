@@ -3,20 +3,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
-from ds9s.forms import ConnectForm, CreateUserForm, UpdateUserForm, CreateUserForm2
+from ds9s.forms import ConnectForm, CreateUserForm, UpdateUserForm, UpdateUserForm
 from django.db import IntegrityError
 from django.views.generic import TemplateView, ListView, DeleteView, UpdateView
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-# Create your views here.
 
-"""def home(request):
-	users = Users.objects.all()
-	#return HttpResponse(text);
-	return render(request, 'home.html', {'users': users})
-"""
 @login_required
 def focus(request, id):
 	save = request.GET
@@ -63,7 +57,7 @@ def updateUser(request, pk):
 	formType = True #change the <form> in the template
 	data = User.objects.get(id=pk)
 	if request.method == 'POST':
-		form = CreateUserForm2(request.POST, instance=data)
+		form = UpdateUserForm(request.POST, instance=data)
 		if form.is_valid():
 			user = User(pk)	
 			user.username = form.cleaned_data['username']
@@ -82,7 +76,7 @@ def updateUser(request, pk):
 				messages.error(request, u"Username already in use")
 				return render(request, 'newUser.html',locals())
 	else:
-		form = CreateUserForm2(instance=data)		
+		form = UpdateUserForm(instance=data)		
 	
 	return render(request, 'newUser.html',locals())
 
@@ -126,25 +120,6 @@ class ViewHome(ListView):
 	template_name = "home.html"
 	#paginate_by = 3
 	#queryset = Users.objects.filter(role_id=1) #{can add some filter with queryset}
-"""
-class FocusUser(DetailView):
-	model = Users
-	context_object_name = "u"
-	template_name = "focus.html
-
-
-class CreateUser(CreateView):
-	model = Users
-	template_name = "newUser.html"
-	form_class = CreateUserModForm
-	#success_url = ""
-"""
-
-class UpdateUser(UpdateView):
-	model = User
-	template_name = "newUser.html"
-	form_class = UpdateUserForm
-	success_url = "/ds9s/"
 
 class DeleteUser(DeleteView):
 	model = User
