@@ -4,8 +4,13 @@
 		<div class="col-md-4">
 			<h1>{{u.first_name}} {{u.last_name}}</h1>
 			<p>{{u.email}}</p>
-			<a class="btn btn-default" href="/ds9s/view/{{u.id}}">See more</a>
-			<a class="btn btn-default" href="/ds9s/delete/{{u.id}}">Delete</a>
+			<a class="btn btn-default" href="/ds9s/view/{{u.id}}/">See more</a>
+			{% if perms.ds9s.delete_user%}
+				<a class="btn btn-default" href="/ds9s/delete/{{u.id}}/">Delete</a>
+			{% endif %}
+			{% if perms.ds9s.update_user%}
+				<a class="btn btn-default" href="/ds9s/update/{{u.id}}/">Update</a>
+			{% endif %}
 		</div>
 	{% endfor %}
 

@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url, include
 #from django.views.generic import ListView
-from ds9s.views import ViewHome, DeleteUser
+from ds9s.views import ViewHome, DeleteUser, UpdateUser
 
 urlpatterns = patterns('ds9s.views',
 	#url(r'^/?$', 'home'),
@@ -12,6 +12,7 @@ urlpatterns = patterns('ds9s.views',
 	url(r'^/login/?$','connect'),
 	url(r'^/logout/?$','deconnect'),
 	url(r'^/newUser/?$','newUser'),
-	#url(r'^/edit/(?P<id>[0-9]+)/?$','edit'),
+	#url(r'^/edit/(?P<pk>[0-9]+)/?$',UpdateUser.as_view(), name="update_user"),
+	url(r'^/update/(?P<pk>[0-9]+)/?$','updateUser'),
 	url(r'^/delete/(?P<pk>[0-9]+)/?$',DeleteUser.as_view(), name="delete_user")
 )

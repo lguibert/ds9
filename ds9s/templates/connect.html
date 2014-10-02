@@ -7,9 +7,6 @@
 {% endif %}
 
 {% block content %}
-	{% if error %}
-		<p class="error"><strong>No user or bad password.</strong></p>
-	{% endif %}
 	{% if user.is_authenticated %}
 		Welcome, {{ user.first_name }} {{ user.last_name }}. 
 	{% else %}

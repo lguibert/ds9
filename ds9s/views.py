@@ -3,12 +3,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
-from ds9s.forms import ConnectForm, CreateUserForm
+from ds9s.forms import ConnectForm, CreateUserForm, UpdateUserForm, CreateUserForm2
 from django.db import IntegrityError
-from django.views.generic import TemplateView, ListView, DeleteView
+from django.views.generic import TemplateView, ListView, DeleteView, UpdateView
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 # Create your views here.
 
 """def home(request):
@@ -35,10 +36,8 @@ def addition(request, num1, num2):
 	return render(request, 'add.html', {'total': total})
 
 def newUser(request):
-	save = False
-
 	if request.method == "POST":
-		form = CreateUserForm(request.POST, request.FILES)
+		form = CreateUserForm(request.POST)
 		if form.is_valid():
 			user = User()
 			user.username = form.cleaned_data['username']
@@ -47,22 +46,48 @@ def newUser(request):
 			user.first_name = form.cleaned_data['first_name']
 			user.last_name = form.cleaned_data['last_name']
 			try:
-				user.save()
-				save = True
+				user.save()				
 				u = User.objects.latest('id') #get the id of the user
+				messages.success(request, u"User saved.")
 				return redirect("/ds9s/view/"+str(u.id)+"?save=1") #redirect to the userpage
 			except IntegrityError as e:
-				error = "Email already in our database."
+				messages.error(request, u"Email already in our database.")
 				return render(request, 'newUser.html',locals())
 	else:
 		form = CreateUserForm()
 
 	return render(request, 'newUser.html',locals())
 
+@login_required
+def updateUser(request, pk):
+	formType = True #change the <form> in the template
+	data = User.objects.get(id=pk)
+	if request.method == 'POST':
+		form = CreateUserForm2(request.POST, instance=data)
+		if form.is_valid():
+			user = User(pk)	
+			user.username = form.cleaned_data['username']
+			user.email = form.cleaned_data['email']
+			user.password = make_password(form.cleaned_data['password'])
+			user.first_name = form.cleaned_data['first_name']
+			user.last_name = form.cleaned_data['last_name']
+			user.is_superuser = data.is_superuser
+			user.is_staff = data.is_staff
+			#user.is_active = data.is_active
+			try:
+				user.save()
+				messages.success(request, u"User updated.")
+				return redirect('/ds9s/view/'+pk)
+			except IntegrityError as e:
+				messages.error(request, u"Username already in use")
+				return render(request, 'newUser.html',locals())
+	else:
+		form = CreateUserForm2(instance=data)		
+	
+	return render(request, 'newUser.html',locals())
 
 
 def connect(request):
-	error = False
 	next = ''
 
 	if request.GET:
@@ -78,11 +103,11 @@ def connect(request):
 			if user:
 				login(request, user)
 				if next == '':
-					return render(request,'test.html',locals())
+					return HttpResponseRedirect("/ds9s/")
 				else:
 					return HttpResponseRedirect(next)		
 			else:
-				error = True
+				messages.error(request, u"Bad password or the user doesn't exist")				
 	else:
 		form = ConnectForm()
 
@@ -99,7 +124,7 @@ class ViewHome(ListView):
 	model = User
 	context_object_name = "users"
 	template_name = "home.html"
-	paginate_by = 1
+	#paginate_by = 3
 	#queryset = Users.objects.filter(role_id=1) #{can add some filter with queryset}
 """
 class FocusUser(DetailView):
@@ -113,14 +138,13 @@ class CreateUser(CreateView):
 	template_name = "newUser.html"
 	form_class = CreateUserModForm
 	#success_url = ""
-
+"""
 
 class UpdateUser(UpdateView):
-	model = Users
+	model = User
 	template_name = "newUser.html"
-	form_class = CreateUserModForm
-	#success_url = ""
-"""
+	form_class = UpdateUserForm
+	success_url = "/ds9s/"
 
 class DeleteUser(DeleteView):
 	model = User
