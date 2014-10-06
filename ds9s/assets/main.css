@@ -23,3 +23,7 @@
 	background-color: #DFF2BF;
 	list-style: none;
 }
+
+.first-uppercase{
+	text-transform: capitalize; /*uppercase all first letters*/
+}

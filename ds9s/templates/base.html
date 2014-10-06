@@ -20,7 +20,9 @@
       <div class="container">
         <div class="navbar-header">
           <a class="navbar-brand" href="/ds9s/">Home</a>
-          <a class="navbar-brand" href="/ds9s/newUser">New user</a>
+          {% if perms.ds9s.delete_user%} 
+            <a class="navbar-brand" href="/ds9s/newUser">New user</a>
+          {% endif %}
         </div>
         <div class="navbar-collapse collapse">
         	{% block loginForm%}

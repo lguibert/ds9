@@ -21,6 +21,8 @@ def focus(request, id):
 		user = get_object_or_404(User, id=id)
 		return render(request, 'focus.html', {'user': user})
 
+@login_required
+@permission_required('ds9s.create_user', raise_exception=True)
 def newUser(request):
 	if request.method == "POST":
 		form = CreateUserForm(request.POST)
@@ -45,7 +47,7 @@ def newUser(request):
 	return render(request, 'newUser.html',locals())
 
 @login_required
-@permission_required('ds9s.update_user')
+@permission_required('ds9s.update_user', raise_exception=True)
 def updateUser(request, pk):
 	formType = True #change the <form> in the template
 	data = User.objects.get(id=pk)
@@ -111,7 +113,7 @@ class ViewHome(ListView):
 	model = User
 	context_object_name = "users"
 	template_name = "home.html"
-	#paginate_by = 3
+	#paginate_by = 1
 	#queryset = Users.objects.filter(role_id=1) #{can add some filter with queryset}
 
 
@@ -122,7 +124,6 @@ class DeleteUser(DeleteView):
 	success_url = "/ds9s/"
 
 	@method_decorator(login_required)
-	@method_decorator(permission_required('ds9s.user_delete',login_url='/ds9s/'))
+	@method_decorator(permission_required('ds9s.user_delete',raise_exception=True))
 	def dispatch(self, *args, **kwargs):
 		return super(DeleteUser, self).dispatch(*args, **kwargs)
-

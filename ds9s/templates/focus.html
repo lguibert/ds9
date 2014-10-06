@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block headTitle%}
-	{{user.first_name}} {{user.last_name}}
+	<div class="first-uppercase">
+		{{user.first_name}} {{user.last_name}}
+	</div>
 {% endblock %}
 
 {% block contentHeadTitle%}
