@@ -2,10 +2,10 @@
 {% block content %}
 	<h1>Are you sure to delete this user?</h1>
 
-	<p>{{ u.EMAIL_USER }} -> {{ u.FIRSTNAME_USER }} {{ u.LASTNAME_USER }} (created on {{ u.REGISTRATIONDATE_USER|date:"DATE_FORMAT" }})</p>
+	<p>{{ u.email }} -> {{ u.first_name }} {{ u.last_name }} (created on {{ u.date_joined|date:"DATE_FORMAT" }})</p>
 
 	<form method="post" action="">
-	   {% csrf_token %}  <!-- Nous prenons bien soin d'ajouter le csrf_token -->
-	   <input type="submit" value="Yes" /> - <a href="{% url "ds9s_home" %}">No</a>
+	   {% csrf_token %} 
+	   <input class="btn btn-default" type="submit" value="Yes" /> - <a class="btn btn-default" href="{% url "ds9s_home" %}">No</a>
 	</form>
 {% endblock %}

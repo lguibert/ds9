@@ -37,7 +37,7 @@ class UpdateUserForm(forms.ModelForm):
 
 	class Meta:
 		model = User
-		fields = ('username', 'password','email','first_name','last_name')
+		fields = ()
 
 	def clean_passwordCheck(self):
 		cleaned_data = super(UpdateUserForm, self).clean()
