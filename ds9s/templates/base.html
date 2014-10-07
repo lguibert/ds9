@@ -19,17 +19,17 @@
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
-          <a class="navbar-brand" href="/ds9s/">Home</a>
-          {% if perms.ds9s.delete_user%} 
-            <a class="navbar-brand" href="/ds9s/newUser">New user</a>
-          {% endif %}
+          <a class="navbar-brand" href="/ds9s/">Home</a>          
+            <a class="navbar-brand navbar-right" href="/ds9s/fits/">Fits</a>
         </div>
         <div class="navbar-collapse collapse">
         	{% block loginForm%}
         		{% if user.is_authenticated %}					
 					<a class="navbar-brand navbar-right" href="/ds9s/logout/">Log out</a>
 				{% else %}
-          		<a class="navbar-brand navbar-right" href="/ds9s/login/">Log in</a>
+          		<a class="navbar-brand navbar-right" href="/ds9s/newUser">Sign in</a>
+              <span class="no-hover navbar-brand navbar-right">/</span>
+              <a class="navbar-brand navbar-right" href="/ds9s/login/">Log in</a>
           		{% endif %}
           	{% endblock %}
         </div>
@@ -39,7 +39,7 @@
     <div class="jumbotron">
       <div class="container">
         <h1>{% block headTitle%}Hello, welcome on DS9 Web Application{% endblock %}</h1>
-        <p>{% block contentHeadTitle%}We'll be able to work here very soon!{% endblock %}</p>        
+        <p>{% block contentHeadTitle%}You'll be able to work here very soon!{% endblock %}</p>        
       </div>
     </div>
 

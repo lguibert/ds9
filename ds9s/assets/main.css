@@ -27,3 +27,7 @@
 .first-uppercase{
 	text-transform: capitalize; /*uppercase all first letters*/
 }
+
+.no-hover:hover{
+	color:#777!important;
+}

@@ -1,11 +1,5 @@
 {% extends "base.html" %}
 
-{% if user.is_authenticated %}
-	{% block loginForm%}
-		<a class="navbar-brand navbar-right" href="/ds9s/logout">Log out</a>
-	{% endblock %}
-{% endif %}
-
 {% block content %}
 	{% if user.is_authenticated %}
 		Welcome, {{ user.first_name }} {{ user.last_name }}. 
@@ -20,6 +14,10 @@
 			 	   {{ form.as_p }}
 			    <button type="submit" class="btn btn-success">Sign in</button>
 			</form>
+
+			<div>
+				<p>Not register ? <a href="/ds9s/newUser/">Do it here !</a></p>
+			</div>
 		{% endif %}	
 {% endblock %}
 
