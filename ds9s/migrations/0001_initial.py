@@ -11,17 +11,35 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Users',
+            name='Fits',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('EMAIL_USER', models.EmailField(unique=True, max_length=254)),
-                ('PASSWORD_USER', models.CharField(max_length=100)),
-                ('FIRSTNAME_USER', models.CharField(max_length=76)),
-                ('LASTNAME_USER', models.CharField(max_length=75)),
-                ('REGISTRATIONDATE_USER', models.DateTimeField(auto_now_add=True)),
+                ('name', models.CharField(max_length=254)),
+                ('date_upload', models.DateTimeField(auto_now_add=True)),
+                ('uniqname', models.CharField(max_length=254, null=True)),
+                ('uniq_id', models.IntegerField(default=0)),
+                ('generated', models.BooleanField(default=False)),
+                ('active', models.BooleanField(default=True)),
             ],
             options={
             },
             bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='ParFileFits',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name_par', models.CharField(max_length=254, null=True)),
+                ('fieldId_par', models.IntegerField(default=0)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AddField(
+            model_name='fits',
+            name='parfilefits_id',
+            field=models.ForeignKey(to='ds9s.ParFileFits', null=True),
+            preserve_default=True,
         ),
     ]

@@ -7,14 +7,14 @@ import matplotlib.pyplot as plt
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 #from django.contrib.auth.models import User
-from ds9s.models import Fits
+from ds9s.models import Fits, ParFileFits
 from ds9s.forms import UploadFitsForm
 from django.db import IntegrityError
-#from django.views.generic import TemplateView, ListView, DeleteView, UpdateView
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
+from django.views.generic import TemplateView, ListView
 
 from astropy.io import fits
 
@@ -23,13 +23,19 @@ import uuid
 
 import pyfits
 
+from string import split
+import re
+from os import listdir
 
 
 
 
-def homeFits(request):
-	fits = Fits.objects.all()
-	return render(request,'homeFits.html',locals())
+
+class ViewHomeFits(ListView):
+	model = Fits
+	context_object_name = "fits"
+	template_name = "homeFits.html"
+	paginate_by = 5
 
 
 def makePng(request, id):
@@ -62,33 +68,36 @@ def viewFits(request,id):
 
 
 def showFits(request,id,zmin=None,zmax=None): # pathToFits is the pathway to one of the stamps in either the G102_DRIZZLE or G141_DRIZZLE directories
-    fit = get_object_or_404(Fits, id=id)
-    pathToFits = "/opt/lampp/projects/ds9/ds9s/upload/" + str(fit.file_field)
-    inFits=pyfits.open(pathToFits)
-    #inFits.info() # shows contents of the FITS image
-    iHdr=inFits[1].header # We will use data from this later
-    iData=inFits[1].data # This is the image data
-    
-    #print iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1']
-    x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
-    y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
-    npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
-    l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
-    #print l1,l2,y1,y2
+	fit = get_object_or_404(Fits, id=id)
+	try :
+		pathToFits = "/opt/lampp/projects/ds9/ds9s/upload/" + str(fit.file_field)
+		inFits=pyfits.open(pathToFits)
+		#inFits.info() # shows contents of the FITS image
+		iHdr=inFits[1].header # We will use data from this later
+		iData=inFits[1].data # This is the image data
 
-    xDispSize=6.0
-    yDispSize=xDispSize*float(npixy)/float(npixx) # Size the image to scale with the image dimensions
+		#print iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1']
+		x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
+		y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
+		npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
+		l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
+	    #print l1,l2,y1,y2
 
-    plt.ion() # Necessary for interactive Python (ipython) environment
-    plt.figure(1,figsize=(xDispSize*1.3,yDispSize*2.5))
-    plt.imshow(iData,cmap=cm.Greys_r,origin="lower",aspect=dl/da, extent=(l1,l2,y1,y2)) # Call imshow
-    plt.axhline(y=0.0,c='cyan',linestyle=':') # Plot a blue dotted line at distance = 0
-    plt.xlabel(r'Wavelength ($\AA$)')
-    plt.ylabel('Distance (arcsec)')
-    plt.draw() 
-    inFits.close()
+		xDispSize=6.0
+		yDispSize=xDispSize*float(npixy)/float(npixx) # Size the image to scale with the image dimensions
 
-    return redirect("/ds9s/fits/view/"+id)
+		plt.ion() # Necessary for interactive Python (ipython) environment
+		plt.figure(1,figsize=(xDispSize*1.3,yDispSize*2.5))
+		plt.imshow(iData,cmap=cm.Greys_r,origin="lower",aspect=dl/da, extent=(l1,l2,y1,y2)) # Call imshow
+		plt.axhline(y=0.0,c='cyan',linestyle=':') # Plot a blue dotted line at distance = 0
+		plt.xlabel(r'Wavelength ($\AA$)')
+		plt.ylabel('Distance (arcsec)')
+		plt.draw() 
+		inFits.close()
+		return redirect("/ds9s/fits/view/"+id)
+	except:
+		messages.error(request, u"Error.")
+		return redirect("/ds9s/fits/view/"+id)
 
 
 
@@ -112,3 +121,61 @@ def uploadFits(request):
 		form = UploadFitsForm()
 
 	return render(request, 'uploadFits.html',locals())
+
+
+def newParFile(request, name='Par321_final'):
+	basePath = "/home/lguibert/test/"
+	findIn = "/G102_DRIZZLE"
+	findIn2 = "/G141_DRIZZLE"
+
+	fileExist = ParFileFits.objects.filter(name_par=name)
+	if not fileExist:
+		#get fieldNum
+		state = split(name,"_")
+		state = state[0]
+		fieldNum = state[3:len(state)] #OK
+
+		par = saveParFile(fieldNum, name)
+		if par != False :
+			#get ID
+			expression = r"^aXeWFC3_G102_mef_ID([0-9]+).fits$"
+			expression2 = r"^aXeWFC3_G141_mef_ID([0-9]+).fits$"
+			
+			try:
+				addFileDatabase(basePath, name, findIn, expression, par.id)
+				addFileDatabase(basePath, name, findIn2, expression2, par.id)
+			except:
+				messages.error(request, u"Error during the saveing.")
+				return redirect("/ds9s/fits/")
+
+			messages.success(request, u"File saved in database.")
+			return redirect("/ds9s/fits/")
+	else:
+		messages.error(request, u"File already in database.")
+		return redirect("/ds9s/fits/")
+
+def saveParFile(fieldNum, name):
+	try:
+		par = ParFileFits()
+		par.fieldId_par = fieldNum
+		par.name_par = name
+		par.save()
+		return par
+	except:
+		return False
+
+def addFileDatabase(basePath, name, findIn, expression, par):
+	directory = listdir(basePath + name + findIn)
+	for file in directory:
+		if re.match(expression, file) is not None:
+			state = split(file,"_")
+			state = split(state[-1],".")
+			state = state[0]
+			id = state[2:len(state)]			
+			#add bdd
+			fit = Fits()
+			fit.name = file
+			fit.parfilefits_id = par
+			fit.uniqname = uuid.uuid1()
+			fit.uniq_id = id
+			fit.save()
