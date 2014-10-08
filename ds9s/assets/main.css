@@ -4,6 +4,10 @@
 	padding-top:55px;
 }
 
+.clear{
+	clear:both;
+}
+
 .error, .success, .errorlist{
 	border: 1px solid;
 	margin: 10px 0px;

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from ds9s.models import Fits
+from ds9s.models import Galaxy
 from string import split
 from django.utils.safestring import mark_safe
 

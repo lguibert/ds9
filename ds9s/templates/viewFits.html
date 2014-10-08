@@ -1,17 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-	<h1 class="first-uppercase">{{fit.name}}</h1>
-	Unique name: <p>{{fit.uniqname}}</p>
-	File: <p>{{fit.file_field}}</p>
-	Upload on: <p>{{fit.date_upload|date:"DATE_FORMAT" }}</p>
-
-	Data : <p>{{data|truncatewords:100}}</p>
-
-	<a class="btn btn-default" href="/ds9s/fits/show/{{fit.id}}/">Show image</a>
-
-	{% if fit.generated%}
-		<img src="{{MEDIA_URL}}fits_png/{{fit.uniqname}}.png"/>
-	{% else %}
-		<a class="btn btn-default" href="/ds9s/fits/generatePNG/{{fit.id}}/">Generate a png</a>
-	{% endif %}
+	<h1>Galaxy n°{{gal.uniq_id}}</h1>
+	<p>Date: {{gal.parfolder.date_upload}}</p>
+	<p>Analysis: {{analysis.redshift}}</p>
 {% endblock %}

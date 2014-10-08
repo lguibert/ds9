@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 #from django.contrib.auth.models import User
-from ds9s.models import Fits, ParFileFits
+from ds9s.models import Galaxy, ParFolder, Analysis
 from ds9s.forms import UploadFitsForm, NewParFileForm
 from django.db import IntegrityError
 from django.contrib.auth import authenticate, login, logout
@@ -15,6 +15,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, ListView
+from django.db.models import Count
 
 from astropy.io import fits
 
@@ -28,19 +29,26 @@ import re
 from os import listdir
 from os.path import exists
 
+import pdb
+from django.db.models import Q
+
 #global variable
 basePath = "/home/lguibert/test/"
+findIn = "/G102_DRIZZLE"
+findIn2 = "/G141_DRIZZLE"
+expression = r"^aXeWFC3_G102_mef_ID([0-9]+).fits$"
+expression2 = r"^aXeWFC3_G141_mef_ID([0-9]+).fits$"
 
 
 class ViewHomeFits(ListView):
-	model = Fits
-	context_object_name = "fits"
+	model = Galaxy
+	context_object_name = "galaxys"
 	template_name = "homeFits.html"
+	queryset = Galaxy.objects.values('uniq_id').order_by('uniq_id').annotate(Count('uniq_id'))
 	paginate_by = 5
 
-
 def makePng(request, id):
-	fit = get_object_or_404(Fits, id=id)
+	fit = get_object_or_404(Galaxy, id=id)
 	if fit:
 		try:
 			file = "/opt/lampp/projects/ds9/ds9s/upload/" + str(fit.file_field)
@@ -57,19 +65,16 @@ def makePng(request, id):
 			messages.error(request, u"PNG unable .")
 			return redirect("/ds9s/fits/view/"+id)
 
-def viewFits(request,id):
-	fit = get_object_or_404(Fits, id=id)
-	try:
-		file = "/opt/lampp/projects/ds9/ds9s/upload/" + str(fit.file_field)
-		data = fits.getdata(file)
-	except:
-		data = None
+def viewFits(request, id):
+	gal = get_object_or_404(Galaxy, uniq_id=id)
+	#analysis = Analysis.objects.get(user_id=request.user, galaxy_id=test)
+	#analysis = get_object_or_404(Analysis, Q(galaxy_id=test),user_id=request.user)
 	return render(request, 'viewFits.html',locals())
 
 
 
 def showFits(request,id,zmin=None,zmax=None): # pathToFits is the pathway to one of the stamps in either the G102_DRIZZLE or G141_DRIZZLE directories
-	fit = get_object_or_404(Fits, id=id)
+	fit = get_object_or_404(Galaxy, id=id)
 	try :
 		pathToFits = "/opt/lampp/projects/ds9/ds9s/upload/" + str(fit.file_field)
 		inFits=pyfits.open(pathToFits)
@@ -100,36 +105,13 @@ def showFits(request,id,zmin=None,zmax=None): # pathToFits is the pathway to one
 		messages.error(request, u"Error.")
 		return redirect("/ds9s/fits/view/"+id)
 
-
-
-def uploadFits(request):
-	if request.method == "POST":
-		form = UploadFitsForm(request.POST, request.FILES)
-		if form.is_valid():
-			file = Fits()
-			file.name = form.cleaned_data['name']
-			file.file_field = form.cleaned_data['upload']
-			file.uniqname = uuid.uuid1()
-			try:
-				file.save()
-				f = Fits.objects.latest('id')
-				messages.success(request, u"File uploaded & saved.")
-				return redirect("/ds9s/fits/view/"+str(f.id))
-			except:
-				messages.error(request, u"Error during file upload.")
-				return render(request, 'uploadFits.html',locals())
-	else:
-		form = UploadFitsForm()
-
-	return render(request, 'uploadFits.html',locals())
-
 def newParFile(request):
 	if request.method == 'POST':
 		form = NewParFileForm(request.POST)
 		if form.is_valid():
 			data = form.cleaned_data['name']
 			try:
-				if(isinstance(int(data),int)): 
+				if(int(data)): 
 #if data is not int (name of the folder), we'll have a exception. So, in except we have the code for the name.
 					if(exists(basePath+"Par"+data+"_final")):
 						uploaded = uploadParFile(request, "Par"+data+"_final")
@@ -138,7 +120,7 @@ def newParFile(request):
 					else:
 						messages.error(request, 'No file with this number.')
 						return render(request, 'newParFits.html',locals())
-			except:
+			except ValueError:
 				if(exists(basePath+data)):
 					uploaded = uploadParFile(request, data)
 					if uploaded:
@@ -158,12 +140,9 @@ def newParFile(request):
 def uploadParFile(request, name=None):
 	if name is None:
 		messages.error('Error in the folder\'s name')
-		return redirect("/ds9s/fits/")
+		return redirect("/ds9s/fits/newParFile/")
 	else:
-		findIn = "/G102_DRIZZLE"
-		findIn2 = "/G141_DRIZZLE"
-
-		fileExist = ParFileFits.objects.filter(name_par=name)
+		fileExist = ParFolder.objects.filter(name_par=name)
 		if not fileExist:
 			#get fieldNum
 			state = split(name,"_")
@@ -172,13 +151,15 @@ def uploadParFile(request, name=None):
 
 			par = saveParFile(fieldNum, name)
 			if par != False :
+				#process of check and add
 				#get ID
-				expression = r"^aXeWFC3_G102_mef_ID([0-9]+).fits$"
-				expression2 = r"^aXeWFC3_G141_mef_ID([0-9]+).fits$"
-				
-				try:
-					addFileDatabase(basePath, name, findIn, expression, par.id)
-					addFileDatabase(basePath, name, findIn2, expression2, par.id)
+				ids1 = getUniqIdFromFile(name, findIn, expression)
+				ids2 = getUniqIdFromFile(name,findIn2,expression2)
+
+				ids_final = checkFilesGtype(ids1,ids2)
+
+				try :
+					addFileDatabase(ids_final, par)
 				except:
 					messages.error(request, u"Error during the saveing.")
 					return False;
@@ -191,7 +172,7 @@ def uploadParFile(request, name=None):
 
 def saveParFile(fieldNum, name):
 	try:
-		par = ParFileFits()
+		par = ParFolder()
 		par.fieldId_par = fieldNum
 		par.name_par = name
 		par.save()
@@ -199,18 +180,33 @@ def saveParFile(fieldNum, name):
 	except:
 		return False
 
-def addFileDatabase(basePath, name, findIn, expression, par):
-	directory = listdir(basePath + name + findIn)
+
+def getUniqIdFromFile(name, fIn, exp):
+	ids = []
+	directory = listdir(basePath + name + fIn)
 	for file in directory:
-		if re.match(expression, file) is not None:
+		if re.match(exp, file) is not None:
 			state = split(file,"_")
 			state = split(state[-1],".")
 			state = state[0]
-			id = state[2:len(state)]			
-			#add bdd
-			fit = Fits()
-			fit.name = file
-			fit.parfilefits_id = par
-			fit.uniqname = uuid.uuid1()
-			fit.uniq_id = id
-			fit.save()
+			id = state[2:len(state)]
+			ids.append(id)
+	return ids	
+
+def checkFilesGtype(ids1, ids2):
+	ids_final = []
+	#ids_wrong = []?
+	for i in ids1:
+		if i in ids2:
+			ids_final.append(i)
+		#else:
+			#ids_wrong.append(i)
+	return ids_final#,ids_wrong
+
+def addFileDatabase(ids, par):
+	for id in ids:	
+		#add bdd
+		gal = Galaxy()
+		gal.parfolder_id = par
+		gal.uniq_id = id
+		gal.save()

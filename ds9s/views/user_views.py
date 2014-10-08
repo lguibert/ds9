@@ -37,7 +37,7 @@ def newUser(request):
 				messages.success(request, u"User saved.")
 				return redirect("/ds9s/view/"+str(u.id)+"?save=1") #redirect to the userpage
 			except IntegrityError as e:
-				messages.error(request, u"Email already in our database.")
+				messages.error(request, u"Username already in our database.")
 				return render(request, 'newUser.html',locals())
 	else:
 		form = CreateUserForm()
