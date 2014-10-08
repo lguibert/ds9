@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from ds9s.models import Fits
 from string import split
+from django.utils.safestring import mark_safe
 
 class ConnectForm(forms.Form):
 	username = forms.CharField(max_length=50)
@@ -52,6 +53,9 @@ class UpdateUserForm(forms.ModelForm):
 				del cleaned_data['passwordCheck']
 				del cleaned_data['password']
 
+
+class NewParFileForm(forms.Form):
+	name = forms.CharField(label=mark_safe("Number of the Par<span class='precision'>XXX</span> or the folder's name"))
 
 
 class UploadFitsForm(forms.Form):

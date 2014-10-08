@@ -31,3 +31,8 @@
 .no-hover:hover{
 	color:#777!important;
 }
+
+.precision{
+	text-decoration: underline;
+	font-style: oblique;
+}

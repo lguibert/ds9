@@ -16,5 +16,5 @@ urlpatterns = patterns('ds9s.views',
 	url(r'^/fits/view/(?P<id>[0-9]+)/?$','viewFits'),
 	url(r'^/fits/generatePNG/(?P<id>[0-9]+)/?$','makePng'),
 	url(r'^/fits/show/(?P<id>[0-9]+)/?$','showFits'),
-	url(r'^/fits/test/','newParFile')
+	url(r'^/fits/newParFile/','newParFile')
 )

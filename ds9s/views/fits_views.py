@@ -8,7 +8,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 #from django.contrib.auth.models import User
 from ds9s.models import Fits, ParFileFits
-from ds9s.forms import UploadFitsForm
+from ds9s.forms import UploadFitsForm, NewParFileForm
 from django.db import IntegrityError
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, permission_required
@@ -26,9 +26,10 @@ import pyfits
 from string import split
 import re
 from os import listdir
+from os.path import exists
 
-
-
+#global variable
+basePath = "/home/lguibert/test/"
 
 
 class ViewHomeFits(ListView):
@@ -122,37 +123,71 @@ def uploadFits(request):
 
 	return render(request, 'uploadFits.html',locals())
 
-
-def newParFile(request, name='Par321_final'):
-	basePath = "/home/lguibert/test/"
-	findIn = "/G102_DRIZZLE"
-	findIn2 = "/G141_DRIZZLE"
-
-	fileExist = ParFileFits.objects.filter(name_par=name)
-	if not fileExist:
-		#get fieldNum
-		state = split(name,"_")
-		state = state[0]
-		fieldNum = state[3:len(state)] #OK
-
-		par = saveParFile(fieldNum, name)
-		if par != False :
-			#get ID
-			expression = r"^aXeWFC3_G102_mef_ID([0-9]+).fits$"
-			expression2 = r"^aXeWFC3_G141_mef_ID([0-9]+).fits$"
-			
+def newParFile(request):
+	if request.method == 'POST':
+		form = NewParFileForm(request.POST)
+		if form.is_valid():
+			data = form.cleaned_data['name']
 			try:
-				addFileDatabase(basePath, name, findIn, expression, par.id)
-				addFileDatabase(basePath, name, findIn2, expression2, par.id)
+				if(isinstance(int(data),int)): 
+#if data is not int (name of the folder), we'll have a exception. So, in except we have the code for the name.
+					if(exists(basePath+"Par"+data+"_final")):
+						uploaded = uploadParFile(request, "Par"+data+"_final")
+						if uploaded:
+							return redirect("/ds9s/fits/")
+					else:
+						messages.error(request, 'No file with this number.')
+						return render(request, 'newParFits.html',locals())
 			except:
-				messages.error(request, u"Error during the saveing.")
-				return redirect("/ds9s/fits/")
-
-			messages.success(request, u"File saved in database.")
-			return redirect("/ds9s/fits/")
+				if(exists(basePath+data)):
+					uploaded = uploadParFile(request, data)
+					if uploaded:
+						return redirect("/ds9s/fits/")
+				else:
+					messages.error(request, 'No file with this name.')
+					return render(request, 'newParFits.html',locals())
+		else:
+			messages.error(request, 'Error in the file.')
+			return render(request, 'newParFits.html',locals())
 	else:
-		messages.error(request, u"File already in database.")
+		form = NewParFileForm()
+
+	return render(request, 'newParFits.html',locals())
+
+
+def uploadParFile(request, name=None):
+	if name is None:
+		messages.error('Error in the folder\'s name')
 		return redirect("/ds9s/fits/")
+	else:
+		findIn = "/G102_DRIZZLE"
+		findIn2 = "/G141_DRIZZLE"
+
+		fileExist = ParFileFits.objects.filter(name_par=name)
+		if not fileExist:
+			#get fieldNum
+			state = split(name,"_")
+			state = state[0]
+			fieldNum = state[3:len(state)]
+
+			par = saveParFile(fieldNum, name)
+			if par != False :
+				#get ID
+				expression = r"^aXeWFC3_G102_mef_ID([0-9]+).fits$"
+				expression2 = r"^aXeWFC3_G141_mef_ID([0-9]+).fits$"
+				
+				try:
+					addFileDatabase(basePath, name, findIn, expression, par.id)
+					addFileDatabase(basePath, name, findIn2, expression2, par.id)
+				except:
+					messages.error(request, u"Error during the saveing.")
+					return False;
+
+				messages.success(request, u"File saved in database.")
+				return True;
+		else:
+			messages.error(request, u"File already in database.")
+			return False;
 
 def saveParFile(fieldNum, name):
 	try:
