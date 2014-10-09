@@ -10,6 +10,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from ds9s.models import Galaxy, ParFolder, Analysis
 from ds9s.forms import UploadFitsForm, NewParFileForm
 from django.db import IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
@@ -32,12 +33,21 @@ from os.path import exists
 import pdb
 from django.db.models import Q
 
-#global variable
+#------------------ GLOBAL VARIABLES --------------------------------
 basePath = "/home/lguibert/test/"
-findIn = "/G102_DRIZZLE"
-findIn2 = "/G141_DRIZZLE"
+
+findIn = "/G102_DRIZZLE/"
+findIn2 = "/G141_DRIZZLE/"
+
+grismFolder = '/DATA/DIRECT_GRISM/'
+
 expression = r"^aXeWFC3_G102_mef_ID([0-9]+).fits$"
 expression2 = r"^aXeWFC3_G141_mef_ID([0-9]+).fits$"
+
+f110w = "F110W_rot_drz.fits"
+f160w = "F160W_rot_drz.fits"
+f140w = "F140W_rot_drz.fits"
+#--------------------------------------------------------------------
 
 
 class ViewHomeFits(ListView):
@@ -65,12 +75,36 @@ def makePng(request, id):
 			messages.error(request, u"PNG unable .")
 			return redirect("/ds9s/fits/view/"+id)
 
-def viewFits(request, id):
+def viewGalaxy(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
-	analysis = Analysis.objects.get(user_id=request.user, galaxy_id=gal.id)
-	#analysis = get_object_or_404(Analysis, Q(galaxy_id=test),user_id=request.user)
-	return render(request, 'viewFits.html',locals())
 
+	try:
+		analysis = Analysis.objects.get(user_id=request.user, galaxy_id=gal.id)
+	except ObjectDoesNotExist:
+		messages.info(request,'No analysis yet.')
+
+	checked = checkAllFiles(gal.id, gal.parfolder.name_par)
+
+	return render(request, 'viewGalaxy.html',locals())
+
+def checkAllFiles(gal_id, par_name):
+	base = basePath + par_name 
+	g102 =  base + findIn + "aXeWFC3_G102_mef_ID"+str(gal_id)+".fits"
+	g141 = base + findIn2 + "aXeWFC3_G141_mef_ID"+str(gal_id)+".fits"
+
+	base_grism = base + grismFolder
+	f110w_f = base_grism + f110w
+	f160w_f = base_grism + f160w
+	f140w_f = base_grism + f140w
+
+
+	filesToCheck = [g102,g141,f110w_f,f140w_f,f160w_f]
+	checked = []
+	for f in filesToCheck:
+		if exists(f):
+			checked.append(f)
+
+	return checked
 
 
 def showFits(request,id,zmin=None,zmax=None): # pathToFits is the pathway to one of the stamps in either the G102_DRIZZLE or G141_DRIZZLE directories
