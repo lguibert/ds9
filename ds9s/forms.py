@@ -55,7 +55,7 @@ class UpdateUserForm(forms.ModelForm):
 
 
 class NewParFileForm(forms.Form):
-	name = forms.CharField(label=mark_safe("Number of the Par<span class='precision'>XXX</span> or the folder's name"))
+	name = forms.CharField(label=mark_safe("Number of the Par<span class='precision'>XXX</span>"))
 
 
 class UploadFitsForm(forms.Form):

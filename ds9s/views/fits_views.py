@@ -67,7 +67,7 @@ def makePng(request, id):
 
 def viewFits(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
-	#analysis = Analysis.objects.get(user_id=request.user, galaxy_id=test)
+	analysis = Analysis.objects.get(user_id=request.user, galaxy_id=gal.id)
 	#analysis = get_object_or_404(Analysis, Q(galaxy_id=test),user_id=request.user)
 	return render(request, 'viewFits.html',locals())
 
@@ -121,13 +121,8 @@ def newParFile(request):
 						messages.error(request, 'No file with this number.')
 						return render(request, 'newParFits.html',locals())
 			except ValueError:
-				if(exists(basePath+data)):
-					uploaded = uploadParFile(request, data)
-					if uploaded:
-						return redirect("/ds9s/fits/")
-				else:
-					messages.error(request, 'No file with this name.')
-					return render(request, 'newParFits.html',locals())
+				messages.error(request, 'The value is not a number.')
+				return render(request, 'newParFits.html',locals())
 		else:
 			messages.error(request, 'Error in the file.')
 			return render(request, 'newParFits.html',locals())

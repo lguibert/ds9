@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 
 @login_required
+@permission_required('ds9s.update_user', raise_exception=True)
 def focus(request, id):
 	save = request.GET
 	if save:
