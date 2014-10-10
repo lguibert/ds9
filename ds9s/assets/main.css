@@ -62,17 +62,17 @@
 	background-color:rgba(46,81,144,0.15);
 }
 
-.col-md-5, .col-md-2{
+#rootFiles .col-md-5, #rootFiles .col-md-2{
 	min-height: 250px;
 }
 
-.col-md-2{
+#rootFiles .col-md-2{
 	margin-left: 4px;
 	margin-right: 4px;
 	max-width: 480px;
 }
 
-.col-md-5{
+#rootFiles .col-md-5{
 	max-width: 480px;
 }
 

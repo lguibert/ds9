@@ -79,8 +79,6 @@ def viewGalaxy(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
 	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
 
-	test = dir(gal)
-
 	try:
 		analysis = Analysis.objects.get(user_id=request.user, galaxy_id=gal.id)
 	except ObjectDoesNotExist:
