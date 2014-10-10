@@ -1,9 +1,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE ds9s_analysis;
-TRUNCATE ds9s_emissionfeatures;
-TRUNCATE ds9s_emissionline;
-TRUNCATE ds9s_emissionlinefields;
 TRUNCATE ds9s_galaxy;
+TRUNCATE ds9s_galaxyfeatures;
 TRUNCATE ds9s_parfolder;
 
 
@@ -27,39 +25,26 @@ TRUNCATE ds9s_parfolder;
 #  14 CLASS_STAR      S/G classifier output
 #  15 FLAGS           Extraction flags
 
-Parent fields:
-c3=pyfits.Column(name='ra',format='E',array=np.float32(outarr[0:,2]))
-c4=pyfits.Column(name='dec',format='E',array=np.float32(outarr[0:,3]))
-c5=pyfits.Column(name='J_mag',format='E',array=np.float32(outarr[0:,4]))
-c6=pyfits.Column(name='H_mag',format='E',array=np.float32(outarr[0:,5]))
-c7=pyfits.Column(name='major_axis',format='E',array=np.float32(outarr[0:,6]))
-c8=pyfits.Column(name='minor_axis',format='E',array=np.float32(outarr[0:,7]))
-c145=pyfits.Column(name='multiple_measurements_flag',format='J',array=np.int32(outarr[0:,144]))
-c146=pyfits.Column(name='multiple_galaxy_flag',format='J',array=np.int32(outarr[0:,145]))
 
-def getDataFromCat(request, parfile, id, type=0):
-#type = 0 => file f110, type = 1 => file F160, type = 2 => file 140
-	
-	cat_file = defineNumberCatFile(type)
-	cat_file_f = basePath + parfile + grismFolder + cat_file
+NeV, OII, NeIII, Hbeta, OIII, Halpha, SII, SIII_9069, SIII_9532, HeI_10830
 
-	catdat=np.genfromtxt(cat_file_f,dtype=np.str)
-	catid=np.array(catdat[0:,1],dtype=np.int)
 
-	catra = np.array(catdat[0:,7],dtype=np.float)
-	catdec = np.array(catdat[0:,8],dtype=np.float)
-	catmajaxe = np.array(catdat[0:,9],dtype=np.float)
-	catminaxe = np.array(catdat[0:,10],dtype=np.float)
-	catmagf110 = np.array(catdat[0:,12],dtype=np.float)
-	catmagautof110 = np.array(catdat[0:,13],dtype=np.float)
+ni, nl , z, zerr, zflag, fwhm, fwhmerr, fwhmflag, ew, flux, fluxerr, sonn, fluxflag, contamflag, edgeflag, lam, qualflag
 
-def defineNumberCatFile(type):
-	if type == 0:
-		return cat_file = "fin_F110.cat"
-	elif type == 1:
-		return cat_file = "fin_F140.cat"
-	elif type == 2:
-		return cat_file = "fin_F160.cat"
-	else:
-		return None
 
+321_82.963646_-7.38544
+      1   
+      816.129   
+      612.767     
+      2.821     
+      2.792      
+      27.3  
+      82.963646  
+      -7.385446  
+      0.000101  
+      0.000099     
+      -27.3    
+      16.060     
+      0.000     
+      1.000    
+      2

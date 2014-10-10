@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 #from django.contrib.auth.models import User
-from ds9s.models import Galaxy, ParFolder, Analysis
+from ds9s.models import Galaxy, ParFolder, Analysis, GalaxyFeatures
 from ds9s.forms import UploadFitsForm, NewParFileForm
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
@@ -54,7 +54,7 @@ class ViewHomeFits(ListView):
 	model = Galaxy
 	context_object_name = "galaxys"
 	template_name = "homeFits.html"
-	queryset = Galaxy.objects.values('uniq_id').order_by('uniq_id').annotate(Count('uniq_id'))
+	queryset = Galaxy.objects.values('uniq_id').order_by('uniq_id')
 	paginate_by = 5
 
 def makePng(request, id):
@@ -77,6 +77,9 @@ def makePng(request, id):
 
 def viewGalaxy(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
+	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
+
+	test = dir(gal)
 
 	try:
 		analysis = Analysis.objects.get(user_id=request.user, galaxy_id=gal.id)
@@ -148,19 +151,19 @@ def newParFile(request):
 		form = NewParFileForm(request.POST)
 		if form.is_valid():
 			data = form.cleaned_data['name']
-			try:
-				if(int(data)): 
+			#try:
+			if(int(data)): 
 #if data is not int (name of the folder), we'll have a exception. So, in except we have the code for the name.
-					if(exists(basePath+"Par"+data+"_final")):
-						uploaded = uploadParFile(request, "Par"+data+"_final")
-						if uploaded:
-							return redirect("/ds9s/fits/")
-					else:
-						messages.error(request, 'No file with this number.')
-						return render(request, 'newParFits.html',locals())
-			except ValueError:
+				if(exists(basePath+"Par"+str(data)+"_final")):
+					uploaded = uploadParFile(request, "Par"+str(data)+"_final")
+					if uploaded:
+						return redirect("/ds9s/fits/")
+				else:
+					messages.error(request, 'No file with this number.')
+					return render(request, 'newParFits.html',locals())
+			"""except ValueError:
 				messages.error(request, 'The value is not a number.')
-				return render(request, 'newParFits.html',locals())
+				return render(request, 'newParFits.html',locals())"""
 		else:
 			messages.error(request, 'Error in the file.')
 			return render(request, 'newParFits.html',locals())
@@ -191,18 +194,26 @@ def uploadParFile(request, name=None):
 
 				ids_final = checkFilesGtype(ids1,ids2)
 
-				try :
-					addFileDatabase(ids_final, par.id)
-				except:
+				addFileDatabase(ids_final, par.id, getTypeSecondFiles())
+				"""except:
 					messages.error(request, u"Error during the saveing.")
 					par.delete()
-					return False;
+					return False;"""
 
 				messages.success(request, u"File saved in database.")
 				return True;
 		else:
 			messages.error(request, u"File already in database.")
-			return False;			
+			return False;	
+
+def getTypeSecondFiles():
+	toCheck = basePath + grismFolder + f140w
+	toCheck2 = basePath + grismFolder + f160w
+
+	if exists(toCheck):
+		return True
+	elif exists(toCheck2):
+		return False
 
 def saveParFile(fieldNum, name):
 	try:
@@ -238,20 +249,27 @@ def checkFilesGtype(ids1, ids2):
 	return ids_final#,ids_wrong
 
 def addFileDatabase(ids, par, type):
-	catid, catra, catdec, catmajaxe, catminaxe, catmagf110, catmagautof110, catmagf0, catmagautof0 = getDataFromCat(par, type)
+	tab = getDataFromCat(par, type)
 	for id in ids:	
-		#add bdd
-		index = getIndexPerId(id, catid)
+		#add bdd		
 		gal = Galaxy()
 		gal.parfolder_id = par
 		gal.uniq_id = id
 		gal.save()
 
-		feat = GalaxyFeatures()
-		feat.ga
+		#data for each galaxy
+		index = getIndexPerId(id, tab[0])
+		for x in range(0, 9):
+			feat = GalaxyFeatures()
+			feat.galaxy_id = gal.id
+			feat.galaxyfields_id = x+1
+			feat.value = tab[x][index]
+			feat.save()
+		
 
-def getDataFromCat(parfile, type):			
-	cat_file_f = basePath + parfile + grismFolder + "fin_F110.cat"
+def getDataFromCat(par_id, type):	
+	parfile = get_object_or_404(ParFolder,id=par_id)		
+	cat_file_f = basePath + parfile.name_par + grismFolder + "fin_F110.cat"
 
 	catdat=np.genfromtxt(cat_file_f,dtype=np.str)
 
@@ -266,13 +284,24 @@ def getDataFromCat(parfile, type):
 
 
 	cat_file = defineNumberCatFile(type)
-	cat_file_f = basePath + parfile + grismFolder + cat_file
+	cat_file_f = basePath + parfile.name_par + grismFolder + cat_file
 	catdat=np.genfromtxt(cat_file_f,dtype=np.str)
 
 	catmagf0 = np.array(catdat[0:,12],dtype=np.float)
 	catmagautof0 = np.array(catdat[0:,13],dtype=np.float)
 
-	return catid, catra, catdec, catmajaxe, catminaxe, catmagf110, catmagautof110, catmagf0, catmagautof0
+	tab = []
+	tab.append(catid)
+	tab.append(catra)
+	tab.append(catdec)
+	tab.append(catmajaxe)
+	tab.append(catminaxe)
+	tab.append(catmagf110)
+	tab.append(catmagautof110)
+	tab.append(catmagf0)
+	tab.append(catmagautof0)
+
+	return tab
 
 def getIndexPerId(id, ids):
 	ids_normal = []

@@ -2,12 +2,16 @@
 {% block content %}
 	<h1>Galaxy n°{{gal.uniq_id}}</h1>
 	<p>Date added: {{gal.parfolder.date_upload}}</p>
-	
-	<p>Test: {{catid}}</p>
+
 	<p>Test: {{test}}</p>
+	<p>Test: {{gal.galaxyfields_name}}</p>
+	
+	<p>Test f : {{features}}</p>
 
-	<p>Test index : {{index}}</p>
-
+	{% for f in features%}
+		<h4>{{f.name}}({{f.shortname}})</h4>
+		<p>{{f.value}}</p>
+	{% endfor %}
 
 	{% if analysis %}
 		<p>Analysis: {{analysis.redshift}}</p>
