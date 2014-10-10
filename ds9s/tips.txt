@@ -1,0 +1,65 @@
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE ds9s_analysis;
+TRUNCATE ds9s_emissionfeatures;
+TRUNCATE ds9s_emissionline;
+TRUNCATE ds9s_emissionlinefields;
+TRUNCATE ds9s_galaxy;
+TRUNCATE ds9s_parfolder;
+
+
+#   0 RA_DEC_NAME  
+#   1 NUMBER          Running object number
+#   2 X_IMAGE         Object position along x                         [pixel]
+#   3 Y_IMAGE         Object position along y                         [pixel]
+#   4 A_IMAGE         Profile RMS along major axis                    [pixel]
+#   5 B_IMAGE         Profile RMS along minor axis                    [pixel]
+#   6 THETA_IMAGE     Position angle (CCW/x)                          [deg]
+#   7 X_WORLD         Barycenter position along world x axis          [deg]
+#   8 Y_WORLD         Barycenter position along world y axis          [deg]
+#   9 A_WORLD         Profile RMS along major axis (world units)      [deg]
+#  10 B_WORLD         Profile RMS along minor axis (world units)      [deg]
+#  11 THETA_WORLD     Position angle (CCW/world-x)                    [deg]
+#  12 MAG_F1153W        Kron-like elliptical aperture magnitude         [mag]
+
+#  12 MAG_F1573W        Kron-like elliptical aperture magnitude         [mag] f160
+
+#  13 MAGERR_AUTO     RMS error for AUTO magnitude                    [mag]
+#  14 CLASS_STAR      S/G classifier output
+#  15 FLAGS           Extraction flags
+
+Parent fields:
+c3=pyfits.Column(name='ra',format='E',array=np.float32(outarr[0:,2]))
+c4=pyfits.Column(name='dec',format='E',array=np.float32(outarr[0:,3]))
+c5=pyfits.Column(name='J_mag',format='E',array=np.float32(outarr[0:,4]))
+c6=pyfits.Column(name='H_mag',format='E',array=np.float32(outarr[0:,5]))
+c7=pyfits.Column(name='major_axis',format='E',array=np.float32(outarr[0:,6]))
+c8=pyfits.Column(name='minor_axis',format='E',array=np.float32(outarr[0:,7]))
+c145=pyfits.Column(name='multiple_measurements_flag',format='J',array=np.int32(outarr[0:,144]))
+c146=pyfits.Column(name='multiple_galaxy_flag',format='J',array=np.int32(outarr[0:,145]))
+
+def getDataFromCat(request, parfile, id, type=0):
+#type = 0 => file f110, type = 1 => file F160, type = 2 => file 140
+	
+	cat_file = defineNumberCatFile(type)
+	cat_file_f = basePath + parfile + grismFolder + cat_file
+
+	catdat=np.genfromtxt(cat_file_f,dtype=np.str)
+	catid=np.array(catdat[0:,1],dtype=np.int)
+
+	catra = np.array(catdat[0:,7],dtype=np.float)
+	catdec = np.array(catdat[0:,8],dtype=np.float)
+	catmajaxe = np.array(catdat[0:,9],dtype=np.float)
+	catminaxe = np.array(catdat[0:,10],dtype=np.float)
+	catmagf110 = np.array(catdat[0:,12],dtype=np.float)
+	catmagautof110 = np.array(catdat[0:,13],dtype=np.float)
+
+def defineNumberCatFile(type):
+	if type == 0:
+		return cat_file = "fin_F110.cat"
+	elif type == 1:
+		return cat_file = "fin_F140.cat"
+	elif type == 2:
+		return cat_file = "fin_F160.cat"
+	else:
+		return None
+

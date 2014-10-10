@@ -2,6 +2,41 @@
 {% block content %}
 	<h1>Galaxy n°{{gal.uniq_id}}</h1>
 	<p>Date added: {{gal.parfolder.date_upload}}</p>
-	<p>Analysis: {{analysis.redshift}}</p>
-	<p>Checked: {{checked}}</p>
+	
+	<p>Test: {{catid}}</p>
+	<p>Test: {{test}}</p>
+
+	<p>Test index : {{index}}</p>
+
+
+	{% if analysis %}
+		<p>Analysis: {{analysis.redshift}}</p>
+	{% endif %}
+
+	<div id="rootFiles" class="container-fluid">
+		<div id="fFiles" class="row">
+			<div class="col-md-5">
+				<p>F110W_rot_drz.fits</p>
+			</div>
+			<div class="buttonsDiv col-md-2"><p>Here links and buttons</p></div>
+			<div class="col-md-5">
+				<p>F160W/F140W_rot_drz.fits</p>
+			</div>
+		</div>
+		<div id="gFiles" class="row">
+			<div class="col-md-5">
+				<p>G102</p>
+			</div>
+			<div class="buttonsDiv col-md-2"><p>Here links and buttons</p></div>
+			<div class="col-md-5">
+				<p>G141</p>
+			</div>
+		</div>
+	</div>
+
+	<div id="buttons">
+		<input class="btn btn-default"  type="button" value="Previous" />
+		<span>—</span>
+		<input class="btn btn-default"  type="button" value="Next" />
+	</div>
 {% endblock %}

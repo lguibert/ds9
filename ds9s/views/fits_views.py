@@ -85,6 +85,7 @@ def viewGalaxy(request, id):
 
 	checked = checkAllFiles(gal.id, gal.parfolder.name_par)
 
+
 	return render(request, 'viewGalaxy.html',locals())
 
 def checkAllFiles(gal_id, par_name):
@@ -99,6 +100,7 @@ def checkAllFiles(gal_id, par_name):
 
 
 	filesToCheck = [g102,g141,f110w_f,f140w_f,f160w_f]
+	#filesToCheck = {'g102':g102,'g141':g141,'f110w':f110w_f,'f140':f140w_f,'f160w':f160w_f}
 	checked = []
 	for f in filesToCheck:
 		if exists(f):
@@ -106,11 +108,13 @@ def checkAllFiles(gal_id, par_name):
 
 	return checked
 
+#def readCatFile():
+	#catdat=np.genfromtxt(p,dtype=np.str)
+	#p = file
 
-def showFits(request,id,zmin=None,zmax=None): # pathToFits is the pathway to one of the stamps in either the G102_DRIZZLE or G141_DRIZZLE directories
-	fit = get_object_or_404(Galaxy, id=id)
-	try :
-		pathToFits = "/opt/lampp/projects/ds9/ds9s/upload/" + str(fit.file_field)
+#only for g102 & g141
+def showFits(request, id, pathToFits, zmin=None, zmax=None): # pathToFits is the pathway to one of the stamps in either the G102_DRIZZLE or G141_DRIZZLE directories
+	try : 
 		inFits=pyfits.open(pathToFits)
 		#inFits.info() # shows contents of the FITS image
 		iHdr=inFits[1].header # We will use data from this later
@@ -134,10 +138,10 @@ def showFits(request,id,zmin=None,zmax=None): # pathToFits is the pathway to one
 		plt.ylabel('Distance (arcsec)')
 		plt.draw() 
 		inFits.close()
-		return redirect("/ds9s/fits/view/"+id)
+		return redirect("/ds9s/fits/view/"+str(id))
 	except:
 		messages.error(request, u"Error.")
-		return redirect("/ds9s/fits/view/"+id)
+		return redirect("/ds9s/fits/view/"+str(id))
 
 def newParFile(request):
 	if request.method == 'POST':
@@ -188,16 +192,17 @@ def uploadParFile(request, name=None):
 				ids_final = checkFilesGtype(ids1,ids2)
 
 				try :
-					addFileDatabase(ids_final, par)
+					addFileDatabase(ids_final, par.id)
 				except:
 					messages.error(request, u"Error during the saveing.")
+					par.delete()
 					return False;
 
 				messages.success(request, u"File saved in database.")
 				return True;
 		else:
 			messages.error(request, u"File already in database.")
-			return False;
+			return False;			
 
 def saveParFile(fieldNum, name):
 	try:
@@ -232,10 +237,52 @@ def checkFilesGtype(ids1, ids2):
 			#ids_wrong.append(i)
 	return ids_final#,ids_wrong
 
-def addFileDatabase(ids, par):
+def addFileDatabase(ids, par, type):
+	catid, catra, catdec, catmajaxe, catminaxe, catmagf110, catmagautof110, catmagf0, catmagautof0 = getDataFromCat(par, type)
 	for id in ids:	
 		#add bdd
+		index = getIndexPerId(id, catid)
 		gal = Galaxy()
 		gal.parfolder_id = par
 		gal.uniq_id = id
 		gal.save()
+
+		feat = GalaxyFeatures()
+		feat.ga
+
+def getDataFromCat(parfile, type):			
+	cat_file_f = basePath + parfile + grismFolder + "fin_F110.cat"
+
+	catdat=np.genfromtxt(cat_file_f,dtype=np.str)
+
+	catid=np.array(catdat[0:,1],dtype=np.int)
+
+	catra = np.array(catdat[0:,7],dtype=np.float)
+	catdec = np.array(catdat[0:,8],dtype=np.float)
+	catmajaxe = np.array(catdat[0:,9],dtype=np.float)
+	catminaxe = np.array(catdat[0:,10],dtype=np.float)
+	catmagf110 = np.array(catdat[0:,12],dtype=np.float)
+	catmagautof110 = np.array(catdat[0:,13],dtype=np.float)
+
+
+	cat_file = defineNumberCatFile(type)
+	cat_file_f = basePath + parfile + grismFolder + cat_file
+	catdat=np.genfromtxt(cat_file_f,dtype=np.str)
+
+	catmagf0 = np.array(catdat[0:,12],dtype=np.float)
+	catmagautof0 = np.array(catdat[0:,13],dtype=np.float)
+
+	return catid, catra, catdec, catmajaxe, catminaxe, catmagf110, catmagautof110, catmagf0, catmagautof0
+
+def getIndexPerId(id, ids):
+	ids_normal = []
+	for i in ids:
+		ids_normal.append(i)
+
+	return ids_normal.index(int(id))
+
+def defineNumberCatFile(type):
+	if type:
+		return "fin_F140.cat"
+	else:
+		return "fin_F160.cat"
