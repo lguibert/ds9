@@ -27,7 +27,7 @@ import pyfits
 
 from string import split
 import re
-from os import listdir
+from os import listdir, makedirs
 from os.path import exists
 
 import pdb
@@ -57,23 +57,60 @@ class ViewHomeFits(ListView):
 	queryset = Galaxy.objects.values('uniq_id').order_by('uniq_id')
 	paginate_by = 5
 
-def makePng(request, id):
-	fit = get_object_or_404(Galaxy, id=id)
-	if fit:
-		try:
-			file = "/opt/lampp/projects/ds9/ds9s/upload/" + str(fit.file_field)
-			data = fits.getdata(file)
-			fig = plt.figure()
-			ax = fig.add_subplot(111)
-			ax.plot(data)
-			fig.savefig('ds9s/upload/fits_png/'+fit.uniqname+'.png')
-			messages.success(request, u"PNG created.")
-			fit.generated = 1
-			fit.save()
-			return redirect("/ds9s/fits/view/"+id)
-		except:
-			messages.error(request, u"PNG unable .")
-			return redirect("/ds9s/fits/view/"+id)
+def makePng(request, file, id, short_name):
+	gal = get_object_or_404(Galaxy, uniq_id=id)
+	"""try:
+		data = fits.getdata(file)
+		fig = plt.figure()
+		ax = fig.add_subplot(111)
+		ax.plot(data)
+
+		directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)
+
+		if not exists(directory):
+			makedirs(directory)
+
+		fig.savefig(directory+'/'+short_name+'_'+gal.uniq_name+'.png')
+		messages.success(request, u"PNG created.")
+		return True
+	except:
+		messages.error(request, u"PNG unable.")
+		return False"""
+	
+	inFits=pyfits.open(file)
+			#inFits.info() # shows contents of the FITS image
+	iHdr=inFits[1].header # We will use data from this later
+	iData=inFits[1].data # This is the image data
+
+			#print iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1']
+	x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
+	y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
+	npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
+	l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
+		    #print l1,l2,y1,y2
+
+	xDispSize=6.0
+	yDispSize=xDispSize*float(npixy)/float(npixx) # Size the image to scale with the image dimensions
+
+	#plt.ion() # Necessary for interactive Python (ipython) environment
+	fig = plt.figure(1,figsize=(xDispSize*1.3,yDispSize*2.5))
+	plt.imshow(iData,cmap=cm.Greys_r,origin="lower",aspect=dl/da, extent=(l1,l2,y1,y2)) # Call imshow
+	plt.axhline(y=0.0,c='cyan',linestyle=':') # Plot a blue dotted line at distance = 0
+	plt.xlabel(r'Wavelength ($\AA$)')
+	plt.ylabel('Distance (arcsec)')
+	directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)
+
+	if not exists(directory):
+		makedirs(directory)
+
+	fig.savefig(directory+'/'+short_name+'_'+gal.uniq_name+'.png')
+	inFits.close()
+	messages.success(request, u"PNG created.")
+	return True
+	"""except:
+		messages.error(request, u"PNG unable.")
+		return False
+"""
 
 def viewGalaxy(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
@@ -84,8 +121,15 @@ def viewGalaxy(request, id):
 	except ObjectDoesNotExist:
 		messages.info(request,'No analysis yet.')
 
-	checked = checkAllFiles(gal.id, gal.parfolder.name_par)
-
+	if not gal.generated:
+		gen = []
+		checked, checked_short = checkAllFiles(gal.id, gal.parfolder.name_par)
+		for index, c in enumerate(checked):
+			png = makePng(request, c, id, checked_short[index])
+			gen.append(png)
+		if not False in gen:
+			gal.generated = True
+			gal.save()	
 
 	return render(request, 'viewGalaxy.html',locals())
 
@@ -103,11 +147,20 @@ def checkAllFiles(gal_id, par_name):
 	filesToCheck = [g102,g141,f110w_f,f140w_f,f160w_f]
 	#filesToCheck = {'g102':g102,'g141':g141,'f110w':f110w_f,'f140':f140w_f,'f160w':f160w_f}
 	checked = []
+	checked_short = []
 	for f in filesToCheck:
 		if exists(f):
 			checked.append(f)
+			f = split(f,'/')
+			f = f[-1]
+			f = split(f,'_')
+			if len(f[0]) > 5 :
+				f = f[1]
+			else:
+				f = f[0]
+			checked_short.append(f)
 
-	return checked
+	return checked, checked_short
 
 #def readCatFile():
 	#catdat=np.genfromtxt(p,dtype=np.str)
@@ -192,11 +245,12 @@ def uploadParFile(request, name=None):
 
 				ids_final = checkFilesGtype(ids1,ids2)
 
-				addFileDatabase(ids_final, par.id, getTypeSecondFiles())
-				"""except:
+				try:
+					addFileDatabase(ids_final, par.id, getTypeSecondFiles())
+				except:
 					messages.error(request, u"Error during the saveing.")
 					par.delete()
-					return False;"""
+					return False;
 
 				messages.success(request, u"File saved in database.")
 				return True;
@@ -253,6 +307,7 @@ def addFileDatabase(ids, par, type):
 		gal = Galaxy()
 		gal.parfolder_id = par
 		gal.uniq_id = id
+		gal.uniq_name = str(id) + '_' + str(uuid.uuid1()) 
 		gal.save()
 
 		#data for each galaxy

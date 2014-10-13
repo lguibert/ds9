@@ -1,5 +1,8 @@
 {% extends "base.html" %}
-{% block content %}
+{% block content %}	
+	<p>Date added: {{checked}}</p>
+	<p>Date added: {{checked_short}}</p>
+
 	<h1>Galaxy n°{{gal.uniq_id}}</h1>
 	<p>Date added: {{gal.parfolder.date_upload}}</p>
 
@@ -12,14 +15,11 @@
 		{% endfor %}
 	</div>	
 
-	{% if analysis %}
-		<p>Analysis: {{analysis.redshift}}</p>
-	{% endif %}
-
+	{% if gal.generated %}
 	<div id="rootFiles" class="container-fluid">
 		<div id="fFiles" class="row">
 			<div class="col-md-5">
-				<p>F110W_rot_drz.fits</p>
+				<img src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F110W_{{gal.uniq_name}}.png">
 			</div>
 			<div class="buttonsDiv col-md-2"><p>Here links and buttons</p></div>
 			<div class="col-md-5">
@@ -28,14 +28,15 @@
 		</div>
 		<div id="gFiles" class="row">
 			<div class="col-md-5">
-				<p>G102</p>
+				<img src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G102_{{gal.uniq_name}}.png">
 			</div>
 			<div class="buttonsDiv col-md-2"><p>Here links and buttons</p></div>
 			<div class="col-md-5">
-				<p>G141</p>
+				<img src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G141_{{gal.uniq_name}}.png">
 			</div>
 		</div>
 	</div>
+	{% endif %}
 
 	<div id="buttons">
 		<input class="btn btn-default"  type="button" value="Previous" />

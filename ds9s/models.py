@@ -12,6 +12,8 @@ class ParFolder(models.Model):
 class Galaxy(models.Model):
 	uniq_id = models.IntegerField(default=0)
 	last_update = models.DateTimeField(auto_now=True)
+	uniq_name = models.CharField(max_length=254,null=True)
+	generated = models.BooleanField(default=False)
 
 	parfolder = models.ForeignKey('ParFolder')	
 	users = models.ManyToManyField(User, through='Analysis')
