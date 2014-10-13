@@ -57,8 +57,7 @@ class ViewHomeFits(ListView):
 	queryset = Galaxy.objects.values('uniq_id').order_by('uniq_id')
 	paginate_by = 5
 
-def makePng(request, file, id, short_name):
-	gal = get_object_or_404(Galaxy, uniq_id=id)
+def makePng(request, file, gal, short_name):
 	"""try:
 		data = fits.getdata(file)
 		fig = plt.figure()
@@ -76,44 +75,55 @@ def makePng(request, file, id, short_name):
 	except:
 		messages.error(request, u"PNG unable.")
 		return False"""
-	
-	inFits=pyfits.open(file)
-			#inFits.info() # shows contents of the FITS image
-	iHdr=inFits[1].header # We will use data from this later
-	iData=inFits[1].data # This is the image data
+	try:
+		inFits=pyfits.open(file)
+				#inFits.info() # shows contents of the FITS image
+		iHdr=inFits[1].header # We will use data from this later
+		iData=inFits[1].data # This is the image data
 
-			#print iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1']
-	x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
-	y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
-	npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
-	l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
-		    #print l1,l2,y1,y2
+				#print iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1']
+		x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
+		y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
+		npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
+		l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
+			    #print l1,l2,y1,y2
 
-	xDispSize=6.0
-	yDispSize=xDispSize*float(npixy)/float(npixx) # Size the image to scale with the image dimensions
+		xDispSize=6.0
+		yDispSize=xDispSize*float(npixy)/float(npixx) # Size the image to scale with the image dimensions
 
-	#plt.ion() # Necessary for interactive Python (ipython) environment
-	fig = plt.figure(1,figsize=(xDispSize*1.3,yDispSize*2.5))
-	plt.imshow(iData,cmap=cm.Greys_r,origin="lower",aspect=dl/da, extent=(l1,l2,y1,y2)) # Call imshow
-	plt.axhline(y=0.0,c='cyan',linestyle=':') # Plot a blue dotted line at distance = 0
-	plt.xlabel(r'Wavelength ($\AA$)')
-	plt.ylabel('Distance (arcsec)')
-	directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)
+		#plt.ion() # Necessary for interactive Python (ipython) environment
+		fig = plt.figure(1,figsize=(xDispSize*1.3,yDispSize*2.5))
+		plt.imshow(iData,cmap=cm.Greys_r,origin="lower",aspect=dl/da, extent=(l1,l2,y1,y2)) # Call imshow
+		plt.axhline(y=0.0,c='cyan',linestyle=':') # Plot a blue dotted line at distance = 0
+		plt.xlabel(r'Wavelength ($\AA$)')
+		plt.ylabel('Distance (arcsec)')
+		directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)
 
-	if not exists(directory):
-		makedirs(directory)
+		if not exists(directory):
+			makedirs(directory)
 
-	fig.savefig(directory+'/'+short_name+'_'+gal.uniq_name+'.png')
-	inFits.close()
-	messages.success(request, u"PNG created.")
-	return True
-	"""except:
+		fig.savefig(directory+'/'+short_name+'_'+gal.uniq_name+".svg",bbox_inches='tight',pad_inches=0.3)
+		inFits.close()
+		messages.success(request, u"PNG created.")
+		return True
+	except:
 		messages.error(request, u"PNG unable.")
 		return False
-"""
 
 def viewGalaxy(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
+
+	try:
+		n = int(id) + 1
+		next = Galaxy.objects.get(uniq_id=n)
+	except:
+		next = None
+	try:
+		p = int(id) -1
+		previous = Galaxy.objects.get(uniq_id=p)
+	except:
+		previous = None
+
 	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
 
 	try:
@@ -125,9 +135,9 @@ def viewGalaxy(request, id):
 		gen = []
 		checked, checked_short = checkAllFiles(gal.id, gal.parfolder.name_par)
 		for index, c in enumerate(checked):
-			png = makePng(request, c, id, checked_short[index])
-			gen.append(png)
-		if not False in gen:
+			png = makePng(request, c, gal, checked_short[index])
+			#gen.append(png)
+		#if not False in gen:
 			gal.generated = True
 			gal.save()	
 
@@ -167,35 +177,6 @@ def checkAllFiles(gal_id, par_name):
 	#p = file
 
 #only for g102 & g141
-def showFits(request, id, pathToFits, zmin=None, zmax=None): # pathToFits is the pathway to one of the stamps in either the G102_DRIZZLE or G141_DRIZZLE directories
-	try : 
-		inFits=pyfits.open(pathToFits)
-		#inFits.info() # shows contents of the FITS image
-		iHdr=inFits[1].header # We will use data from this later
-		iData=inFits[1].data # This is the image data
-
-		#print iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1']
-		x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
-		y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
-		npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
-		l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
-	    #print l1,l2,y1,y2
-
-		xDispSize=6.0
-		yDispSize=xDispSize*float(npixy)/float(npixx) # Size the image to scale with the image dimensions
-
-		plt.ion() # Necessary for interactive Python (ipython) environment
-		plt.figure(1,figsize=(xDispSize*1.3,yDispSize*2.5))
-		plt.imshow(iData,cmap=cm.Greys_r,origin="lower",aspect=dl/da, extent=(l1,l2,y1,y2)) # Call imshow
-		plt.axhline(y=0.0,c='cyan',linestyle=':') # Plot a blue dotted line at distance = 0
-		plt.xlabel(r'Wavelength ($\AA$)')
-		plt.ylabel('Distance (arcsec)')
-		plt.draw() 
-		inFits.close()
-		return redirect("/ds9s/fits/view/"+str(id))
-	except:
-		messages.error(request, u"Error.")
-		return redirect("/ds9s/fits/view/"+str(id))
 
 def newParFile(request):
 	if request.method == 'POST':

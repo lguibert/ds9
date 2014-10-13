@@ -1,8 +1,5 @@
 {% extends "base.html" %}
 {% block content %}	
-	<p>Date added: {{checked}}</p>
-	<p>Date added: {{checked_short}}</p>
-
 	<h1>Galaxy n°{{gal.uniq_id}}</h1>
 	<p>Date added: {{gal.parfolder.date_upload}}</p>
 
@@ -16,31 +13,39 @@
 	</div>	
 
 	{% if gal.generated %}
-	<div id="rootFiles" class="container-fluid">
-		<div id="fFiles" class="row">
-			<div class="col-md-5">
-				<img src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F110W_{{gal.uniq_name}}.png">
+	<div id="rootFiles" class="">
+		<div id="fFiles" class="">
+			<div>
+				<img class="figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F110W_{{gal.uniq_name}}.png" contenteditable="true">
 			</div>
-			<div class="buttonsDiv col-md-2"><p>Here links and buttons</p></div>
-			<div class="col-md-5">
-				<p>F160W/F140W_rot_drz.fits</p>
+			<div>
+				<p contenteditable="false">F160W/F140W_rot_drz.fits</p>
 			</div>
 		</div>
-		<div id="gFiles" class="row">
-			<div class="col-md-5">
-				<img src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G102_{{gal.uniq_name}}.png">
+		<div id="gFiles" class="">
+			<div>
+				<img class="figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G102_{{gal.uniq_name}}.svg" contenteditable="true">
 			</div>
-			<div class="buttonsDiv col-md-2"><p>Here links and buttons</p></div>
-			<div class="col-md-5">
-				<img src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G141_{{gal.uniq_name}}.png">
+			<div contenteditable="false">
+				<img class="secondDiv figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G141_{{gal.uniq_name}}.svg" contenteditable="true">
 			</div>
 		</div>
 	</div>
 	{% endif %}
 
 	<div id="buttons">
-		<input class="btn btn-default"  type="button" value="Previous" />
-		<span>—</span>
-		<input class="btn btn-default"  type="button" value="Next" />
+		{% if previous %}
+			<form action="/ds9s/fits/view/{{previous.uniq_id}}/" method="post">
+				 {% csrf_token %}
+				<input class="btn btn-default"  type="submit" value="Previous" />
+			</form>
+		{% endif %}	
+		<span>—</span>	
+		{%if next %}
+			<form action="/ds9s/fits/view/{{next.uniq_id}}/" method="post">
+				 {% csrf_token %}
+				<input class="btn btn-default"  type="submit" value="Next" />
+			</form>
+		{% endif %}	
 	</div>
 {% endblock %}
