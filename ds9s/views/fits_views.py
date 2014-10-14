@@ -38,6 +38,8 @@ from os.path import exists
 import pdb
 from django.db.models import Q
 
+from django.utils.safestring import mark_safe
+
 #------------------ GLOBAL VARIABLES --------------------------------
 basePath = "/home/lguibert/test/"
 
@@ -63,9 +65,12 @@ class ViewHomeFits(ListView):
 
 
 def test(request):
-	fig = plt.figure(1,figsize=(200, 200))
-	img = mpimg.imread("/opt/lampp/projects/ds9/ds9s/upload/fits_png/Par321_final/F110W.png")
+	file = "/opt/lampp/projects/ds9/ds9s/upload/fits_png/Par321_final/F110W.svg"
+	#fig = plt.figure(1,figsize=(200, 200))
+	#img = mpimg.imread()
 	
+	s = mark_safe(open(file).read())
+
 	"""imgplot = plt.imshow(img)
 	""lum_img = img[:,:,0]
 	imgplot = plt.imshow(lum_img)"""
@@ -75,42 +80,42 @@ def test(request):
 	return render(request, 'test.html',locals()) 
 
 def makePngFFile(request, file, gal, short_name, raCenter=None, decCenter=None):
-    #pathToFits specifies the pathway to either the F110W_rot_drz.fits, etc.
-    
-    features = GalaxyFeatures.objects.filter(galaxy_id=gal.uniq_id).order_by('galaxyfields_id')
-    raCenter = float(features[0].value)
-    decCenter = float(features[1].value)
+	try:
+		features = GalaxyFeatures.objects.filter(galaxy_id=gal.uniq_id).order_by('galaxyfields_id')
+		raCenter = float(features[0].value)
+		decCenter = float(features[1].value)
 
-    inFits=pyfits.open(file)
-    iHdr=inFits[1].header
-    iData=inFits[1].data
+		inFits=pyfits.open(file)
+		iHdr=inFits[1].header
+		iData=inFits[1].data
 
-    # Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
-    x0,y0,ra0,dec0,drdx,drdy,dddx,dddy,fieldRotation=iHdr["CRPIX1"],iHdr["CRPIX2"],iHdr["CRVAL1"],iHdr["CRVAL2"],iHdr["CD1_1"],iHdr["CD1_2"],iHdr["CD2_1"],iHdr["CD2_2"],iHdr["ORIENTAT"]
+			    # Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
+		x0,y0,ra0,dec0,drdx,drdy,dddx,dddy,fieldRotation=iHdr["CRPIX1"],iHdr["CRPIX2"],iHdr["CRVAL1"],iHdr["CRVAL2"],iHdr["CD1_1"],iHdr["CD1_2"],iHdr["CD2_1"],iHdr["CD2_2"],iHdr["ORIENTAT"]
 
-    #If centering is specified in RA and Dec, calculate pixel coordinates of center
-    # raCenter and decCenter should be drawn from the catalog information for each galaxy
-    # where raCenter = X_World and decCenter = Y_World
-    # When we display the image, I would then like the image to be centered on the (xcen,ycen) pixel
-    # finally, I would like all of the galaxies and stars in the image to be labelled by their catalog id number
-    
-    fieldRotation=-1.*fieldRotation 
-    pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
-    xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
-    ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
-    
-    npixx,npixy=iData.shape[1],iData.shape[0]
-    xDispSize=6.0
-    yDispSize=xDispSize*float(npixy)/float(npixx)
+			    #If centering is specified in RA and Dec, calculate pixel coordinates of center
+			    # raCenter and decCenter should be drawn from the catalog information for each galaxy
+			    # where raCenter = X_World and decCenter = Y_World
+			    # When we display the image, I would then like the image to be centered on the (xcen,ycen) pixel
+			    # finally, I would like all of the galaxies and stars in the image to be labelled by their catalog id number
+			    
+		fieldRotation=-1.*fieldRotation 
+		pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
+		xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
+		ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
+			    
+		npixx,npixy=iData.shape[1],iData.shape[0]
+		xDispSize=6.0
+		yDispSize=xDispSize*float(npixy)/float(npixx)
+		
+		fig = plt.figure(1,figsize=(xDispSize, yDispSize))
+		plt.imshow(iData,cmap=cm.Greys_r,origin="lower")
+		directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"    
+		result = savePng(request, directory, short_name, gal.uniq_name, fig)
 
-    fig = plt.figure(1,figsize=(xDispSize, yDispSize))
-    plt.imshow(iData,cmap=cm.Greys_r,origin="lower")
-    directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"    
-    result = savePng(request, directory, short_name, gal.uniq_name, fig)
-
-    inFits.close()
-
-    return result
+		inFits.close()
+		return result
+	except:
+		return False
 
 def makePngGFile(request, file, gal, short_name):
 	try:
@@ -189,19 +194,20 @@ def viewGalaxy(request, id):
 		
 		directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
 		#pdb.set_trace()
-
-		if not exists(directory+"F110W.svg"):
-			gen.append(makePngFFile(request, checked[2], gal, checked_short[2]))
-			messages.info(request,"F110W Created")
-			time.sleep(1)
-		if checked_short[3] == 'F160W':
-			if not exists(directory+"F160W.svg"):
-				gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
-				messages.info(request,"F160W Created")
-		if checked_short[3] == 'F140W':
-			if not exists(directory+"F140W.svg"):
-				gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
-		
+		try:
+			if not exists(directory+"F110W.svg"):
+				gen.append(makePngFFile(request, checked[2], gal, checked_short[2]))
+				messages.info(request,"F110W Created")
+				time.sleep(1)
+			if checked_short[3] == 'F160W':
+				if not exists(directory+"F160W.svg"):
+					gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
+					messages.info(request,"F160W Created")
+			if checked_short[3] == 'F140W':
+				if not exists(directory+"F140W.svg"):
+					gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
+		except:
+			messages.warning(request, "No file for this galaxy.")
 		time.sleep(1)
 		gen.append(makePngGFile(request, checked[0], gal, checked_short[0]))
 		gen.append(makePngGFile(request, checked[1], gal, checked_short[1]))

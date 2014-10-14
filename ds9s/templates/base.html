@@ -19,8 +19,10 @@
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
-          <a class="navbar-brand" href="/ds9s/">Home</a>          
-            <a class="navbar-brand navbar-right" href="/ds9s/fits/upload/">Add new ParXXX</a>
+          <a class="navbar-brand" href="/ds9s/">Home</a>    
+          <a class="navbar-brand navbar-right" href="/ds9s/fits/test/">Test page</a>      
+          <a class="navbar-brand navbar-right" href="/ds9s/fits/upload/">Add new ParXXX</a>
+          
         </div>
         <div class="navbar-collapse collapse">
         	{% block loginForm%}
@@ -71,22 +73,34 @@
 
   <script type="text/javascript">
     $(document).ready(function(){
-      document.getElementById('g102').addEventListener('mousemove', function(e){
-        $('#g102 + div .x').html(e.pageX);
-        $('#g102 + div .y').html(e.pageY);
+
+      $('#g102').on("mousemove",function(e){
+            tab = getCoordonate(e.pageX, e.pageY, this)
+            $('#g102 + div .x').html(tab[0]);
+            $('#g102 + div .y').html(tab[1]);
       })
-      document.getElementById('g141').addEventListener('mousemove', function(e){
-        $('#g141 + div .x').html(e.pageX);
-        $('#g141 + div .y').html(e.pageY);
+      $('#g141').on("mousemove",function(e){
+            tab = getCoordonate(e.pageX, e.pageY, this)
+            $('#g141 + div .x').html(tab[0]);
+            $('#g141 + div .y').html(tab[1]);
       })
-      document.getElementById('f110').addEventListener('mousemove', function(e){
-        $('#f110 + div .x').html(e.pageX);
-        $('#f110 + div .y').html(e.pageY);
+      $('#f110').on("mousemove",function(e){
+            tab = getCoordonate(e.pageX, e.pageY, this)
+            $('#f110 + div .x').html(tab[0]);
+            $('#f110 + div .y').html(tab[1]);
       })
-      document.getElementById('f160140').addEventListener('mousemove', function(e){
-        $('#f160140 + div .x').html(e.pageX);
-        $('#f160140 + div .y').html(e.pageY);
+      $('#f160140').on("mousemove",function(e){
+            tab = getCoordonate(e.pageX, e.pageY, this)
+            $('#f160140 + div .x').html(tab[0]);
+            $('#f160140 + div .y').html(tab[1]);
       })
+      
+
+      function getCoordonate(x, y, selector){
+        dataWidth = $(selector).position().left
+        dataHeight = $(selector).position().top
+        return [x-dataWidth, y-dataHeight]
+      }
     })    
   </script>
   </body>
