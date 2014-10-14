@@ -13,9 +13,7 @@ urlpatterns = patterns('ds9s.views',
 
 	
 	url(r'^/fits/$',ViewHomeFits.as_view(), name='ds9s_homeFits'),
-	#url(r'^/fits/$','homeFits'),
+	url(r'^/fits/test/?$','test'),
 	url(r'^/fits/view/(?P<id>[0-9]+)/?$','viewGalaxy'),
-	url(r'^/fits/generatePNG/(?P<id>[0-9]+)/?$','makePng'),
-	url(r'^/fits/show/(?P<id>[0-9]+)/?$','showFits'),
 	url(r'^/fits/upload/','newParFile')
 )

@@ -48,7 +48,23 @@ ni, nl , z, zerr, zflag, fwhm, fwhmerr, fwhmflag, ew, flux, fluxerr, sonn, fluxf
       0.000     
       1.000    
       2
+      """try:
+            data = fits.getdata(file)
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.plot(data)
 
+            directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)
+
+            if not exists(directory):
+                  makedirs(directory)
+
+            fig.savefig(directory+'/'+short_name+'_'+gal.uniq_name+'.png')
+            messages.success(request, u"PNG created.")
+            return True
+      except:
+            messages.error(request, u"PNG unable.")
+            return False"""
 
 def showFits(request, id, pathToFits, zmin=None, zmax=None): # pathToFits is the pathway to one of the stamps in either the G102_DRIZZLE or G141_DRIZZLE directories
       try : 

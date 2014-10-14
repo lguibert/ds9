@@ -15,19 +15,31 @@
 	{% if gal.generated %}
 	<div id="rootFiles" class="">
 		<div id="fFiles" class="">
-			<div>
-				<img class="figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F110W_{{gal.uniq_name}}.png" contenteditable="true">
+			<div contenteditable="false">
+				<img id="f110" class="figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/F110W.svg" contenteditable="true">
+				<div class="clear">
+					<p>Cursor position => X:<span class="x"></span>- Y:<span class="y"></span></p>
+				</div>
 			</div>
-			<div>
-				<p contenteditable="false">F160W/F140W_rot_drz.fits</p>
+			<div contenteditable="false">
+				<img id="f160140" class="secondDiv figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/F160W.svg" contenteditable="true">
+				<div class="clear">
+					<p>Cursor position => X:<span class="x"></span>- Y:<span class="y"></span></p>
+				</div>
 			</div>
 		</div>
 		<div id="gFiles" class="">
 			<div>
-				<img class="figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G102_{{gal.uniq_name}}.svg" contenteditable="true">
+				<img id="g102" class="figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G102_{{gal.uniq_name}}.svg" contenteditable="true">
+				<div class="clear">
+					<p>Cursor position => X:<span class="x"> </span>- Y:<span class="y"> </span></p>
+				</div>
 			</div>
 			<div contenteditable="false">
-				<img class="secondDiv figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G141_{{gal.uniq_name}}.svg" contenteditable="true">
+				<img id="g141" class="secondDiv figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G141_{{gal.uniq_name}}.svg" contenteditable="true">
+				<div class="clear">
+					<p>Cursor position => X:<span class="x"></span>- Y:<span class="y"></span></p>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -39,6 +51,8 @@
 				 {% csrf_token %}
 				<input class="btn btn-default"  type="submit" value="Previous" />
 			</form>
+		{%else%}
+			<input class="btn btn-default"  disabled="disabled" type="button" value="Previous" />
 		{% endif %}	
 		<span>—</span>	
 		{%if next %}
@@ -46,6 +60,8 @@
 				 {% csrf_token %}
 				<input class="btn btn-default"  type="submit" value="Next" />
 			</form>
+		{%else%}
+			<input class="btn btn-default"  disabled="disabled" type="button" value="Next" />
 		{% endif %}	
 	</div>
 {% endblock %}

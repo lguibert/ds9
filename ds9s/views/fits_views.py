@@ -1,4 +1,6 @@
 #-*- coding: utf-8 -*-
+import time
+from django.conf import settings
 import matplotlib
 import matplotlib.cm as cm
 matplotlib.use('Agg')
@@ -20,7 +22,10 @@ from django.db.models import Count
 
 from astropy.io import fits
 
+from math import cos, pi, sin
+
 import numpy as np
+import matplotlib.image as mpimg
 import uuid
 
 import pyfits
@@ -43,7 +48,6 @@ grismFolder = '/DATA/DIRECT_GRISM/'
 
 expression = r"^aXeWFC3_G102_mef_ID([0-9]+).fits$"
 expression2 = r"^aXeWFC3_G141_mef_ID([0-9]+).fits$"
-
 f110w = "F110W_rot_drz.fits"
 f160w = "F160W_rot_drz.fits"
 f140w = "F140W_rot_drz.fits"
@@ -55,43 +59,76 @@ class ViewHomeFits(ListView):
 	context_object_name = "galaxys"
 	template_name = "homeFits.html"
 	queryset = Galaxy.objects.values('uniq_id').order_by('uniq_id')
-	paginate_by = 5
+	paginate_by = 15
 
-def makePng(request, file, gal, short_name):
-	"""try:
-		data = fits.getdata(file)
-		fig = plt.figure()
-		ax = fig.add_subplot(111)
-		ax.plot(data)
 
-		directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)
+def test(request):
+	fig = plt.figure(1,figsize=(200, 200))
+	img = mpimg.imread("/opt/lampp/projects/ds9/ds9s/upload/fits_png/Par321_final/F110W.png")
+	
+	"""imgplot = plt.imshow(img)
+	""lum_img = img[:,:,0]
+	imgplot = plt.imshow(lum_img)"""
 
-		if not exists(directory):
-			makedirs(directory)
+	#fig.savefig("/opt/lampp/projects/ds9/ds9s/upload/fits_png/Par321_final/testIMG.png")
 
-		fig.savefig(directory+'/'+short_name+'_'+gal.uniq_name+'.png')
-		messages.success(request, u"PNG created.")
-		return True
-	except:
-		messages.error(request, u"PNG unable.")
-		return False"""
+	return render(request, 'test.html',locals()) 
+
+def makePngFFile(request, file, gal, short_name, raCenter=None, decCenter=None):
+    #pathToFits specifies the pathway to either the F110W_rot_drz.fits, etc.
+    
+    features = GalaxyFeatures.objects.filter(galaxy_id=gal.uniq_id).order_by('galaxyfields_id')
+    raCenter = float(features[0].value)
+    decCenter = float(features[1].value)
+
+    inFits=pyfits.open(file)
+    iHdr=inFits[1].header
+    iData=inFits[1].data
+
+    # Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
+    x0,y0,ra0,dec0,drdx,drdy,dddx,dddy,fieldRotation=iHdr["CRPIX1"],iHdr["CRPIX2"],iHdr["CRVAL1"],iHdr["CRVAL2"],iHdr["CD1_1"],iHdr["CD1_2"],iHdr["CD2_1"],iHdr["CD2_2"],iHdr["ORIENTAT"]
+
+    #If centering is specified in RA and Dec, calculate pixel coordinates of center
+    # raCenter and decCenter should be drawn from the catalog information for each galaxy
+    # where raCenter = X_World and decCenter = Y_World
+    # When we display the image, I would then like the image to be centered on the (xcen,ycen) pixel
+    # finally, I would like all of the galaxies and stars in the image to be labelled by their catalog id number
+    
+    fieldRotation=-1.*fieldRotation 
+    pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
+    xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
+    ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
+    
+    npixx,npixy=iData.shape[1],iData.shape[0]
+    xDispSize=6.0
+    yDispSize=xDispSize*float(npixy)/float(npixx)
+
+    fig = plt.figure(1,figsize=(xDispSize, yDispSize))
+    plt.imshow(iData,cmap=cm.Greys_r,origin="lower")
+    directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"    
+    result = savePng(request, directory, short_name, gal.uniq_name, fig)
+
+    inFits.close()
+
+    return result
+
+def makePngGFile(request, file, gal, short_name):
 	try:
 		inFits=pyfits.open(file)
-				#inFits.info() # shows contents of the FITS image
+					#inFits.info() # shows contents of the FITS image
 		iHdr=inFits[1].header # We will use data from this later
 		iData=inFits[1].data # This is the image data
 
-				#print iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1']
+					#print iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1']
 		x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
 		y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
 		npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
 		l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
-			    #print l1,l2,y1,y2
+				    #print l1,l2,y1,y2
 
 		xDispSize=6.0
 		yDispSize=xDispSize*float(npixy)/float(npixx) # Size the image to scale with the image dimensions
 
-		#plt.ion() # Necessary for interactive Python (ipython) environment
 		fig = plt.figure(1,figsize=(xDispSize*1.3,yDispSize*2.5))
 		plt.imshow(iData,cmap=cm.Greys_r,origin="lower",aspect=dl/da, extent=(l1,l2,y1,y2)) # Call imshow
 		plt.axhline(y=0.0,c='cyan',linestyle=':') # Plot a blue dotted line at distance = 0
@@ -99,15 +136,29 @@ def makePng(request, file, gal, short_name):
 		plt.ylabel('Distance (arcsec)')
 		directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)
 
-		if not exists(directory):
-			makedirs(directory)
+		savePng(request, directory, short_name, gal.uniq_name, fig)
 
-		fig.savefig(directory+'/'+short_name+'_'+gal.uniq_name+".svg",bbox_inches='tight',pad_inches=0.3)
 		inFits.close()
-		messages.success(request, u"PNG created.")
+		messages.success(request, u"Image created (G FILE).")
 		return True
 	except:
-		messages.error(request, u"PNG unable.")
+		messages.error(request, u"Image unable.")
+		return False
+
+def savePng(request, directory, short_name, uniq_name, fig):
+	try:
+		if not exists(directory):
+				makedirs(directory)
+
+		if short_name in ['F110W', 'F160W', 'F140W']:
+			fig.savefig(directory+'/'+short_name+".svg",bbox_inches='tight',pad_inches=0.3)
+		else:
+			fig.savefig(directory+'/'+short_name+'_'+uniq_name+".svg",bbox_inches='tight',pad_inches=0.3)
+
+		messages.success(request, u"Image saved.")
+		return True
+	except:
+		messages.error(request, u"Error during saving image")
 		return False
 
 def viewGalaxy(request, id):
@@ -124,7 +175,7 @@ def viewGalaxy(request, id):
 	except:
 		previous = None
 
-	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
+	features = GalaxyFeatures.objects.filter(galaxy_id = gal.uniq_id)
 
 	try:
 		analysis = Analysis.objects.get(user_id=request.user, galaxy_id=gal.id)
@@ -134,12 +185,30 @@ def viewGalaxy(request, id):
 	if not gal.generated:
 		gen = []
 		checked, checked_short = checkAllFiles(gal.id, gal.parfolder.name_par)
-		for index, c in enumerate(checked):
-			png = makePng(request, c, gal, checked_short[index])
-			#gen.append(png)
-		#if not False in gen:
+
+		
+		directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
+		#pdb.set_trace()
+
+		if not exists(directory+"F110W.svg"):
+			gen.append(makePngFFile(request, checked[2], gal, checked_short[2]))
+			messages.info(request,"F110W Created")
+			time.sleep(1)
+		if checked_short[3] == 'F160W':
+			if not exists(directory+"F160W.svg"):
+				gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
+				messages.info(request,"F160W Created")
+		if checked_short[3] == 'F140W':
+			if not exists(directory+"F140W.svg"):
+				gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
+		
+		time.sleep(1)
+		gen.append(makePngGFile(request, checked[0], gal, checked_short[0]))
+		gen.append(makePngGFile(request, checked[1], gal, checked_short[1]))
+		
+		if not False in gen:
 			gal.generated = True
-			gal.save()	
+			gal.save()
 
 	return render(request, 'viewGalaxy.html',locals())
 
@@ -171,12 +240,6 @@ def checkAllFiles(gal_id, par_name):
 			checked_short.append(f)
 
 	return checked, checked_short
-
-#def readCatFile():
-	#catdat=np.genfromtxt(p,dtype=np.str)
-	#p = file
-
-#only for g102 & g141
 
 def newParFile(request):
 	if request.method == 'POST':

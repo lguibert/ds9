@@ -16,7 +16,6 @@
   </head>
 
   <body>
-
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
@@ -40,7 +39,7 @@
     <div class="jumbotron">
       <div class="container">
         <h1>{% block headTitle%}Hello, welcome on DS9 Web Application{% endblock %}</h1>
-        <p>{% block contentHeadTitle%}You'll be able to work here very soon!{% endblock %}</p>        
+        <p>{% block contentHeadTitle%}You'll be able to work here very soon!{% endblock %}</p>      
       </div>
     </div>
 
@@ -69,5 +68,26 @@
 
     <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      document.getElementById('g102').addEventListener('mousemove', function(e){
+        $('#g102 + div .x').html(e.pageX);
+        $('#g102 + div .y').html(e.pageY);
+      })
+      document.getElementById('g141').addEventListener('mousemove', function(e){
+        $('#g141 + div .x').html(e.pageX);
+        $('#g141 + div .y').html(e.pageY);
+      })
+      document.getElementById('f110').addEventListener('mousemove', function(e){
+        $('#f110 + div .x').html(e.pageX);
+        $('#f110 + div .y').html(e.pageY);
+      })
+      document.getElementById('f160140').addEventListener('mousemove', function(e){
+        $('#f160140 + div .x').html(e.pageX);
+        $('#f160140 + div .y').html(e.pageY);
+      })
+    })    
+  </script>
   </body>
 </html>
