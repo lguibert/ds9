@@ -102,7 +102,9 @@ def makePngFFile(request, file, gal, short_name, raCenter=None, decCenter=None):
 		pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
 		xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
 		ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
-			    
+		 
+		#pdb.set_trace()
+
 		npixx,npixy=iData.shape[1],iData.shape[0]
 		xDispSize=6.0
 		yDispSize=xDispSize*float(npixy)/float(npixx)
@@ -252,19 +254,19 @@ def newParFile(request):
 		form = NewParFileForm(request.POST)
 		if form.is_valid():
 			data = form.cleaned_data['name']
-			#try:
-			if(int(data)): 
-#if data is not int (name of the folder), we'll have a exception. So, in except we have the code for the name.
-				if(exists(basePath+"Par"+str(data)+"_final")):
-					uploaded = uploadParFile(request, "Par"+str(data)+"_final")
-					if uploaded:
-						return redirect("/ds9s/fits/")
-				else:
-					messages.error(request, 'No file with this number.')
-					return render(request, 'newParFits.html',locals())
-			"""except ValueError:
+			try:
+				if(int(data)): 
+	#if data is not int (name of the folder), we'll have a exception. So, in except we have the code for the name.
+					if(exists(basePath+"Par"+str(data)+"_final")):
+						uploaded = uploadParFile(request, "Par"+str(data)+"_final")
+						if uploaded:
+							return redirect("/ds9s/fits/")
+					else:
+						messages.error(request, 'No file with this number.')
+						return render(request, 'newParFits.html',locals())
+			except ValueError:
 				messages.error(request, 'The value is not a number.')
-				return render(request, 'newParFits.html',locals())"""
+				return render(request, 'newParFits.html',locals())
 		else:
 			messages.error(request, 'Error in the file.')
 			return render(request, 'newParFits.html',locals())
