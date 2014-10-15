@@ -22,6 +22,17 @@ def focus(request, id):
 		user = get_object_or_404(User, id=id)
 		return render(request, 'focus.html', {'user': user})
 
+@login_required
+def myAccount(request):
+	user = User.objects.get(id=request.user.id)
+	return render(request, 'myaccount.html',locals())
+
+def informations(request):
+	return render(request, 'informations.html',locals())
+
+def gettingStarted(request):
+	return render(request, 'gettingStarted.html',locals())
+
 def newUser(request):
 	if request.method == "POST":
 		form = CreateUserForm(request.POST)
@@ -65,7 +76,7 @@ def updateUser(request, pk):
 			try:
 				user.save()
 				messages.success(request, u"User updated.")
-				return redirect('/ds9s/view/'+pk)
+				return redirect('/ds9s/account/')
 			except IntegrityError as e:
 				messages.error(request, u"Username already in use")
 				return render(request, 'newUser.html',locals())

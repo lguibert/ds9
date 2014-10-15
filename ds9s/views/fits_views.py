@@ -64,7 +64,6 @@ class ViewHomeFits(ListView):
 	queryset = Galaxy.objects.values('uniq_id').order_by('uniq_id')
 	paginate_by = 15
 
-
 def test(request):
 	file = "/opt/lampp/projects/ds9/ds9s/upload/fits_png/Par321_final/F110W.svg"
 	#fig = plt.figure(1,figsize=(200, 200))
@@ -184,7 +183,7 @@ def getPrevGalaxy(id):
 
 def getNextGalaxy(id):
 	next = None
-	
+
 	latest = Galaxy.objects.latest('uniq_id').uniq_id
 	while(next == None):
 		id = int(id) + 1
@@ -204,7 +203,7 @@ def viewGalaxy(request, id):
 	next = getNextGalaxy(id)
 	previous = getPrevGalaxy(id)
 
-	features = GalaxyFeatures.objects.filter(galaxy_id = gal.uniq_id)
+	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
 
 	try:
 		analysis = Analysis.objects.get(user_id=request.user, galaxy_id=gal.id)
@@ -320,12 +319,12 @@ def uploadParFile(request, name=None):
 
 				ids_final = checkFilesGtype(ids1,ids2)
 
-				try:
-					addFileDatabase(ids_final, par.id, getTypeSecondFiles())
-				except:
+				#try:
+				addFileDatabase(ids_final, par.id, getTypeSecondFiles())
+				"""except:
 					messages.error(request, u"Error during the saveing.")
 					par.delete()
-					return False;
+					return False;"""
 
 				messages.success(request, u"File saved in database.")
 				return True;
@@ -387,10 +386,10 @@ def addFileDatabase(ids, par, type):
 
 		#data for each galaxy
 		index = getIndexPerId(id, tab[0])
-		for x in range(0, 9):
+		for x in range(1, 8):
 			feat = GalaxyFeatures()
 			feat.galaxy_id = gal.id
-			feat.galaxyfields_id = x+1
+			feat.galaxyfields_id = x
 			feat.value = tab[x][index]
 			feat.save()
 		
@@ -420,14 +419,14 @@ def getDataFromCat(par_id, type):
 
 	tab = []
 	tab.append(catid)
-	tab.append(catra)
-	tab.append(catdec)
-	tab.append(catmajaxe)
-	tab.append(catminaxe)
-	tab.append(catmagf110)
-	tab.append(catmagautof110)
-	tab.append(catmagf0)
-	tab.append(catmagautof0)
+	tab.append(catra) #1
+	tab.append(catdec)#2
+	tab.append(catmajaxe)#3
+	tab.append(catminaxe)#4
+	tab.append(catmagf110)#5
+	tab.append(catmagautof110)#6
+	tab.append(catmagf0)#7
+	tab.append(catmagautof0)#8
 
 	return tab
 
