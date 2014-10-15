@@ -386,7 +386,7 @@ def addFileDatabase(ids, par, type):
 
 		#data for each galaxy
 		index = getIndexPerId(id, tab[0])
-		for x in range(1, 8):
+		for x in range(1, 9):
 			feat = GalaxyFeatures()
 			feat.galaxy_id = gal.id
 			feat.galaxyfields_id = x
