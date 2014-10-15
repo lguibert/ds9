@@ -40,6 +40,7 @@ from django.db.models import Q
 
 from django.utils.safestring import mark_safe
 
+
 #------------------ GLOBAL VARIABLES --------------------------------
 basePath = "/home/lguibert/test/"
 
@@ -59,7 +60,7 @@ f140w = "F140W_rot_drz.fits"
 class ViewHomeFits(ListView):
 	model = Galaxy
 	context_object_name = "galaxys"
-	template_name = "homeFits.html"
+	template_name = "homeGalaxy.html"
 	queryset = Galaxy.objects.values('uniq_id').order_by('uniq_id')
 	paginate_by = 15
 
@@ -80,44 +81,42 @@ def test(request):
 	return render(request, 'test.html',locals()) 
 
 def makePngFFile(request, file, gal, short_name, raCenter=None, decCenter=None):
-	try:
-		features = GalaxyFeatures.objects.filter(galaxy_id=gal.uniq_id).order_by('galaxyfields_id')
-		raCenter = float(features[0].value)
-		decCenter = float(features[1].value)
+	#try:
+	features = GalaxyFeatures.objects.filter(galaxy_id=gal.uniq_id).order_by('galaxyfields_id')
+	raCenter = float(features[0].value)
+	decCenter = float(features[1].value)
 
-		inFits=pyfits.open(file)
-		iHdr=inFits[1].header
-		iData=inFits[1].data
+	inFits=pyfits.open(file)
+	iHdr=inFits[1].header
+	iData=inFits[1].data
 
-			    # Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
-		x0,y0,ra0,dec0,drdx,drdy,dddx,dddy,fieldRotation=iHdr["CRPIX1"],iHdr["CRPIX2"],iHdr["CRVAL1"],iHdr["CRVAL2"],iHdr["CD1_1"],iHdr["CD1_2"],iHdr["CD2_1"],iHdr["CD2_2"],iHdr["ORIENTAT"]
-
-			    #If centering is specified in RA and Dec, calculate pixel coordinates of center
-			    # raCenter and decCenter should be drawn from the catalog information for each galaxy
-			    # where raCenter = X_World and decCenter = Y_World
-			    # When we display the image, I would then like the image to be centered on the (xcen,ycen) pixel
-			    # finally, I would like all of the galaxies and stars in the image to be labelled by their catalog id number
-			    
-		fieldRotation=-1.*fieldRotation 
-		pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
-		xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
-		ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
+	# Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
+	x0,y0,ra0,dec0,drdx,drdy,dddx,dddy,fieldRotation=iHdr["CRPIX1"],iHdr["CRPIX2"],iHdr["CRVAL1"],iHdr["CRVAL2"],iHdr["CD1_1"],iHdr["CD1_2"],iHdr["CD2_1"],iHdr["CD2_2"],iHdr["ORIENTAT"]
+	    
+	fieldRotation=-1.*fieldRotation 
+	pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
+	xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
+	ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
 		 
-		#pdb.set_trace()
+	#pdb.set_trace()
 
-		npixx,npixy=iData.shape[1],iData.shape[0]
-		xDispSize=6.0
-		yDispSize=xDispSize*float(npixy)/float(npixx)
+	npixx,npixy=iData.shape[1],iData.shape[0]
+	xDispSize=6.0
+	yDispSize=xDispSize*float(npixy)/float(npixx)
 		
-		fig = plt.figure(1,figsize=(xDispSize, yDispSize))
-		plt.imshow(iData,cmap=cm.Greys_r,origin="lower")
-		directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"    
-		result = savePng(request, directory, short_name, gal.uniq_name, fig)
+	fig = plt.figure()
+	plt.imshow(iData,cmap=cm.Greys_r,origin="lower")
 
-		inFits.close()
-		return result
-	except:
-		return False
+	#return fig.ginput(n=10, timeout=15)
+	"""time.sleep(30)"""
+
+	directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"    
+	result = savePng(request, directory, short_name, gal.uniq_name, fig)
+
+	inFits.close()
+	return result
+	#except:
+	#	return False
 
 def makePngGFile(request, file, gal, short_name):
 	try:
@@ -168,19 +167,42 @@ def savePng(request, directory, short_name, uniq_name, fig):
 		messages.error(request, u"Error during saving image")
 		return False
 
+def getPrevGalaxy(id):
+	previous = None
+
+	while(previous == None):
+		id = int(id) - 1
+		if id > 0:
+			try:
+				previous = Galaxy.objects.get(uniq_id=id)
+			except:
+				previous = None
+		else:
+			break;
+
+	return previous
+
+def getNextGalaxy(id):
+	next = None
+	
+	latest = Galaxy.objects.latest('uniq_id').uniq_id
+	while(next == None):
+		id = int(id) + 1
+		if id < latest:
+			try:
+				next = Galaxy.objects.get(uniq_id=id)
+			except:
+				next = None
+		else:
+			break;
+
+	return next
+
 def viewGalaxy(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
 
-	try:
-		n = int(id) + 1
-		next = Galaxy.objects.get(uniq_id=n)
-	except:
-		next = None
-	try:
-		p = int(id) -1
-		previous = Galaxy.objects.get(uniq_id=p)
-	except:
-		previous = None
+	next = getNextGalaxy(id)
+	previous = getPrevGalaxy(id)
 
 	features = GalaxyFeatures.objects.filter(galaxy_id = gal.uniq_id)
 
@@ -198,9 +220,8 @@ def viewGalaxy(request, id):
 		#pdb.set_trace()
 		try:
 			if not exists(directory+"F110W.svg"):
-				gen.append(makePngFFile(request, checked[2], gal, checked_short[2]))
+				test = makePngFFile(request, checked[2], gal, checked_short[2])
 				messages.info(request,"F110W Created")
-				time.sleep(1)
 			if checked_short[3] == 'F160W':
 				if not exists(directory+"F160W.svg"):
 					gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
@@ -217,6 +238,8 @@ def viewGalaxy(request, id):
 		if not False in gen:
 			gal.generated = True
 			gal.save()
+		else:
+			messages.error(request,u"Error somewhere (not over the rainbow")
 
 	return render(request, 'viewGalaxy.html',locals())
 
