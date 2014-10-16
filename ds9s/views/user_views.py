@@ -57,33 +57,35 @@ def newUser(request):
 	return render(request, 'newUser.html',locals())
 
 @login_required
-@permission_required('ds9s.update_user', raise_exception=True)
 def updateUser(request, pk):
-	formType = True #change the <form> in the template
-	data = User.objects.get(id=pk)
-	if request.method == 'POST':
-		form = UpdateUserForm(request.POST, instance=data)
-		if form.is_valid():
-			user = User(pk)	
-			user.username = form.cleaned_data['username']
-			user.email = form.cleaned_data['email']
-			user.password = make_password(form.cleaned_data['password'])
-			user.first_name = form.cleaned_data['first_name']
-			user.last_name = form.cleaned_data['last_name']
-			user.is_superuser = data.is_superuser
-			user.is_staff = data.is_staff
-			#user.is_active = data.is_active
-			try:
-				user.save()
-				messages.success(request, u"User updated.")
-				return redirect('/ds9s/account/')
-			except IntegrityError as e:
-				messages.error(request, u"Username already in use")
-				return render(request, 'newUser.html',locals())
+	if int(pk) == int(request.user.id):
+		formType = True #change the <form> in the template
+		data = User.objects.get(id=pk)
+		if request.method == 'POST':
+			form = UpdateUserForm(request.POST, instance=data)
+			if form.is_valid():
+				user = User(pk)	
+				user.username = form.cleaned_data['username']
+				user.email = form.cleaned_data['email']
+				user.password = make_password(form.cleaned_data['password'])
+				user.first_name = form.cleaned_data['first_name']
+				user.last_name = form.cleaned_data['last_name']
+				user.is_superuser = data.is_superuser
+				user.is_staff = data.is_staff
+				#user.is_active = data.is_active
+				try:
+					user.save()
+					messages.success(request, u"User updated.")
+					return redirect('/ds9s/account/')
+				except IntegrityError as e:
+					messages.error(request, u"Username already in use")
+					return render(request, 'newUser.html',locals())
+		else:
+			form = UpdateUserForm(instance=data)		
+		
+		return render(request, 'newUser.html',locals())
 	else:
-		form = UpdateUserForm(instance=data)		
-	
-	return render(request, 'newUser.html',locals())
+		return redirect('/ds9s/account/')
 
 
 def connect(request):
