@@ -54,8 +54,12 @@
 	background-color:rgba(86,61,124,0.15);
 }
 
-#fFiles{
+#fFiles, #gFiles div:first-child{
 	margin-bottom: 15px;
+}
+
+#g102{
+	margin:auto !important;
 }
 
 
@@ -90,4 +94,8 @@
 
 #imgSearch:hover{
     transform: rotate(10deg);
+}
+
+.pointer:hover{
+	cursor:pointer;
 }

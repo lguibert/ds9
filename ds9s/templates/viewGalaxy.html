@@ -13,32 +13,32 @@
 	</div>	
 
 	{% if gal.generated %}
-	<div id="rootFiles" class="">
-		<div id="fFiles" class="">
-			<div contenteditable="false">
-				{{test}}
-				<img id="f110" class="figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F110W.svg" contenteditable="true">
-				<div class="clear">
+	<div id="rootFiles" class="container-fluid">
+		<div id="fFiles">
+			<div contenteditable="false" class="row">
+				<img id="f110" class="col-xs-6 col-md-5 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F110W.svg" contenteditable="true">
+				<div class="col-xs-2 col-md-2"></div>
+				<img id="f160140" class="col-xs-6 col-md-5 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F160W.svg" contenteditable="true">	
+			</div>
+			<div contenteditable="false" class="row">
+				<div id='dataF110' class="col-xs-6 col-md-5">
 					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
 				</div>
-			</div>
-			<div contenteditable="false">
-				<img id="f160140" class="secondDiv figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F160W.svg" contenteditable="true">
-				<div class="clear">
+				<div id='dataF160140' class="col-md-offset-2 col-xs-6 col-md-5">
 					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
 				</div>
 			</div>
 		</div>
-		<div id="gFiles" class="">
-			<div>
-				<img id="g102" class="figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G102_{{gal.uniq_name}}.svg" contenteditable="true">
-				<div class="clear">
+		<div id="gFiles">
+			<div contenteditable="false" class="row">
+				<img id="g102" class="col-xs-12 col-md-12 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G102_{{gal.uniq_name}}.svg" contenteditable="true">
+				<div class="clear col-xs-12 col-md-12">
 					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
 				</div>
 			</div>
-			<div contenteditable="false">
-				<img id="g141" class="secondDiv figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G141_{{gal.uniq_name}}.svg" contenteditable="true">
-				<div class="clear">
+			<div contenteditable="false" class="row">
+				<img id="g141" class="col-xs-12 col-md-12 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G141_{{gal.uniq_name}}.svg" contenteditable="true">
+				<div class="clear col-xs-12 col-md-12">
 					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
 				</div>
 			</div>

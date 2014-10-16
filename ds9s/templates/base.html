@@ -102,21 +102,28 @@
       })
       $('#f110').on("mousemove",function(e){
             tab = getCoordonate(e.pageX, e.pageY, this)
-            $('#f110 + div .x').html(tab[0]);
-            $('#f110 + div .y').html(tab[1]);
+            $('#dataF110 .x').html(tab[0]);
+            $('#dataF110 .y').html(tab[1]);
       })
       $('#f160140').on("mousemove",function(e){
             tab = getCoordonate(e.pageX, e.pageY, this)
-            $('#f160140 + div .x').html(tab[0]);
-            $('#f160140 + div .y').html(tab[1]);
+            $('#dataF160140 .x').html(tab[0]);
+            $('#dataF160140 .y').html(tab[1]);
       })
       
 
       function getCoordonate(x, y, selector){
         dataWidth = $(selector).position().left
         dataHeight = $(selector).position().top
+        //paddingLeft = spliter($(selector).css('padding-left'), "px")[0]
+        //paddingRight = spliter($(selector).css('padding-right'), "px")[0]
         return [x-dataWidth, y-dataHeight]
       }
+
+      /*function spliter(str, separator){
+        return str.split(separator)
+      }*/
+        
     })    
   </script>
   </body>
