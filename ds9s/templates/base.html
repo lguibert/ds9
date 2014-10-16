@@ -22,7 +22,6 @@
           <a class="navbar-brand" href="/ds9s/">Home</a>    
           <a class="navbar-brand navbar-right" href="/ds9s/fits/test/">Test page</a>      
           <a class="navbar-brand navbar-right" href="/ds9s/fits/upload/">Add new ParXXX</a>
-          
         </div>
         <div class="navbar-collapse collapse">
         	{% block loginForm%}
@@ -43,7 +42,18 @@
     <div class="jumbotron">
       <div class="container">
         <h1>{% block headTitle%}Hello, welcome on DS9 Web Application{% endblock %}</h1>
-        <p>{% block contentHeadTitle%}You'll be able to work here very soon!{% endblock %}</p>      
+        <p>{% block contentHeadTitle%}You'll be able to work here very soon!{% endblock %}</p>    
+
+        <div class="row">
+          <form>
+            <div class="col-xs-2">
+              <input class="form-control" type="search" placeholder='Search...'/>
+            </div>
+            <div class="col-xs-1">
+              <input id="imgSearch" type='image' src="{%static 'search.png'%}" onsubmit="submit()" title='Search'/>
+            </div>
+          </form>  
+        </div>
       </div>
     </div>
 

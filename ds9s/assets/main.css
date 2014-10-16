@@ -87,3 +87,7 @@
 #buttons form{
 	display: inline-block;
 }
+
+#imgSearch:hover{
+    transform: rotate(10deg);
+}

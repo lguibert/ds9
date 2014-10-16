@@ -65,18 +65,6 @@ class ViewHomeFits(ListView):
 	paginate_by = 15
 
 def test(request):
-	file = "/opt/lampp/projects/ds9/ds9s/upload/fits_png/Par321_final/F110W.svg"
-	#fig = plt.figure(1,figsize=(200, 200))
-	#img = mpimg.imread()
-	
-	s = mark_safe(open(file).read())
-
-	"""imgplot = plt.imshow(img)
-	""lum_img = img[:,:,0]
-	imgplot = plt.imshow(lum_img)"""
-
-	#fig.savefig("/opt/lampp/projects/ds9/ds9s/upload/fits_png/Par321_final/testIMG.png")
-
 	return render(request, 'test.html',locals()) 
 
 def makePngFFile(request, file, gal, short_name, raCenter=None, decCenter=None):
@@ -89,6 +77,7 @@ def makePngFFile(request, file, gal, short_name, raCenter=None, decCenter=None):
 	iHdr=inFits[1].header
 	iData=inFits[1].data
 
+
 	# Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
 	x0,y0,ra0,dec0,drdx,drdy,dddx,dddy,fieldRotation=iHdr["CRPIX1"],iHdr["CRPIX2"],iHdr["CRVAL1"],iHdr["CRVAL2"],iHdr["CD1_1"],iHdr["CD1_2"],iHdr["CD2_1"],iHdr["CD2_2"],iHdr["ORIENTAT"]
 	    
@@ -97,6 +86,8 @@ def makePngFFile(request, file, gal, short_name, raCenter=None, decCenter=None):
 	xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
 	ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
 		 
+	iFocus = iData[xcen:xcen+100,ycen:ycen+100]
+
 	#pdb.set_trace()
 
 	npixx,npixy=iData.shape[1],iData.shape[0]
@@ -104,12 +95,12 @@ def makePngFFile(request, file, gal, short_name, raCenter=None, decCenter=None):
 	yDispSize=xDispSize*float(npixy)/float(npixx)
 		
 	fig = plt.figure()
-	plt.imshow(iData,cmap=cm.Greys_r,origin="lower")
+	plt.imshow(iFocus,cmap=cm.Greys_r,origin="lower")
 
 	#return fig.ginput(n=10, timeout=15)
 	"""time.sleep(30)"""
 
-	directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"    
+	directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)+"/"    
 	result = savePng(request, directory, short_name, gal.uniq_name, fig)
 
 	inFits.close()
@@ -217,19 +208,20 @@ def viewGalaxy(request, id):
 		
 		directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
 		#pdb.set_trace()
-		try:
-			if not exists(directory+"F110W.svg"):
-				test = makePngFFile(request, checked[2], gal, checked_short[2])
-				messages.info(request,"F110W Created")
-			if checked_short[3] == 'F160W':
-				if not exists(directory+"F160W.svg"):
-					gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
-					messages.info(request,"F160W Created")
-			if checked_short[3] == 'F140W':
-				if not exists(directory+"F140W.svg"):
-					gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
-		except:
-			messages.warning(request, "No file for this galaxy.")
+		#try:
+		if not exists(directory+str(gal.uniq_id)+"/F110W.svg"):
+			gen.append(makePngFFile(request, checked[2], gal, checked_short[2]))
+			time.sleep(1)
+			messages.info(request,"F110W Created")
+		if checked_short[3] == 'F160W':
+			if not exists(directory+str(gal.uniq_id)+"/F160W.svg"):
+				gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
+				messages.info(request,"F160W Created")
+		if checked_short[3] == 'F140W':
+			if not exists(directory+str(gal.uniq_id)+"/F140W.svg"):
+				gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
+		"""except:
+			messages.warning(request, "No file for this galaxy.")"""
 		time.sleep(1)
 		gen.append(makePngGFile(request, checked[0], gal, checked_short[0]))
 		gen.append(makePngGFile(request, checked[1], gal, checked_short[1]))
