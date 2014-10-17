@@ -36,7 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ds9_soft',
+    'ds9s',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -77,7 +77,7 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '127.0.0.1',
         'PORT': '',
-    }
+    }    
 }
 
 # Internationalization
@@ -95,6 +95,13 @@ USE_TZ = True
 
 APPEND_SLASH = True
 
+MEDIA_URL = "/upload/"
+MEDIA_ROOT = "/opt/lampp/projects/ds9/ds9s/upload"
+
+LOGIN_URL="/ds9s/login/"
+
+SESSION_COOKIE_AGE = 86400 #24h
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
@@ -102,5 +109,16 @@ APPEND_SLASH = True
 STATIC_URL = '/assets/'
 
 STATICFILES_DIRS = (
-	"/opt/lampp/projects/ds9/ds9_projects/assets/",
+	"/opt/lampp/projects/ds9/ds9s/assets/",
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = ("django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
+
+    "ds9s.context_processors.get_infos",
 )

@@ -7,5 +7,5 @@ urlpatterns = [
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^ds9_soft', inclute('ds9_soft.urls')),
+    url(r'^ds9_soft', include('ds9_soft.urls')),
 ]
