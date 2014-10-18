@@ -50,11 +50,17 @@
 	font-style: oblique;
 }
 
-#fFiles div, #gFiles div{
+.dataCat{
+	-webkit-box-shadow: 6px 0px 12px 0px rgba(50, 50, 50, 0.27);
+	-moz-box-shadow:    6px 0px 12px 0px rgba(50, 50, 50, 0.27);
+	box-shadow:         6px 0px 12px 0px rgba(50, 50, 50, 0.27);
+}
+
+#fFiles div, #gFiles div, .dataCat{
 	background-color:rgba(86,61,124,0.15);
 }
 
-#fFiles, #gFiles div:first-child{
+#fFiles, #gFiles div:first-child, #dataCatContainer{
 	margin-bottom: 15px;
 }
 

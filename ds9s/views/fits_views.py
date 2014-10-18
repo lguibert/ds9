@@ -36,9 +36,11 @@ from os import listdir, makedirs
 from os.path import exists
 
 import pdb
-from django.db.models import Q
 
 from django.utils.safestring import mark_safe
+"""
+from bokeh.plotting import *
+from bokeh.objects import ColumnDataSource"""
 
 
 #------------------ GLOBAL VARIABLES --------------------------------
@@ -67,7 +69,36 @@ class ViewHomeFits(ListView):
 def test(request):
 	return render(request, 'test.html',locals()) 
 
-def makePngFFile(request, file, gal, short_name, raCenter=None, decCenter=None):
+def zoomFile(request, id):
+	zoom = request.POST['zoom']
+
+	try:
+		zoom = int(zoom)
+	except:
+		messages.error(request,"Zoom value can contain only number")
+		return redirect("/ds9s/fits/view/"+id+"/")
+
+	try:
+		gal = get_object_or_404(Galaxy, uniq_id=id)		
+		checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
+		gen = []
+
+		gen.append(makePngFFile(request, checked[2], gal, checked_short[2], zoom))
+		time.sleep(1)
+		gen.append(makePngFFile(request, checked[3], gal, checked_short[3], zoom))
+		time.sleep(3)
+		if not False in gen:
+			messages.success(request,"Images resizabled.")
+			return HttpResponseRedirect("/ds9s/fits/view/"+id+"/")
+		else:
+			messages.error(request,"Error during images resizabling.")
+			return redirect("/ds9s/fits/view/"+id+"/")
+	except:
+		#just fix for the moment. Have to find a better solution
+		messages.error(request,"Resize picture is a big work. Let the server get some rest for a second.")
+		return redirect("/ds9s/fits/view/"+id+"/")
+
+def makePngFFile(request, file, gal, short_name, zoom=100, raCenter=None, decCenter=None):
 	#try:
 	features = GalaxyFeatures.objects.filter(galaxy_id=gal.uniq_id).order_by('galaxyfields_id')
 	raCenter = float(features[0].value)
@@ -86,7 +117,7 @@ def makePngFFile(request, file, gal, short_name, raCenter=None, decCenter=None):
 	xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
 	ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
 		 
-	iFocus = iData[xcen:xcen+100,ycen:ycen+100]
+	iFocus = iData[xcen:xcen+zoom,ycen:ycen+zoom]
 
 	#pdb.set_trace()
 
@@ -104,6 +135,8 @@ def makePngFFile(request, file, gal, short_name, raCenter=None, decCenter=None):
 	result = savePng(request, directory, short_name, gal.uniq_name, fig)
 
 	inFits.close()
+
+	del fig
 	return result
 	#except:
 	#	return False
@@ -208,20 +241,21 @@ def viewGalaxy(request, id):
 		
 		directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
 		#pdb.set_trace()
-		#try:
-		if not exists(directory+str(gal.uniq_id)+"/F110W.svg"):
-			gen.append(makePngFFile(request, checked[2], gal, checked_short[2]))
-			time.sleep(1)
-			messages.info(request,"F110W Created")
-		if checked_short[3] == 'F160W':
-			if not exists(directory+str(gal.uniq_id)+"/F160W.svg"):
-				gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
-				messages.info(request,"F160W Created")
-		if checked_short[3] == 'F140W':
-			if not exists(directory+str(gal.uniq_id)+"/F140W.svg"):
-				gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
-		"""except:
-			messages.warning(request, "No file for this galaxy.")"""
+		try:
+			if not exists(directory+str(gal.uniq_id)+"/F110W.svg"):
+				gen.append(makePngFFile(request, checked[2], gal, checked_short[2]))
+				time.sleep(1)
+				messages.info(request,"F110W Created")
+			if checked_short[3] == 'F160W':
+				if not exists(directory+str(gal.uniq_id)+"/F160W.svg"):
+					gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
+					messages.info(request,"F160W Created")
+			if checked_short[3] == 'F140W':
+				if not exists(directory+str(gal.uniq_id)+"/F140W.svg"):
+					gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
+		except:
+			messages.warning(request, "No file for this galaxy.")
+
 		time.sleep(1)
 		gen.append(makePngGFile(request, checked[0], gal, checked_short[0]))
 		gen.append(makePngGFile(request, checked[1], gal, checked_short[1]))
