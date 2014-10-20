@@ -1,5 +1,4 @@
 from django.conf.urls import patterns, url, include
-from ds9s.views import ViewHome, ViewHomeFits
 
 urlpatterns = patterns('ds9s.views',
 	url(r'^/?$', 'viewHomeGalaxy'),

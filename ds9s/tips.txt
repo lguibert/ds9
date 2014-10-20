@@ -95,3 +95,28 @@ def showFits(request, id, pathToFits, zmin=None, zmax=None): # pathToFits is the
       except:
             messages.error(request, u"Error.")
             return redirect("/ds9s/fits/view/"+str(id))
+
+
+@login_required
+@permission_required('ds9s.update_user', raise_exception=True)
+def focus(request, id):
+      save = request.GET
+      if save:
+            user = get_object_or_404(User, id=id)
+            return render(request, 'focus.html', {'user': user, 'save':save['save']})
+      else:
+            user = get_object_or_404(User, id=id)
+            return render(request, 'focus.html', {'user': user})
+
+
+
+class DeleteUser(DeleteView):
+      model = User
+      context_object_name = "u"
+      template_name = "delete.html"
+      success_url = "/ds9s/"
+
+      @method_decorator(login_required)
+      @method_decorator(permission_required('ds9s.user_delete',raise_exception=True))
+      def dispatch(self, *args, **kwargs):
+            return super(DeleteUser, self).dispatch(*args, **kwargs)

@@ -13,17 +13,15 @@
 			</div>
 		{%endfor%}
 
-		{% if is_paginated %}
-			<div class="pagination clear">
-		    {% if page_obj.has_previous %}
-		    	<a class="btn btn-default" href="?page={{ page_obj.previous_page_number }}">Previous</a> —
-		    {% endif %}
-		    Page {{ page_obj.number }} on {{ page_obj.paginator.num_pages }} 
-		    {% if page_obj.has_next %}
-		    	— <a class="btn btn-default" href="?page={{ page_obj.next_page_number }}">Next</a>
-		    {% endif %}
-		    </div>
-		{% endif %}
+		<div class="pagination clear">
+			{% if galaxys.has_previous %}
+			    <a class="btn btn-default" href="?page={{ galaxys.previous_page_number }}">Previous</a> —
+			{% endif %}
+			Page {{ galaxys.number }} on {{ galaxys.paginator.num_pages }} 
+			{% if galaxys.has_next %}
+			    — <a class="btn btn-default" href="?page={{ galaxys.next_page_number }}">Next</a>
+			{% endif %}
+		</div>
 	{% else %}
 		<h1>No data yet. <a href="/ds9s/fits/upload/">Add some !</a></h1>
 	{% endif %}

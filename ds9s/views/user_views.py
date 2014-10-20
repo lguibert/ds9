@@ -11,16 +11,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 
-@login_required
-@permission_required('ds9s.update_user', raise_exception=True)
-def focus(request, id):
-	save = request.GET
-	if save:
-		user = get_object_or_404(User, id=id)
-		return render(request, 'focus.html', {'user': user, 'save':save['save']})
-	else:
-		user = get_object_or_404(User, id=id)
-		return render(request, 'focus.html', {'user': user})
+
 
 @login_required
 def myAccount(request):
@@ -120,22 +111,11 @@ def deconnect(request):
 
 
 
-
+'''
 class ViewHome(ListView):
 	model = User
 	context_object_name = "users"
 	template_name = "home.html"
 	#paginate_by = 1
 	#queryset = Users.objects.filter(role_id=1) #{can add some filter with queryset}
-
-
-class DeleteUser(DeleteView):
-	model = User
-	context_object_name = "u"
-	template_name = "delete.html"
-	success_url = "/ds9s/"
-
-	@method_decorator(login_required)
-	@method_decorator(permission_required('ds9s.user_delete',raise_exception=True))
-	def dispatch(self, *args, **kwargs):
-		return super(DeleteUser, self).dispatch(*args, **kwargs)
+'''
