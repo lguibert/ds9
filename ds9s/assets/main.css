@@ -8,6 +8,10 @@
 	clear:both;
 }
 
+.none{
+	display: none;
+}
+
 .error, .success, .errorlist, .info, .warning{
 	border: 1px solid;
 	margin: 10px 0px;
@@ -109,4 +113,8 @@
 .nunAnaly{
 	display:inline;
 	margin-left: 100px;
+}
+
+#displayCatData, #hideCatData{
+	margin-bottom:20px;
 }

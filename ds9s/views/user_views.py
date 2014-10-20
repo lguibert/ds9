@@ -18,7 +18,7 @@ def myAccount(request):
 	user = User.objects.get(id=request.user.id)
 	return render(request, 'myaccount.html',locals())
 
-def informations(request):
+def information(request):
 	return render(request, 'informations.html',locals())
 
 def gettingStarted(request):
@@ -38,9 +38,9 @@ def newUser(request):
 				user.save()				
 				u = User.objects.latest('id') #get the id of the user
 				messages.success(request, u"User saved.")
-				return redirect("/ds9s/view/"+str(u.id)+"?save=1") #redirect to the userpage
-			except IntegrityError as e:
-				messages.error(request, u"Username already in our database.")
+				return redirect("/ds9s/account/") #redirect to the userpage
+			except:
+				messages.error(request, u"Error during the saving.")
 				return render(request, 'newUser.html',locals())
 	else:
 		form = CreateUserForm()

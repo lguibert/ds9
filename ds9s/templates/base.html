@@ -20,8 +20,10 @@
       <div class="container">
         <div class="navbar-header">
           <a class="navbar-brand" href="/ds9s/">Home</a>    
-          <a class="navbar-brand navbar-right" href="/ds9s/fits/test/">Test page</a>      
+          <a class="navbar-brand navbar-right" href="/ds9s/fits/test/">Test page</a>   
+          {% if perms.can_add_parfolder %}   
           <a class="navbar-brand navbar-right" href="/ds9s/fits/upload/">Add new ParXXX</a>
+          {% endif %}
         </div>
         <div class="navbar-collapse collapse">
         	{% block loginForm%}
@@ -30,7 +32,7 @@
           <span class="no-hover navbar-brand navbar-right">/</span>
           <a class="navbar-brand navbar-right" href="/ds9s/account/">My account</a> 
 				{% else %}
-          		<a class="navbar-brand navbar-right" href="/ds9s/newUser">Sign in</a>
+          		<a class="navbar-brand navbar-right" href="/ds9s/newUser">Create account</a>
               <span class="no-hover navbar-brand navbar-right">/</span>
               <a class="navbar-brand navbar-right" href="/ds9s/login/">Log in</a>
           		{% endif %}
@@ -44,16 +46,17 @@
         <h1>{% block headTitle%}Hello, welcome on DS9 Web Application{% endblock %}</h1>
         <p>{% block contentHeadTitle%}You'll be able to work here very soon!{% endblock %}</p>    
 
-        <div class="row">
-          <form>
+        <!--<div class="row">
+          <form method='post' action='/ds9s/fits/search/'>
+            {% csrf_token %}
             <div class="col-xs-2">
-              <input class="form-control" type="search" placeholder='Search...'/>
+              <input class="form-control" type="search" name='search' placeholder='Search...'/>
             </div>
             <div class="col-xs-1">
               <input id="imgSearch" type='image' src="{%static 'search.png'%}" onsubmit="submit()" title='Search'/>
             </div>
           </form>  
-        </div>
+        </div>-->
       </div>
     </div>
 
@@ -78,7 +81,7 @@
       <footer>
         <h4>DS9 Web Application</h4>
         <ul class="list-inline list-unstyled">
-          <li><a class="btn btn-primary btn-lg" href="/ds9s/informations/">Informations</a></li>
+          <li><a class="btn btn-primary btn-lg" href="/ds9s/information/">Information</a></li>
           <li><a class="btn btn-primary btn-lg" href="/ds9s/started/">Getting started</a></li>
         </ul>
       </footer>
@@ -89,6 +92,17 @@
 
   <script type="text/javascript">
     $(document).ready(function(){
+      $('#displayCatData').click(function(){
+        if ($(this).attr('type') == 0){
+          $('#dataCatContainer').show('slow');
+          $(this).attr('type','1');
+          $(this).html('See less');
+        }else{
+          $('#dataCatContainer').hide('slow');
+          $(this).attr('type','0');
+          $(this).html('See more');
+        }
+      })      
 
       $('#g102').on("mousemove",function(e){
             tab = getCoordonate(e.pageX, e.pageY, this)

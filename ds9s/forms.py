@@ -30,6 +30,29 @@ class CreateUserForm(forms.Form):
 
 		return cleaned_data
 
+	def clean_username(self):
+		cleaned_data = super(CreateUserForm, self).clean()
+		name = cleaned_data.get('username')
+		user = User.objects.filter(username=name)		
+		if user:
+			msg = u"Username already in our database."
+			self._errors['username'] = self.error_class([msg])
+			del cleaned_data['username']
+
+		return cleaned_data
+
+	def clean_email(self):
+		cleaned_data = super(CreateUserForm, self).clean()
+		email = cleaned_data.get('email')
+		user = User.objects.filter(email=email)		
+		if user:
+			msg = u"Email already in our database."
+			self._errors['email'] = self.error_class([msg])
+			del cleaned_data['email']
+
+		return cleaned_data
+
+
 class UpdateUserForm(forms.ModelForm):
 	username = forms.CharField(label="Your username")
 	password = forms.CharField(widget=forms.PasswordInput)

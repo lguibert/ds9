@@ -22,6 +22,8 @@ from django.db.models import Count
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from django.utils.html import escape
+
 from astropy.io import fits
 
 from math import cos, pi, sin
@@ -37,12 +39,16 @@ import re
 from os import listdir, makedirs
 from os.path import exists
 
+from six.moves import zip
+
 import pdb
 
+from itertools import repeat
+
 from django.utils.safestring import mark_safe
-"""
+
 from bokeh.plotting import *
-from bokeh.objects import ColumnDataSource"""
+from bokeh.objects import ColumnDataSource
 
 
 #------------------ GLOBAL VARIABLES --------------------------------
@@ -73,10 +79,8 @@ def viewHomeGalaxy(request):
 	analysis = Analysis.objects.raw('SELECT COUNT(DISTINCT user_id) as count, galaxy_id, id FROM ds9s_analysis group by galaxy_id')
 
 	aly = {}
-
 	for g in galaxy_list:
 		aly[g['id']] = 0
-
 	for a in analysis:
 		aly[a.galaxy_id] = a.count
 
@@ -123,6 +127,44 @@ def zoomFile(request, id):
 		#just fix for the moment. Have to find a better solution
 		messages.error(request,"Resize picture is a big work. Let the server get some rest for a second.")
 		return redirect("/ds9s/fits/view/"+id+"/")
+
+def displayImage(request):
+	TOOLS="pan,wheel_zoom,box_zoom,reset"	
+
+	features = GalaxyFeatures.objects.filter(galaxy_id=1).order_by('galaxyfields_id')
+	raCenter = float(features[0].value)
+	decCenter = float(features[1].value)
+
+	inFits=pyfits.open("/home/lguibert/test/Par321_final/DATA/DIRECT_GRISM/F160W_rot_drz.fits")
+	iHdr=inFits[1].header
+	iData=inFits[1].data
+
+
+	# Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
+	x0,y0,ra0,dec0,drdx,drdy,dddx,dddy,fieldRotation=iHdr["CRPIX1"],iHdr["CRPIX2"],iHdr["CRVAL1"],iHdr["CRVAL2"],iHdr["CD1_1"],iHdr["CD1_2"],iHdr["CD2_1"],iHdr["CD2_2"],iHdr["ORIENTAT"]
+	    
+	fieldRotation=-1.*fieldRotation 
+	pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
+	xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
+	ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
+
+	source = ColumnDataSource(
+    data=dict(
+        x=xcen,
+        y=ycen,
+    	)
+	)
+
+	output_file("test.html")
+
+	hold()
+
+	circle(xcen+100, ycen+100, source=source, tools=TOOLS, fill_alpha=0.6, line_color=None, Title="Super test")
+	#rect(xcen, ycen, 50,source=source, fill_color="green", fill_alpha=0.6, line_color=None)
+
+	show()
+
+	return render(request, 'test.html',locals()) 
 
 def makePngFFile(request, file, gal, short_name, zoom=100, raCenter=None, decCenter=None):
 	#try:
@@ -291,7 +333,7 @@ def viewGalaxy(request, id):
 			gal.generated = True
 			gal.save()
 		else:
-			messages.error(request,u"Error somewhere (not over the rainbow")
+			messages.error(request,u"Error somewhere.")
 
 	return render(request, 'viewGalaxy.html',locals())
 

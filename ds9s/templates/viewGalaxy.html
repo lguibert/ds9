@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}	
 	<h1>Galaxy n°{{gal.uniq_id}}</h1>
-	<p>Date added: {{gal.parfolder.date_upload}}</p>
 
-	<div id="dataCatContainer" class="container-fluid">
+	<a class='btn btn-default' type='0' id='displayCatData'>See more</a>
+	<div id="dataCatContainer" class="none container-fluid">
 		<div class="row">
 			{% for f in features%}
 				<div class="dataCat col-md-3 col-xs-3">
@@ -21,7 +21,7 @@
 		<form action="/ds9s/fits/zoom/{{gal.uniq_id}}/" method="post">
 			{% csrf_token %}
 			<label for="zoom">Zoom:</label>
-			<input name="zoom" id="zoom" value="100" type="number" min="0"/>
+			<input name="zoom" id="zoom" placeholder="100" type="number" min="0"/>
 			<input type="submit" class="btn btn-default" value="Zoom"/>
 		</form>
 	</div>
