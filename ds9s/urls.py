@@ -1,0 +1,19 @@
+from django.conf.urls import patterns, url, include
+from ds9s.views import ViewHome, ViewHomeFits
+
+urlpatterns = patterns('ds9s.views',
+	url(r'^/?$', 'viewHomeGalaxy'),
+	url(r'^/login/?$','connect'),
+	url(r'^/logout/?$','deconnect'),
+	url(r'^/newUser/?$','newUser'),
+	url(r'^/update/(?P<pk>[0-9]+)/?$','updateUser'),
+	url(r'^/informations/?$','informations'),
+	url(r'^/started/?$','gettingStarted'),
+	url(r'^/account/?$','myAccount'),
+	
+	url(r'^/fits/$','viewHomeGalaxy'),
+	url(r'^/fits/test/?$','test'),
+	url(r'^/fits/view/(?P<id>[0-9]+)/?$','viewGalaxy'),
+	url(r'^/fits/upload/','newParFile'),
+	url(r'^/fits/zoom/(?P<id>[0-9]+)/?$','zoomFile')
+)

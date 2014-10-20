@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block headTitle%}
+	<div class="first-uppercase">
+		{{user.first_name}} {{user.last_name}}
+	</div>
+{% endblock %}
+
+{% block contentHeadTitle%}
+	Soon, same page for edit.
+{% endblock %}
+
+{% block content %}
+	<p>{{user.first_name}} {{user.last_name}}</p>
+	<p>{{user.email}}</p>
+	<p>{{user.password}}</p>
+
+	{% if perms.ds9s.delete_user%}
+		<a class="btn btn-default" href="/ds9s/delete/{{user.id}}/">Delete</a>
+	{% endif %}
+	{% if perms.ds9s.update_user%}
+		<a class="btn btn-default" href="/ds9s/update/{{user.id}}/">Update</a>
+	{% endif %}
+{% endblock %}

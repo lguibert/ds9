@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}	
+	<h1>Galaxy n°{{gal.uniq_id}}</h1>
+	<p>Date added: {{gal.parfolder.date_upload}}</p>
+
+	<div id="dataCatContainer" class="container-fluid">
+		<div class="row">
+			{% for f in features%}
+				<div class="dataCat col-md-3 col-xs-3">
+					<h6>
+						{{f.galaxyfields.name}}
+						({{f.galaxyfields.shortname}})
+					</h6>
+					<p>{{f.value}}</p>
+				</div>
+			{% endfor %}
+		</div>	
+	</div>	
+	{% if gal.generated %}
+	<div>
+		<form action="/ds9s/fits/zoom/{{gal.uniq_id}}/" method="post">
+			{% csrf_token %}
+			<label for="zoom">Zoom:</label>
+			<input name="zoom" id="zoom" value="100" type="number" min="0"/>
+			<input type="submit" class="btn btn-default" value="Zoom"/>
+		</form>
+	</div>
+	<div id="rootFiles" class="container-fluid">
+		<div id="fFiles">
+			<div contenteditable="false" class="row">
+				<img id="f110" class="col-xs-6 col-md-5 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F110W.svg" contenteditable="true">
+				<div class="col-xs-2 col-md-2"></div>
+				<img id="f160140" class="col-xs-6 col-md-5 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F160W.svg" contenteditable="true">	
+			</div>
+			<div contenteditable="false" class="row">
+				<div id='dataF110' class="col-xs-6 col-md-5">
+					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+				</div>
+				<div id='dataF160140' class="col-md-offset-2 col-xs-6 col-md-5">
+					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+				</div>
+			</div>
+		</div>
+		<div id="gFiles">
+			<div contenteditable="false" class="row">
+				<img id="g102" class="col-xs-12 col-md-12 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G102_{{gal.uniq_name}}.svg" contenteditable="true">
+				<div class="clear col-xs-12 col-md-12">
+					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+				</div>
+			</div>
+			<div contenteditable="false" class="row">
+				<img id="g141" class="col-xs-12 col-md-12 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G141_{{gal.uniq_name}}.svg" contenteditable="true">
+				<div class="clear col-xs-12 col-md-12">
+					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+
+	<div id="buttons">
+		{% if previous %}
+			<form action="/ds9s/fits/view/{{previous.uniq_id}}/" method="post">
+				 {% csrf_token %}
+				<input class="btn btn-default"  type="submit" value="Previous" />
+			</form>
+		{%else%}
+			<input class="btn btn-default"  disabled="disabled" type="button" value="Previous" />
+		{% endif %}	
+		<span>—</span>	
+		{%if next %}
+			<form action="/ds9s/fits/view/{{next.uniq_id}}/" method="post">
+				 {% csrf_token %}
+				<input class="btn btn-default"  type="submit" value="Next" />
+			</form>
+		{%else%}
+			<input class="btn btn-default"  disabled="disabled" type="button" value="Next" />
+		{% endif %}	
+	</div>
+{% endblock %}
