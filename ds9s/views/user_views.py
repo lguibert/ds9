@@ -19,7 +19,7 @@ def myAccount(request):
 	return render(request, 'myaccount.html',locals())
 
 def information(request):
-	return render(request, 'informations.html',locals())
+	return render(request, 'information.html',locals())
 
 def gettingStarted(request):
 	return render(request, 'gettingStarted.html',locals())

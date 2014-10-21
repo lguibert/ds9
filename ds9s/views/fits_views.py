@@ -36,7 +36,7 @@ import pyfits
 
 from string import split
 import re
-from os import listdir, makedirs
+from os import listdir, makedirs, open
 from os.path import exists
 
 from six.moves import zip
@@ -129,38 +129,41 @@ def zoomFile(request, id):
 		return redirect("/ds9s/fits/view/"+id+"/")
 
 def displayImage(request):
-	TOOLS="pan,wheel_zoom,box_zoom,reset"	
+	TOOLS="pan,wheel_zoom,box_zoom,reset,resize"	
 
 	features = GalaxyFeatures.objects.filter(galaxy_id=1).order_by('galaxyfields_id')
 	raCenter = float(features[0].value)
 	decCenter = float(features[1].value)
 
-	inFits=pyfits.open("/home/lguibert/test/Par321_final/DATA/DIRECT_GRISM/F160W_rot_drz.fits")
+	inFits=pyfits.open("/home/lguibert/test/Par321_final/G141_DRIZZLE/aXeWFC3_G141_mef_ID402.fits")
 	iHdr=inFits[1].header
 	iData=inFits[1].data
 
 
 	# Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
-	x0,y0,ra0,dec0,drdx,drdy,dddx,dddy,fieldRotation=iHdr["CRPIX1"],iHdr["CRPIX2"],iHdr["CRVAL1"],iHdr["CRVAL2"],iHdr["CD1_1"],iHdr["CD1_2"],iHdr["CD2_1"],iHdr["CD2_2"],iHdr["ORIENTAT"]
-	    
-	fieldRotation=-1.*fieldRotation 
-	pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
-	xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
-	ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
+	x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
+	y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
+	npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
+	l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da
 
-	source = ColumnDataSource(
-    data=dict(
-        x=xcen,
-        y=ycen,
-    	)
+	xDispSize=6.0
+	yDispSize=xDispSize*float(npixy)/float(npixx)
+
+	image(image=[iData], 
+		x_range=[0, 1], 
+		y_range=[0, 1], 
+		x=0, 
+		y=0, 
+		dw=xDispSize*1.3,
+		dh=yDispSize*2.5,
+		tools=TOOLS,
+		title='Image',
+		palette=["Greys-9"],
+		aspect=dl/da,
+		extent=(l1,l2,y1,y2)
 	)
 
 	output_file("test.html")
-
-	hold()
-
-	circle(xcen+100, ycen+100, source=source, tools=TOOLS, fill_alpha=0.6, line_color=None, Title="Super test")
-	#rect(xcen, ycen, 50,source=source, fill_color="green", fill_alpha=0.6, line_color=None)
 
 	show()
 
@@ -299,7 +302,7 @@ def viewGalaxy(request, id):
 	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
 
 	try:
-		analysis = Analysis.objects.get(user_id=request.user, galaxy_id=gal.id)
+		analysis = Analysis.objects.filter(user_id=request.user, galaxy_id=gal.id)
 	except ObjectDoesNotExist:
 		messages.info(request,'No analysis yet.')
 
