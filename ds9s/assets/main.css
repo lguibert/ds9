@@ -8,7 +8,11 @@
 	clear:both;
 }
 
-.none{
+label{
+	min-width: 175px;
+}
+
+.none, #formUpdateUser #id_password, #formUpdateUser #id_passwordCheck, #formUpdateUser label[for='id_password'], #formUpdateUser label[for='id_passwordCheck']{
 	display: none;
 }
 

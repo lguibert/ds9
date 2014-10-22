@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-	<h1>New user</h1>	   
+	{% if formType %}
+	<h1>Update user</h1>
+	{% else %}	 
+	<h1>New user</h1>
+	{% endif %}  
 	<p>
 		{% if formType %}
-			<form method="post" action="/ds9s/update/{{pk}}/">
+			<form method="post" id='formUpdateUser' action="/ds9s/update/{{pk}}/">
 		{% else %}
 	    	<form method="post" action="/ds9s/newUser/">
 	    {% endif %}

@@ -55,11 +55,12 @@ class CreateUserForm(forms.Form):
 
 class UpdateUserForm(forms.ModelForm):
 	username = forms.CharField(label="Your username")
-	password = forms.CharField(widget=forms.PasswordInput)
-	passwordCheck = forms.CharField(widget=forms.PasswordInput, label=u"Password confirmation")
 	email = forms.EmailField(label=u'Your email')	
 	first_name = forms.CharField(label=u"First name")
 	last_name = forms.CharField(label=u"Last name")
+	showPass= forms.BooleanField(label='Change password',required=False)
+	password = forms.CharField(widget=forms.PasswordInput, required=False)
+	passwordCheck = forms.CharField(widget=forms.PasswordInput, label='Password confirmation', required=False)
 
 	class Meta:
 		model = User

@@ -58,7 +58,12 @@ def updateUser(request, pk):
 				user = User(pk)	
 				user.username = form.cleaned_data['username']
 				user.email = form.cleaned_data['email']
-				user.password = make_password(form.cleaned_data['password'])
+
+				if form.cleaned_data['password'] != '':
+					user.password = make_password(form.cleaned_data['password'])
+				else:
+					user.password = request.user.password
+
 				user.first_name = form.cleaned_data['first_name']
 				user.last_name = form.cleaned_data['last_name']
 				user.is_superuser = data.is_superuser
