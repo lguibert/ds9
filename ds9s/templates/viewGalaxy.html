@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block classPage %}
+class = 'container-fuild'	
+{% endblock %}
 {% block content %}	
 	<h1>Galaxy n°{{gal.uniq_id}}</h1>
 
@@ -16,21 +19,17 @@
 			{% endfor %}
 		</div>	
 	</div>	
-	{% if gal.generated %}
 	<div>
-		<form action="/ds9s/fits/zoom/{{gal.uniq_id}}/" method="post">
-			{% csrf_token %}
-			<label for="zoom">Zoom:</label>
-			<input name="zoom" id="zoom" placeholder="100" type="number" min="0"/>
-			<input type="submit" class="btn btn-default" value="Zoom"/>
-		</form>
-	</div>
 	<div id="rootFiles" class="container-fluid">
 		<div id="fFiles">
 			<div contenteditable="false" class="row">
-				<img id="f110" class="col-xs-6 col-md-5 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F110W.svg" contenteditable="true">
-				<div class="col-xs-2 col-md-2"></div>
-				<img id="f160140" class="col-xs-6 col-md-5 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F160W.svg" contenteditable="true">	
+				<div id="f110" class='test'>
+					{{f110div}}
+				</div>
+				
+				<div id="f160140" class='test'>
+					{{f160140div}}
+				</div>
 			</div>
 			<div contenteditable="false" class="row">
 				<div id='dataF110' class="col-xs-6 col-md-5">
@@ -43,20 +42,23 @@
 		</div>
 		<div id="gFiles">
 			<div contenteditable="false" class="row">
-				<img id="g102" class="col-xs-12 col-md-12 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G102_{{gal.uniq_name}}.svg" contenteditable="true">
+				<div id="g102" class="col-xs-12 col-md-12">
+					{{g1div}}
+				</div>
 				<div class="clear col-xs-12 col-md-12">
 					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
 				</div>
 			</div>
 			<div contenteditable="false" class="row">
-				<img id="g141" class="col-xs-12 col-md-12 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G141_{{gal.uniq_name}}.svg" contenteditable="true">
+				<div id="g102" class="col-xs-12 col-md-12">
+					{{g2div}}
+				</div>
 				<div class="clear col-xs-12 col-md-12">
 					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
 				</div>
 			</div>
 		</div>
 	</div>
-	{% endif %}
 
 	<div id="buttons">
 		{% if previous %}
@@ -77,4 +79,9 @@
 			<input class="btn btn-default"  disabled="disabled" type="button" value="Next" />
 		{% endif %}	
 	</div>
+
+	{{f110script}}
+	{{f160140script}}
+	{{g1script}}
+	{{g2script}}
 {% endblock %}

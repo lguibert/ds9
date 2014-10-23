@@ -48,8 +48,10 @@ from itertools import repeat
 from django.utils.safestring import mark_safe
 
 from bokeh.plotting import *
-from bokeh.objects import ColumnDataSource
-import bokeh.embed as bke
+from bokeh.embed import components
+from bokeh.resources import Resources
+from bokeh.templates import RESOURCES
+from bokeh.utils import encode_utf8
 
 
 #------------------ GLOBAL VARIABLES --------------------------------
@@ -99,110 +101,7 @@ def viewHomeGalaxy(request):
 def test(request):
 	return render(request, 'test.html',locals()) 
 
-@login_required
-def zoomFile(request, id):
-	zoom = request.POST['zoom']
-
-	try:
-		zoom = int(zoom)
-	except:
-		messages.error(request,"Zoom value can contain only number")
-		return redirect("/ds9s/fits/view/"+id+"/")
-
-	try:
-		gal = get_object_or_404(Galaxy, uniq_id=id)		
-		checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
-		gen = []
-
-		gen.append(makePngFFile(request, checked[2], gal, checked_short[2], zoom))
-		time.sleep(1)
-		gen.append(makePngFFile(request, checked[3], gal, checked_short[3], zoom))
-		time.sleep(3)
-		if not False in gen:
-			messages.success(request,"Images resizabled.")
-			return HttpResponseRedirect("/ds9s/fits/view/"+id+"/")
-		else:
-			messages.error(request,"Error during images resizabling.")
-			return redirect("/ds9s/fits/view/"+id+"/")
-	except:
-		#just fix for the moment. Have to find a better solution
-		messages.error(request,"Resize picture is a big work. Let the server get some rest for a second.")
-		return redirect("/ds9s/fits/view/"+id+"/")
-
-def displayImage(request):
-	TOOLS="pan,wheel_zoom,box_zoom,reset,resize,crosshair"	
-
-	'''inFits=pyfits.open("/home/lguibert/test/Par321_final/G141_DRIZZLE/aXeWFC3_G141_mef_ID1.fits")
-	iHdr=inFits[1].header
-	iData=inFits[1].data
-
-
-	# Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
-	x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
-	y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
-	npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
-	l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da
-
-	xDispSize=6.0
-	yDispSize=xDispSize*float(npixy)/float(npixx)
-
-	image(image=[iData], 
-		x_range=[0, xDispSize], 
-		y_range=[0, yDispSize], 
-		x=0, 
-		y=0, 
-		dw=100,
-		dh=100,
-		tools=TOOLS,
-		title='Image',
-		palette=["Greys-9"],
-	)'''
-	
-
-	features = GalaxyFeatures.objects.filter(galaxy_id=104).order_by('galaxyfields_id')
-	raCenter = float(features[0].value)
-	decCenter = float(features[1].value)
-
-	inFits=pyfits.open("/home/lguibert/test/Par321_final/DATA/DIRECT_GRISM/F160W_rot_drz.fits")
-	iHdr=inFits[1].header
-	iData=inFits[1].data
-
-
-	# Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
-	x0,y0,ra0,dec0,drdx,drdy,dddx,dddy,fieldRotation=iHdr["CRPIX1"],iHdr["CRPIX2"],iHdr["CRVAL1"],iHdr["CRVAL2"],iHdr["CD1_1"],iHdr["CD1_2"],iHdr["CD2_1"],iHdr["CD2_2"],iHdr["ORIENTAT"]
-	    
-	fieldRotation=-1.*fieldRotation 
-	pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
-	xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
-	ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
-
-	iFocus = iData[xcen-50:xcen+50,ycen-50:ycen+50]
-
-	image(image=[iFocus], 
-		x_range=[0, xcen], 
-		y_range=[0, ycen], 
-		x=0, 
-		y=0, 
-		dw=300,
-		dh=400,
-		tools=TOOLS,
-		title='Image',
-		palette=["Greys-9"],
-	)
-
-	output_file("test.html")
-
-	hold()
-
-	#js = bke.autoload_server("test.html",request.session)
-	#html = bke.components("test.html")
-
-	#show()
-
-	return render(request, 'test.html',locals()) 
-
-def makePngFFile(request, file, gal, short_name, zoom=10, raCenter=None, decCenter=None):
-	#try:
+def displayFImage(request, file, gal, short_name):
 	features = GalaxyFeatures.objects.filter(galaxy_id=gal.id).order_by('galaxyfields_id')
 	raCenter = float(features[0].value)
 	decCenter = float(features[1].value)
@@ -219,79 +118,62 @@ def makePngFFile(request, file, gal, short_name, zoom=10, raCenter=None, decCent
 	pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
 	xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
 	ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
-		 
-	iFocus = iData[xcen-10:xcen+10,ycen-10:ycen+10]
 
-	#pdb.set_trace()
+	iFocus = iData[xcen-50:xcen+50,ycen-50:ycen+50]
 
-	npixx,npixy=iData.shape[1],iData.shape[0]
+	script, div = createBokehImage(iFocus, 700, 700,0,0,600,600,800,800, short_name)
+
+	return script, div
+
+def displayGImage(request, file, short_name):
+	inFits=pyfits.open(file)
+	iHdr=inFits[1].header
+	iData=inFits[1].data
+
+
+	# Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
+	x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
+	y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
+	npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
+	#l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da
+
 	xDispSize=6.0
 	yDispSize=xDispSize*float(npixy)/float(npixx)
-		
-	fig = plt.figure()
-	plt.imshow(iFocus,cmap=cm.Greys_r,origin="lower")
 
-	#return fig.ginput(n=10, timeout=15)
-	"""time.sleep(30)"""
+	script, div = createBokehImage(iData, 1100, 50,0,0,1000,20,1100,300,short_name)
 
-	directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)+"/"    
-	result = savePng(request, directory, short_name, gal.uniq_name, fig)
+	return script, div
 
-	inFits.close()
 
-	del fig
-	return result
-	#except:
-	#	return False
+def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_height, title):
+	TOOLS="pan,wheel_zoom,box_zoom,reset,resize"
 
-def makePngGFile(request, file, gal, short_name):
-	try:
-		inFits=pyfits.open(file)
-					#inFits.info() # shows contents of the FITS image
-		iHdr=inFits[1].header # We will use data from this later
-		iData=inFits[1].data # This is the image data
+	img = image(image=[data], 
+		x_range=[0, x_range], 
+		y_range=[0, y_range], 
+		x=x, 
+		y=y, 
+		dw=dw,
+		dh=dh,
+		tools=TOOLS,
+		palette=["Greys-9"],
+		title=title,
+		plot_width=plot_width,
+		plot_height=plot_height,
+	)
 
-					#print iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1']
-		x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
-		y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
-		npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
-		l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
-				    #print l1,l2,y1,y2
+	resources = Resources("inline")
 
-		xDispSize=6.0
-		yDispSize=xDispSize*float(npixy)/float(npixx) # Size the image to scale with the image dimensions
+	plot_script, plot_div = components(img, resources)
 
-		fig = plt.figure(1,figsize=(xDispSize*1.3,yDispSize*2.5))
-		plt.imshow(iData,cmap=cm.Greys_r,origin="lower",aspect=dl/da, extent=(l1,l2,y1,y2)) # Call imshow
-		plt.axhline(y=0.0,c='cyan',linestyle=':') # Plot a blue dotted line at distance = 0
-		plt.xlabel(r'Wavelength ($\AA$)')
-		plt.ylabel('Distance (arcsec)')
-		directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)
+	html_script = mark_safe(encode_utf8(plot_script))
+	html_div = mark_safe(encode_utf8(plot_div))
 
-		savePng(request, directory, short_name, gal.uniq_name, fig)
+	hold()
 
-		inFits.close()
-		messages.success(request, u"Image created (G FILE).")
-		return True
-	except:
-		messages.error(request, u"Image unable.")
-		return False
+	figure()
 
-def savePng(request, directory, short_name, uniq_name, fig):
-	try:
-		if not exists(directory):
-				makedirs(directory)
-
-		if short_name in ['F110W', 'F160W', 'F140W']:
-			fig.savefig(directory+'/'+short_name+".svg",bbox_inches='tight',pad_inches=0.3)
-		else:
-			fig.savefig(directory+'/'+short_name+'_'+uniq_name+".svg",bbox_inches='tight',pad_inches=0.3)
-
-		messages.success(request, u"Image saved.")
-		return True
-	except:
-		messages.error(request, u"Error during saving image")
-		return False
+	return html_script, html_div
 
 def getPrevGalaxy(id):
 	previous = None
@@ -338,37 +220,17 @@ def viewGalaxy(request, id):
 	except ObjectDoesNotExist:
 		messages.info(request,'No analysis yet.')
 
-	if not gal.generated:
-		gen = []
-		checked, checked_short = checkAllFiles(gal.id, gal.parfolder.name_par)
-
+	checked, checked_short = checkAllFiles(gal.id, gal.parfolder.name_par)
 		
-		directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
-		#pdb.set_trace()
-		try:
-			if not exists(directory+str(gal.uniq_id)+"/F110W.svg"):
-				gen.append(makePngFFile(request, checked[2], gal, checked_short[2]))
-				time.sleep(1)
-				messages.info(request,"F110W Created")
-			if checked_short[3] == 'F160W':
-				if not exists(directory+str(gal.uniq_id)+"/F160W.svg"):
-					gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
-					messages.info(request,"F160W Created")
-			if checked_short[3] == 'F140W':
-				if not exists(directory+str(gal.uniq_id)+"/F140W.svg"):
-					gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
-		except:
-			messages.warning(request, "No file for this galaxy.")
+	#directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
+	#pdb.set_trace()
+	
+	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2])				
+	
+	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3])
 
-		time.sleep(1)
-		gen.append(makePngGFile(request, checked[0], gal, checked_short[0]))
-		gen.append(makePngGFile(request, checked[1], gal, checked_short[1]))
-		
-		if not False in gen:
-			gal.generated = True
-			gal.save()
-		else:
-			messages.error(request,u"Error somewhere.")
+	g1script, g1div = displayGImage(request, checked[0],checked_short[0])
+	g2script, g2div = displayGImage(request, checked[1],checked_short[1])
 
 	return render(request, 'viewGalaxy.html',locals())
 

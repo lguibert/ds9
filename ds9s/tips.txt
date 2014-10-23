@@ -120,3 +120,190 @@ class DeleteUser(DeleteView):
       @method_decorator(permission_required('ds9s.user_delete',raise_exception=True))
       def dispatch(self, *args, **kwargs):
             return super(DeleteUser, self).dispatch(*args, **kwargs)
+
+
+
+try:
+                  if not exists(directory+str(gal.uniq_id)+"/F110W.svg"):
+                        gen.append(makePngFFile(request, checked[2], gal, checked_short[2]))
+                        time.sleep(1)
+                        messages.info(request,"F110W Created")
+                  if checked_short[3] == 'F160W':
+                        if not exists(directory+str(gal.uniq_id)+"/F160W.svg"):
+                              gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
+                              messages.info(request,"F160W Created")
+                  if checked_short[3] == 'F140W':
+                        if not exists(directory+str(gal.uniq_id)+"/F140W.svg"):
+                              gen.append(makePngFFile(request, checked[3], gal, checked_short[3]))
+            except:
+                  messages.warning(request, "No file for this galaxy.")
+
+            time.sleep(1)
+            gen.append(makePngGFile(request, checked[0], gal, checked_short[0]))
+            gen.append(makePngGFile(request, checked[1], gal, checked_short[1]))
+
+
+<div id="rootFiles" class="container-fluid">
+            <div id="fFiles">
+                  <div contenteditable="false" class="row">
+                        <img id="f110" class="col-xs-6 col-md-5 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F110W.svg" contenteditable="true">
+                        <div class="col-xs-2 col-md-2"></div>
+                        <img id="f160140" class="col-xs-6 col-md-5 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/F160W.svg" contenteditable="true"> 
+                  </div>
+                  <div contenteditable="false" class="row">
+                        <div id='dataF110' class="col-xs-6 col-md-5">
+                              <p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+                        </div>
+                        <div id='dataF160140' class="col-md-offset-2 col-xs-6 col-md-5">
+                              <p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+                        </div>
+                  </div>
+            </div>
+            <div id="gFiles">
+                  <div contenteditable="false" class="row">
+                        <img id="g102" class="col-xs-12 col-md-12 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G102_{{gal.uniq_name}}.svg" contenteditable="true">
+                        <div class="clear col-xs-12 col-md-12">
+                              <p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+                        </div>
+                  </div>
+                  <div contenteditable="false" class="row">
+                        <img id="g141" class="col-xs-12 col-md-12 figure" src="{{MEDIA_URL}}fits_png/{{gal.parfolder.name_par}}/{{gal.uniq_id}}/G141_{{gal.uniq_name}}.svg" contenteditable="true">
+                        <div class="clear col-xs-12 col-md-12">
+                              <p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+                        </div>
+                  </div>
+            </div>
+      </div>
+
+
+
+def makePngFFile(request, file, gal, short_name, zoom=10, raCenter=None, decCenter=None):
+      #try:
+      features = GalaxyFeatures.objects.filter(galaxy_id=gal.id).order_by('galaxyfields_id')
+      raCenter = float(features[0].value)
+      decCenter = float(features[1].value)
+
+      inFits=pyfits.open(file)
+      iHdr=inFits[1].header
+      iData=inFits[1].data
+
+
+      # Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
+      x0,y0,ra0,dec0,drdx,drdy,dddx,dddy,fieldRotation=iHdr["CRPIX1"],iHdr["CRPIX2"],iHdr["CRVAL1"],iHdr["CRVAL2"],iHdr["CD1_1"],iHdr["CD1_2"],iHdr["CD2_1"],iHdr["CD2_2"],iHdr["ORIENTAT"]
+          
+      fieldRotation=-1.*fieldRotation 
+      pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
+      xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
+      ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
+             
+      iFocus = iData[xcen-10:xcen+10,ycen-10:ycen+10]
+
+      #pdb.set_trace()
+
+      npixx,npixy=iData.shape[1],iData.shape[0]
+      xDispSize=6.0
+      yDispSize=xDispSize*float(npixy)/float(npixx)
+            
+      fig = plt.figure()
+      plt.imshow(iFocus,cmap=cm.Greys_r,origin="lower")
+
+      #return fig.ginput(n=10, timeout=15)
+      """time.sleep(30)"""
+
+      directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)+"/"    
+      result = savePng(request, directory, short_name, gal.uniq_name, fig)
+
+      inFits.close()
+
+      del fig
+      return result
+      #except:
+      #     return False
+
+def makePngGFile(request, file, gal, short_name):
+      try:
+            inFits=pyfits.open(file)
+                              #inFits.info() # shows contents of the FITS image
+            iHdr=inFits[1].header # We will use data from this later
+            iData=inFits[1].data # This is the image data
+
+                              #print iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1']
+            x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
+            y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
+            npixx,npixy=iData.shape[1],iData.shape[0] # get the number of pixels in each direction
+            l1,l2,y1,y2 = l0-x0*dl, l0+(float(npixx)-x0)*dl, a0-y0*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
+                            #print l1,l2,y1,y2
+
+            xDispSize=6.0
+            yDispSize=xDispSize*float(npixy)/float(npixx) # Size the image to scale with the image dimensions
+
+            fig = plt.figure(1,figsize=(xDispSize*1.3,yDispSize*2.5))
+            plt.imshow(iData,cmap=cm.Greys_r,origin="lower",aspect=dl/da, extent=(l1,l2,y1,y2)) # Call imshow
+            plt.axhline(y=0.0,c='cyan',linestyle=':') # Plot a blue dotted line at distance = 0
+            plt.xlabel(r'Wavelength ($\AA$)')
+            plt.ylabel('Distance (arcsec)')
+            directory = "ds9s/upload/fits_png/"+gal.parfolder.name_par+"/"+str(gal.uniq_id)
+
+            savePng(request, directory, short_name, gal.uniq_name, fig)
+
+            inFits.close()
+            messages.success(request, u"Image created (G FILE).")
+            return True
+      except:
+            messages.error(request, u"Image unable.")
+            return False
+
+def savePng(request, directory, short_name, uniq_name, fig):
+      try:
+            if not exists(directory):
+                        makedirs(directory)
+
+            if short_name in ['F110W', 'F160W', 'F140W']:
+                  fig.savefig(directory+'/'+short_name+".svg",bbox_inches='tight',pad_inches=0.3)
+            else:
+                  fig.savefig(directory+'/'+short_name+'_'+uniq_name+".svg",bbox_inches='tight',pad_inches=0.3)
+
+            messages.success(request, u"Image saved.")
+            return True
+      except:
+            messages.error(request, u"Error during saving image")
+            return False
+
+
+@login_required
+def zoomFile(request, id):
+      zoom = request.POST['zoom']
+
+      try:
+            zoom = int(zoom)
+      except ValueError:
+            messages.error(request,"Zoom value can contain only number")
+            return redirect("/ds9s/fits/view/"+id+"/")
+
+      try:
+            gal = get_object_or_404(Galaxy, uniq_id=id)           
+            checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
+            gen = []
+
+            gen.append(makePngFFile(request, checked[2], gal, checked_short[2], zoom))
+            time.sleep(1)
+            gen.append(makePngFFile(request, checked[3], gal, checked_short[3], zoom))
+            time.sleep(3)
+            if not False in gen:
+                  messages.success(request,"Images resizabled.")
+                  return HttpResponseRedirect("/ds9s/fits/view/"+id+"/")
+            else:
+                  messages.error(request,"Error during images resizabling.")
+                  return redirect("/ds9s/fits/view/"+id+"/")
+      except:
+            #just fix for the moment. Have to find a better solution
+            messages.error(request,"Resize picture is a big work. Let the server get some rest for a second.")
+            return redirect("/ds9s/fits/view/"+id+"/")
+
+            <form action="/ds9s/fits/zoom/{{gal.uniq_id}}/" method="post">
+                  {% csrf_token %}
+                  <label for="zoom">Zoom:</label>
+                  <input name="zoom" id="zoom" placeholder="100" type="number" min="0"/>
+                  <input type="submit" class="btn btn-default" value="Zoom"/>
+            </form>
+      </div>

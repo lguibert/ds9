@@ -65,7 +65,7 @@ label{
 }
 
 #fFiles div, #gFiles div, .dataCat{
-	background-color:rgba(86,61,124,0.15);
+	/*background-color:rgba(86,61,124,0.15);*/
 }
 
 #fFiles, #gFiles div:first-child, #dataCatContainer{
@@ -121,4 +121,25 @@ label{
 
 #displayCatData, #hideCatData{
 	margin-bottom:20px;
+}
+
+.test{
+	float:left;
+}
+
+div[class='bk-sidebar'] a[class='bk-logo bk-logo-small']{
+	display: none;
+}
+
+@media (min-width: 1500px) {
+	.container-fuild{
+		width:1800px;
+		margin: auto;
+	}
+}
+
+@media (max-width: 1500px){
+	.container-fuild{
+		margin-left: 25px;
+	}
 }

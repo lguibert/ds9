@@ -7,9 +7,15 @@
 
     <title>{% block title %}DS9 Web Application{% endblock %}</title>
 
+    {%load static %}
+    <script type="text/javascript" src='{% static "jquery-1.11.1.min.js" %}'></script>
+    <script type="text/javascript" src='http://cdn.pydata.org/bokeh-0.6.1.min.js'></script>
+
    	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 
-   	{%load static %}
+    <link rel="stylesheet" type="text/css" href="http://cdn.pydata.org/bokeh-0.6.1.min.css">
+
+   
    	<link rel="stylesheet" href="{%static 'main.css'%}"/>
     
   </head>
@@ -25,7 +31,7 @@
           {% endif %}
         </div>
         <div class="navbar-collapse collapse">
-        	{% block loginForm%}
+        	{% block loginForm %}
           	{% if user.is_authenticated %}				
     					<a class="navbar-brand navbar-right" href="/ds9s/logout/">Log out</a>
               <span class="no-hover navbar-brand navbar-right">/</span>
@@ -59,7 +65,7 @@
       </div>
     </div>
 
-    <div class="container">
+    <div {% block classPage%} class="container" {% endblock %}>
       <div class="row">
         {% if messages %}
         <ul class="messages">
@@ -74,7 +80,6 @@
           {% block content %}{% endblock %}
         </section>
       </div>
-
       <hr>
 
       <footer>
@@ -84,11 +89,11 @@
           <li><a class="btn btn-primary btn-lg" href="/ds9s/started/">Getting started</a></li>
         </ul>
       </footer>
-    </div>
-
-    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  </div>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
   <script type="text/javascript" src='{% static "coordonatePictures.js" %}'></script>
   <script type="text/javascript" src='{% static "showHide.js" %}'></script>
+  <!--<script type="text/javascript" src='{% static "test.js" %}'></script>-->
+  
   </body>
 </html>
