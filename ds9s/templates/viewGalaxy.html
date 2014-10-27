@@ -19,41 +19,48 @@ class = 'container-fuild'
 			{% endfor %}
 		</div>	
 	</div>	
-	<div>
+	<div id="scaled">
+		<form>
+			{% csrf_token %}
+			<label for="scaling">Scaling: </label>
+			<input type="number" value="50" name="valScaling" id="valScaling"/>
+			<input type="range" id="scaling" name="scaling" min="0" step="1" max=""/>
+		</form>
+	</div>
 	<div id="rootFiles" class="container-fluid">
 		<div id="fFiles">
-			<div contenteditable="false" class="row">
-				<div id="f110" class='test'>
+			<div contenteditable="false" class="row auto">
+				<div id="f110" class='col-xs-6 col-md-6'>
 					{{f110div}}
 				</div>
 				
-				<div id="f160140" class='test'>
+				<div id="f160140" class='col-xs-6 col-md-6'>
 					{{f160140div}}
 				</div>
 			</div>
-			<div contenteditable="false" class="row">
-				<div id='dataF110' class="col-xs-6 col-md-5">
+			<div contenteditable="false" class="row auto">
+				<div id='dataF110' class="col-xs-6 col-md-6">
 					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
 				</div>
-				<div id='dataF160140' class="col-md-offset-2 col-xs-6 col-md-5">
+				<div id='dataF160140' class="col-xs-6 col-md-6">
 					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
 				</div>
 			</div>
 		</div>
 		<div id="gFiles">
-			<div contenteditable="false" class="row">
-				<div id="g102" class="col-xs-12 col-md-12">
+			<div contenteditable="false" class="row auto">
+				<div id="g102" class="col-xs-6 col-md-6">
 					{{g1div}}
 				</div>
-				<div class="clear col-xs-12 col-md-12">
-					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
-				</div>
-			</div>
-			<div contenteditable="false" class="row">
-				<div id="g102" class="col-xs-12 col-md-12">
+				<div id="g141" class="col-xs-6 col-md-6">
 					{{g2div}}
 				</div>
-				<div class="clear col-xs-12 col-md-12">
+			</div>
+			<div contenteditable="false" class="row auto">
+				<div id='dataG102' class="col-xs-6 col-md-5">
+					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+				</div>
+				<div id='dataG141' class="col-md-offset-2 col-xs-6 col-md-5">
 					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
 				</div>
 			</div>
@@ -79,9 +86,14 @@ class = 'container-fuild'
 			<input class="btn btn-default"  disabled="disabled" type="button" value="Next" />
 		{% endif %}	
 	</div>
-
-	{{f110script}}
-	{{f160140script}}
-	{{g1script}}
-	{{g2script}}
+	{% block js %}
+	{{block.super}}
+		{{f110script}}
+		{{f160140script}}
+		{{g1script}}
+		{{g2script}}
+		{%load static %}
+		<script type="text/javascript" src='{% static "scaling.js" %}'></script>
+  		<script type="text/javascript" src='{% static "coordonatePictures.js" %}'></script>
+	{% endblock %}
 {% endblock %}

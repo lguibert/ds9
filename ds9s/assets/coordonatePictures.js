@@ -1,13 +1,13 @@
 $(document).ready(function(){
       $('#g102').on("mousemove",function(e){
             tab = getCoordonate(e.pageX, e.pageY, this)
-            $('#g102 + div .x').html(tab[0]);
-            $('#g102 + div .y').html(tab[1]);
+            $('#dataG102 .x').html(tab[0]);
+            $('#dataG102 .y').html(tab[1]);
       })
       $('#g141').on("mousemove",function(e){
             tab = getCoordonate(e.pageX, e.pageY, this)
-            $('#g141 + div .x').html(tab[0]);
-            $('#g141 + div .y').html(tab[1]);
+            $('#dataG141 .x').html(tab[0]);
+            $('#dataG141 .y').html(tab[1]);
       })
       $('#f110').on("mousemove",function(e){
             tab = getCoordonate(e.pageX, e.pageY, this)

@@ -123,10 +123,6 @@ label{
 	margin-bottom:20px;
 }
 
-.test{
-	float:left;
-}
-
 div[class='bk-sidebar'] a[class='bk-logo bk-logo-small']{
 	display: none;
 }
@@ -142,4 +138,8 @@ div[class='bk-sidebar'] a[class='bk-logo bk-logo-small']{
 	.container-fuild{
 		margin-left: 25px;
 	}
+}
+
+.auto{
+	margin: auto;
 }

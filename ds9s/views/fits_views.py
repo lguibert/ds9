@@ -53,6 +53,8 @@ from bokeh.resources import Resources
 from bokeh.templates import RESOURCES
 from bokeh.utils import encode_utf8
 
+import stsci.imagestats as imagestats
+
 
 #------------------ GLOBAL VARIABLES --------------------------------
 basePath = "/home/lguibert/test/"
@@ -98,10 +100,11 @@ def viewHomeGalaxy(request):
 
 	return render(request, 'homeGalaxy.html',locals())
 
-def test(request):
-	return render(request, 'test.html',locals()) 
+def test(request, id):
+	viewGalaxy(request, id)
 
-def displayFImage(request, file, gal, short_name):
+def displayFImage(request, file, gal, short_name, val):
+	val = int(val)
 	features = GalaxyFeatures.objects.filter(galaxy_id=gal.id).order_by('galaxyfields_id')
 	raCenter = float(features[0].value)
 	decCenter = float(features[1].value)
@@ -119,7 +122,8 @@ def displayFImage(request, file, gal, short_name):
 	xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
 	ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
 
-	iFocus = iData[xcen-50:xcen+50,ycen-50:ycen+50]
+	iFocus = iData[xcen-val:xcen+val,ycen-val:ycen+val]
+
 
 	script, div = createBokehImage(iFocus, 700, 700,0,0,600,600,800,800, short_name)
 
@@ -140,13 +144,51 @@ def displayGImage(request, file, short_name):
 	xDispSize=6.0
 	yDispSize=xDispSize*float(npixy)/float(npixx)
 
-	script, div = createBokehImage(iData, 1100, 50,0,0,1000,20,1100,300,short_name)
+	script, div = createBokehImage(iData, 1000, 50,0,0,1000,20,865,300,short_name)
 
 	return script, div
+
+def remapPixels(data, minpex=None, maxpex=None):
+	datastat = imagestats.ImageStats(data,nclip=3)
+	if minpex == None:
+		minpex = datastat.mean
+	if maxpex == None:
+		maxpex = datastat.mean + 10 * datastat.stddev
+
+	m = 1 / (maxpex - minpex)
+	b = minpex * -1 / (maxpex - minpex)
+
+	data = data * m + b
+
+	data[data<0]=0
+	data[data>1]=1
+
+	return data
+
+def remapPixelsLog(data):
+	datastat = imagestats.ImageStats(data,nclip=3)
+	minpex = datastat.mean
+	maxpex = datastat.mean + 15 * datastat.stddev
+
+	m = 1 / (np.log(maxpex) - np.log(minpex))
+	b = np.log(minpex) * -1 / (np.log(maxpex) - np.log(minpex))
+
+	data = np.log(data)
+	data = data * m + b
+
+	data[np.isnan(data)] = 0
+
+	data[data<0]=0
+	data[data>1]=1
+
+	return data
+
 
 
 def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_height, title):
 	TOOLS="pan,wheel_zoom,box_zoom,reset,resize"
+
+	data = remapPixels(data)
 
 	img = image(image=[data], 
 		x_range=[0, x_range], 
@@ -162,14 +204,16 @@ def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_heig
 		plot_height=plot_height,
 	)
 
+	hold()
+	circle(x=10,y=10,radius=100,fill_color="#df1c1c",line_color="#df1c1c")
+	
+
 	resources = Resources("inline")
 
 	plot_script, plot_div = components(img, resources)
 
 	html_script = mark_safe(encode_utf8(plot_script))
 	html_div = mark_safe(encode_utf8(plot_div))
-
-	hold()
 
 	figure()
 
@@ -210,6 +254,10 @@ def getNextGalaxy(id):
 def viewGalaxy(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
 
+	val = request.GET.get("value",34)
+
+	print str(val) + "-----"
+
 	next = getNextGalaxy(id)
 	previous = getPrevGalaxy(id)
 
@@ -225,12 +273,14 @@ def viewGalaxy(request, id):
 	#directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
 	#pdb.set_trace()
 	
-	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2])				
+	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val)				
 	
-	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3])
+	'''f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], val)
 
 	g1script, g1div = displayGImage(request, checked[0],checked_short[0])
-	g2script, g2div = displayGImage(request, checked[1],checked_short[1])
+	g2script, g2div = displayGImage(request, checked[1],checked_short[1])'''
+
+	
 
 	return render(request, 'viewGalaxy.html',locals())
 

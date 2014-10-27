@@ -13,6 +13,7 @@ urlpatterns = patterns('ds9s.views',
 	url(r'^/fits/$','viewHomeGalaxy'),
 	#url(r'^/fits/search/?$','search'),
 	url(r'^/fits/test/?$','test'),
+	url(r'^/fits/test/(?P<id>[0-9]+)/?$','test'),
 	url(r'^/fits/view/(?P<id>[0-9]+)/?$','viewGalaxy'),
 	url(r'^/fits/upload/','newParFile'),
 	#url(r'^/fits/zoom/(?P<id>[0-9]+)/?$','zoomFile')
