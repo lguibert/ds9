@@ -1,15 +1,12 @@
 $(document).ready(function(){
-	$("#scaling").change(function(){
-		if(!$.cookie("done")){
-			$("#valScaling").val($(this).val());
-			scaling($(this).val());	
-			$.cookie("done","true");
-		}		
+	$("#scaling").unbind().change(function(){
+		$("#valScaling").val($(this).val());
+		scaling($(this).val());			
 	});
 
-	/*$("#valScaling").on("change",function(){
+	$("#valScaling").on("change",function(){
 		$("#scaling").val($(this).val());
-	})*/
+	})
 
 	function getCookie(name) {
 	    var cookieValue = null;
@@ -39,9 +36,8 @@ $(document).ready(function(){
 		id = url.split("/")[6];
 
 		$.ajax({
-			url : "/ds9s/fits/view/"+id+"/?value="+val,
-			type: "GET",
-			data: {value:val},
+			url : "/ds9s/fits/test/"+id+"/"+val+"/",
+			type: "POST",
 		    beforeSend: function(xhr, settings) {
 		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
 		            xhr.setRequestHeader("X-CSRFToken", csrftoken);
@@ -49,7 +45,19 @@ $(document).ready(function(){
 		    }
 		    })
 			.success(function(data){
-		    	location.reload();
+				data = $.parseJSON(data)
+				var f110script = data[0];
+				var f110div = data[1];
+				var f160script = data[2];
+				var f160div = data[3];
+
+				$("#f110").html(f110div);
+				$("#f160140").html(f160div);
+				$("#scrF110").html(f110script);
+				$("#scrf160140").html(f160script);
+		    }).error(function(xhr, err){
+		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
+		    	alert("responseText: "+xhr.responseText);
 		    });
 
 

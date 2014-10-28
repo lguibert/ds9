@@ -3,6 +3,9 @@
 class = 'container-fuild'	
 {% endblock %}
 {% block content %}	
+	{% include "buttonsNextPrev.html" %}
+
+
 	<h1>Galaxy n°{{gal.uniq_id}}</h1>
 
 	<a class='btn btn-default' type='0' id='displayCatData'>See more</a>
@@ -23,8 +26,8 @@ class = 'container-fuild'
 		<form>
 			{% csrf_token %}
 			<label for="scaling">Scaling: </label>
-			<input type="number" value="50" name="valScaling" id="valScaling"/>
-			<input type="range" id="scaling" name="scaling" min="0" step="1" max=""/>
+			<input type="number" value="100" name="valScaling" id="valScaling"/>
+			<input type="range" id="scaling" name="scaling" min="0" step="1" max="300" value="100"/>
 		</form>
 	</div>
 	<div id="rootFiles" class="container-fluid">
@@ -67,29 +70,12 @@ class = 'container-fuild'
 		</div>
 	</div>
 
-	<div id="buttons">
-		{% if previous %}
-			<form action="/ds9s/fits/view/{{previous.uniq_id}}/" method="post">
-				 {% csrf_token %}
-				<input class="btn btn-default"  type="submit" value="Previous" />
-			</form>
-		{%else%}
-			<input class="btn btn-default"  disabled="disabled" type="button" value="Previous" />
-		{% endif %}	
-		<span>—</span>	
-		{%if next %}
-			<form action="/ds9s/fits/view/{{next.uniq_id}}/" method="post">
-				 {% csrf_token %}
-				<input class="btn btn-default"  type="submit" value="Next" />
-			</form>
-		{%else%}
-			<input class="btn btn-default"  disabled="disabled" type="button" value="Next" />
-		{% endif %}	
-	</div>
+	{% include "buttonsNextPrev.html" %}
+
 	{% block js %}
 	{{block.super}}
-		{{f110script}}
-		{{f160140script}}
+		<span id="scrF110">{{f110script}}</span>
+		<span id="scrf160140">{{f160140script}}</span>		
 		{{g1script}}
 		{{g2script}}
 		{%load static %}

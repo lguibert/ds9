@@ -307,3 +307,22 @@ def zoomFile(request, id):
                   <input type="submit" class="btn btn-default" value="Zoom"/>
             </form>
       </div>
+
+
+def remapPixelsLog(data):
+      datastat = imagestats.ImageStats(data,nclip=3)
+      minpex = datastat.mean
+      maxpex = datastat.mean + 15 * datastat.stddev
+
+      m = 1 / (np.log(maxpex) - np.log(minpex))
+      b = np.log(minpex) * -1 / (np.log(maxpex) - np.log(minpex))
+
+      data = np.log(data)
+      data = data * m + b
+
+      data[np.isnan(data)] = 0
+
+      data[data<0]=0
+      data[data>1]=1
+
+      return data

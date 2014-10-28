@@ -55,6 +55,8 @@ from bokeh.utils import encode_utf8
 
 import stsci.imagestats as imagestats
 
+import json
+
 
 #------------------ GLOBAL VARIABLES --------------------------------
 basePath = "/home/lguibert/test/"
@@ -100,8 +102,18 @@ def viewHomeGalaxy(request):
 
 	return render(request, 'homeGalaxy.html',locals())
 
-def test(request, id):
-	viewGalaxy(request, id)
+def test(request, id, val):
+	#pdb.set_trace()
+	gal = Galaxy.objects.get(uniq_id=id)
+
+	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
+
+	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val)
+	f160script, f160div = displayFImage(request, checked[3], gal, checked_short[3], val)
+
+	#return f110script, f110div, f160script, f160div
+	data = f110script, f110div, f160script, f160div
+	return HttpResponse(json.dumps(data))
 
 def displayFImage(request, file, gal, short_name, val):
 	val = int(val)
@@ -125,7 +137,7 @@ def displayFImage(request, file, gal, short_name, val):
 	iFocus = iData[xcen-val:xcen+val,ycen-val:ycen+val]
 
 
-	script, div = createBokehImage(iFocus, 700, 700,0,0,600,600,800,800, short_name)
+	script, div = createBokehImage(iFocus, 700, 700,0,0,600,600,800,800, short_name, xcen, ycen)
 
 	return script, div
 
@@ -165,28 +177,9 @@ def remapPixels(data, minpex=None, maxpex=None):
 
 	return data
 
-def remapPixelsLog(data):
-	datastat = imagestats.ImageStats(data,nclip=3)
-	minpex = datastat.mean
-	maxpex = datastat.mean + 15 * datastat.stddev
 
-	m = 1 / (np.log(maxpex) - np.log(minpex))
-	b = np.log(minpex) * -1 / (np.log(maxpex) - np.log(minpex))
-
-	data = np.log(data)
-	data = data * m + b
-
-	data[np.isnan(data)] = 0
-
-	data[data<0]=0
-	data[data>1]=1
-
-	return data
-
-
-
-def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_height, title):
-	TOOLS="pan,wheel_zoom,box_zoom,reset,resize"
+def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_height, title,xcircle=0, ycircle=0):
+	TOOLS="pan,wheel_zoom,box_zoom,reset"
 
 	data = remapPixels(data)
 
@@ -205,7 +198,11 @@ def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_heig
 	)
 
 	hold()
-	circle(x=10,y=10,radius=100,fill_color="#df1c1c",line_color="#df1c1c")
+	#circle(x=[10],y=10,radius=10,fill_color="#df1c1c",line_color="#df1c1c")
+	if xcircle != 0 and ycircle != 0:
+		annulus([xcircle],ycircle,9.9,10,line_color="#df1c1c")
+
+	#pdb.set_trace()
 	
 
 	resources = Resources("inline")
@@ -254,9 +251,7 @@ def getNextGalaxy(id):
 def viewGalaxy(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
 
-	val = request.GET.get("value",34)
-
-	print str(val) + "-----"
+	val = request.GET.get("value",100)
 
 	next = getNextGalaxy(id)
 	previous = getPrevGalaxy(id)
@@ -268,17 +263,17 @@ def viewGalaxy(request, id):
 	except ObjectDoesNotExist:
 		messages.info(request,'No analysis yet.')
 
-	checked, checked_short = checkAllFiles(gal.id, gal.parfolder.name_par)
+	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
 		
 	#directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
-	#pdb.set_trace()
+	
 	
 	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val)				
 	
-	'''f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], val)
+	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], val)
 
 	g1script, g1div = displayGImage(request, checked[0],checked_short[0])
-	g2script, g2div = displayGImage(request, checked[1],checked_short[1])'''
+	g2script, g2div = displayGImage(request, checked[1],checked_short[1])
 
 	
 
@@ -296,7 +291,7 @@ def checkAllFiles(gal_id, par_name):
 
 
 	filesToCheck = [g102,g141,f110w_f,f140w_f,f160w_f]
-	#filesToCheck = {'g102':g102,'g141':g141,'f110w':f110w_f,'f140':f140w_f,'f160w':f160w_f}
+
 	checked = []
 	checked_short = []
 	for f in filesToCheck:
@@ -321,7 +316,6 @@ def newParFile(request):
 			data = form.cleaned_data['name']
 			try:
 				if(int(data)): 
-	#if data is not int (name of the folder), we'll have a exception. So, in except we have the code for the name.
 					if(exists(basePath+"Par"+str(data)+"_final")):
 						uploaded = uploadParFile(request, "Par"+str(data)+"_final")
 						if uploaded:
@@ -362,12 +356,12 @@ def uploadParFile(request, name=None):
 
 				ids_final = checkFilesGtype(ids1,ids2)
 
-				#try:
-				addFileDatabase(ids_final, par.id, getTypeSecondFiles())
-				"""except:
+				try:
+					addFileDatabase(ids_final, par.id, getTypeSecondFiles())
+				except:
 					messages.error(request, u"Error during the saveing.")
 					par.delete()
-					return False;"""
+					return False;
 
 				messages.success(request, u"File saved in database.")
 				return True;
