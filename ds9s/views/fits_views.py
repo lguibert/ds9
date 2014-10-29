@@ -105,6 +105,7 @@ def viewHomeGalaxy(request):
 def test(request):
 	return render(request, 'test.html',locals())
 
+@login_required
 def scaling(request, id, val, color):
 	#pdb.set_trace()
 	gal = Galaxy.objects.get(uniq_id=id)
@@ -139,10 +140,19 @@ def displayFImage(request, file, gal, short_name, val, color="Greys-9"):
 
 	iFocus = iData[xcen-val:xcen+val,ycen-val:ycen+val]
 
-	xcircle = ((iFocus.shape[1]) - (xcen + val))
-	ycircle = ((iFocus.shape[0]) - (ycen + val)) 
+	iFsx = iFocus.shape[1]
+	iFsy = iFocus.shape[0]
+	if iFsx > val:
+		xcircle = iFsx - val 
+	else:
+		xcircle = iFsx + val 
 
-	script, div = createBokehImage(iFocus, 700, 700,0,0,iData.shape[1],iData.shape[0],800,800, short_name, xcen-val, ycen-val,color)
+	if iFsy > val:
+		ycircle = iFsy - val 
+	else:
+		ycircle = iFsy + val 
+
+	script, div = createBokehImage(iFocus, 800, 800,0,0,800,800,800,800, short_name, xcen, ycen,color, val)
 
 	return script, div
 
@@ -183,8 +193,11 @@ def remapPixels(data, minpex=None, maxpex=None):
 	return data
 
 
-def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_height, title,xcircle=0, ycircle=0,color="Greys-9"):
+def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_height, title,xcircle=0, ycircle=0,color="Greys-9",val=100):
 	TOOLS="pan,wheel_zoom,box_zoom,reset"
+
+	xPixVal = (x_range / dw)
+	yPixVal = (y_range / dh) 
 
 	data = remapPixels(data)
 
@@ -196,7 +209,7 @@ def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_heig
 		dw=dw,
 		dh=dh,
 		tools=TOOLS,
-		palette=[""+color+""],
+		palette=[color],
 		title=title,
 		plot_width=plot_width,
 		plot_height=plot_height,
@@ -205,7 +218,7 @@ def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_heig
 	hold()
 	#circle(x=[10],y=10,radius=10,fill_color="#df1c1c",line_color="#df1c1c")
 	if xcircle != 0 and ycircle != 0:
-		annulus([xcircle],ycircle,9.9,10,line_color="#df1c1c")
+		annulus([xcircle*xPixVal],ycircle*yPixVal,9.9,10,fill_color="#df1c1c", line_color="#df1c1c")
 
 	#pdb.set_trace()
 	
