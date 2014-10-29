@@ -143,3 +143,17 @@ div[class='bk-sidebar'] a[class='bk-logo bk-logo-small']{
 .auto{
 	margin: auto;
 }
+
+#colors{
+	width: auto;
+	display:inline-block;
+	margin-left: 20px;
+}
+
+#default{
+	margin-left: 20px;
+}
+
+#scaling{
+	margin-top: 10px;
+}

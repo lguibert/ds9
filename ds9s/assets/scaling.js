@@ -1,11 +1,12 @@
 $(document).ready(function(){
 	$("#scaling").unbind().change(function(){
 		$("#valScaling").val($(this).val());
-		scaling($(this).val());			
+		scaling($(this).val(), $("#colors").val());			
 	});
 
-	$("#valScaling").on("change",function(){
+	$("#valScaling").unbind().change(function(){
 		$("#scaling").val($(this).val());
+		scaling($(this).val(), $("#colors").val());	
 	})
 
 	function getCookie(name) {
@@ -29,14 +30,14 @@ $(document).ready(function(){
 	}
 
 
-	function scaling(val){
+	function scaling(val,color){
 		var csrftoken = getCookie('csrftoken');
 
 		url = document.location.href;
 		id = url.split("/")[6];
 
 		$.ajax({
-			url : "/ds9s/fits/test/"+id+"/"+val+"/",
+			url : "/ds9s/fits/scaling/"+id+"/"+val+"/"+color+"/",
 			type: "POST",
 		    beforeSend: function(xhr, settings) {
 		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -59,12 +60,22 @@ $(document).ready(function(){
 		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
 		    	alert("responseText: "+xhr.responseText);
 		    });
-
-
-
 	}
 
-	
+	$("#colors").unbind().change(function(){
+		scaling($("#scaling").val(), $(this).val());	
+	})
+
+	$("#default").unbind().click(function(){
+		if($("#scaling").val() != 100 || $("#colors").val() != "Greys-9"){
+			$("#scaling").val("100");
+			$("#valScaling").val("100");
+			$("#colors option[value='Greys-9']").attr("selected",true);
+			scaling($("#scaling").val(), $("#colors").val());
+		}else{
+			alert("Values already at default value");
+		}
+	})
 
 
 });

@@ -1,0 +1,112 @@
+{
+	"colors":[
+		{
+			"name":"Blues",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"BrBG",
+			"values": [3,4,5,6,7,8,9,10,11]
+		},
+		{
+			"name":"BuGn",
+			"values" : [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"BuPu",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"GnBu",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"Greens",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"Greys",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"OrRd",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"Oranges",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"PRGn",
+			"values": [3,4,5,6,7,8,9,10,11]
+		},
+		{
+			"name":"PiYG",
+			"values": [3,4,5,6,7,8,9,10,11]
+		},
+		{
+			"name":"PuBu",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"PuBuGn",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"PuOr",
+			"values": [3,4,5,6,7,8,9,10,11]
+		},
+		{
+			"name":"PuRd",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"Purples",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"RdBu",
+			"values": [3,4,5,6,7,8,9,10,11]
+		},
+		{
+			"name":"RdGy",
+			"values": [3,4,5,6,7,8,9,10,11]
+		},
+		{
+			"name":"RdPu",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"RdYlBu",
+			"values": [3,4,5,6,7,8,9,10,11]
+		},
+		{
+			"name":"RdYlGn",
+			"values": [3,4,5,6,7,8,9,10,11]
+		},
+		{
+			"name":"Reds",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"Spectral",
+			"values": [3,4,5,6,7,8,9,10,11]
+		},
+		{
+			"name":"YlGn",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"YlGnBu",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"YlOrBr",
+			"values": [3,4,5,6,7,8,9]
+		},
+		{
+			"name":"YlOrRd",
+			"values": [3,4,5,6,7,8,9]
+		}
+	]
+}

@@ -102,20 +102,23 @@ def viewHomeGalaxy(request):
 
 	return render(request, 'homeGalaxy.html',locals())
 
-def test(request, id, val):
+def test(request):
+	return render(request, 'test.html',locals())
+
+def scaling(request, id, val, color):
 	#pdb.set_trace()
 	gal = Galaxy.objects.get(uniq_id=id)
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
 
-	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val)
-	f160script, f160div = displayFImage(request, checked[3], gal, checked_short[3], val)
+	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val, color)
+	f160script, f160div = displayFImage(request, checked[3], gal, checked_short[3], val, color)
 
 	#return f110script, f110div, f160script, f160div
 	data = f110script, f110div, f160script, f160div
 	return HttpResponse(json.dumps(data))
 
-def displayFImage(request, file, gal, short_name, val):
+def displayFImage(request, file, gal, short_name, val, color="Greys-9"):
 	val = int(val)
 	features = GalaxyFeatures.objects.filter(galaxy_id=gal.id).order_by('galaxyfields_id')
 	raCenter = float(features[0].value)
@@ -136,8 +139,10 @@ def displayFImage(request, file, gal, short_name, val):
 
 	iFocus = iData[xcen-val:xcen+val,ycen-val:ycen+val]
 
+	xcircle = ((iFocus.shape[1]) - (xcen + val))
+	ycircle = ((iFocus.shape[0]) - (ycen + val)) 
 
-	script, div = createBokehImage(iFocus, 700, 700,0,0,600,600,800,800, short_name, xcen, ycen)
+	script, div = createBokehImage(iFocus, 700, 700,0,0,iData.shape[1],iData.shape[0],800,800, short_name, xcen-val, ycen-val,color)
 
 	return script, div
 
@@ -178,7 +183,7 @@ def remapPixels(data, minpex=None, maxpex=None):
 	return data
 
 
-def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_height, title,xcircle=0, ycircle=0):
+def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_height, title,xcircle=0, ycircle=0,color="Greys-9"):
 	TOOLS="pan,wheel_zoom,box_zoom,reset"
 
 	data = remapPixels(data)
@@ -191,7 +196,7 @@ def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_heig
 		dw=dw,
 		dh=dh,
 		tools=TOOLS,
-		palette=["Greys-9"],
+		palette=[""+color+""],
 		title=title,
 		plot_width=plot_width,
 		plot_height=plot_height,
@@ -247,9 +252,13 @@ def getNextGalaxy(id):
 
 	return next
 
+def getColors():
+	return json.load(open('/opt/lampp/www/ds9/ds9s/assets/colors.json'))
+
 @login_required
 def viewGalaxy(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
+	colors = getColors()
 
 	val = request.GET.get("value",100)
 
