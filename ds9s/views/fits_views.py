@@ -52,6 +52,8 @@ from bokeh.embed import components
 from bokeh.resources import Resources
 from bokeh.templates import RESOURCES
 from bokeh.utils import encode_utf8
+from bokeh.objects import HoverTool
+from collections import OrderedDict
 
 import stsci.imagestats as imagestats
 
@@ -105,6 +107,18 @@ def viewHomeGalaxy(request):
 def test(request):
 	return render(request, 'test.html',locals())
 
+def wavelenghing(request, id, redshift):
+	gal = Galaxy.objects.get(uniq_id=id)
+
+	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
+
+	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshift)
+	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshift)
+
+	#return f110script, f110div, f160script, f160div
+	data = g1script, g1div, g2script, g2div
+	return HttpResponse(json.dumps(data))
+
 @login_required
 def scaling(request, id, val, color):
 	#pdb.set_trace()
@@ -138,25 +152,16 @@ def displayFImage(request, file, gal, short_name, val, color="Greys-9"):
 	xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
 	ycen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*sin(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*1.*cos(pi*fieldRotation/180.)+y0 # OK, this transformation seems to get closest
 
-	iFocus = iData[xcen-val:xcen+val,ycen-val:ycen+val]
+	iFocusBoundaries=imSubarrayBoundaries(iData.shape,xcen,ycen,val)
+	# make the subarray with the new boundaries
+	#iFocus = iData[xcen-val:xcen+val,ycen-val:ycen+val]
+	iFocus = iData[iFocusBoundaries[0]:iFocusBoundaries[1],iFocusBoundaries[2]:iFocusBoundaries[3]]
 
-	iFsx = iFocus.shape[1]
-	iFsy = iFocus.shape[0]
-	if iFsx > val:
-		xcircle = iFsx - val 
-	else:
-		xcircle = iFsx + val 
-
-	if iFsy > val:
-		ycircle = iFsy - val 
-	else:
-		ycircle = iFsy + val 
-
-	script, div = createBokehImage(iFocus, 800, 800,0,0,800,800,800,800, short_name, xcen, ycen,color, val)
+	script, div = createBokehImage(iFocus,iFocusBoundaries,800,800, short_name, xcircle=xcen, ycircle=ycen, color=color, val=val)
 
 	return script, div
 
-def displayGImage(request, file, short_name):
+def displayGImage(request, file, short_name, redshift):
 	inFits=pyfits.open(file)
 	iHdr=inFits[1].header
 	iData=inFits[1].data
@@ -171,7 +176,9 @@ def displayGImage(request, file, short_name):
 	xDispSize=6.0
 	yDispSize=xDispSize*float(npixy)/float(npixx)
 
-	script, div = createBokehImage(iData, 1000, 50,0,0,1000,20,865,300,short_name)
+	dataBoundaries = grismBoundaries([iData.shape[0],iData.shape[1]],iHdr)
+
+	script, div = createBokehImage(iData, dataBoundaries,865,300,short_name, type=False,redshift=redshift)
 
 	return script, div
 
@@ -192,37 +199,68 @@ def remapPixels(data, minpex=None, maxpex=None):
 
 	return data
 
+def imSubarrayBoundaries(fullImageDataShape,xCenter,yCenter,halfSize):
+	#fullImageDataShape is the iData.shape
+	#xCenter is the x-coordinate of the relevant galaxy/star in the full image
+	#yCenter is the x-coordinate of the relevant galaxy/star in the full image
+	#halfSize is the val set by the slider and equivalent to half the size
+	xCenter, yCenter, halfSize = int(xCenter), int(yCenter), int(halfSize)
+	subArrayLeft,subArrayRight,subArrayBottom,subArrayTop = xCenter - halfSize, xCenter + halfSize, yCenter - halfSize, yCenter + halfSize 
+	if subArrayLeft < 0: 
+		subArrayLeft = 0
+	if subArrayRight >= fullImageDataShape[1] - 1:
+		 subArrayRight = fullImageDataShape[1] - 1
+	if subArrayBottom < 0:
+		subArrayBottom = 0
+	if subArrayTop >=  fullImageDataShape[0] - 1:
+		subArrayTop = fullImageDataShape[0] - 1
+	#return (subArrayLeft,subArrayRight,subArrayBottom,subArrayTop)
+	return (subArrayBottom,subArrayTop,subArrayLeft,subArrayRight)
 
-def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_height, title,xcircle=0, ycircle=0,color="Greys-9",val=100):
+def grismBoundaries(grismStampShape,grismStampHeader):
+    # given the shape of the array and the fits header, calculate the minimum and maximum wavelengths and the vertical scale in arcseconds
+    iHdr = grismStampHeader
+    x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
+    y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
+    npixx,npixy=grismStampShape[1],grismStampShape[0] # get the number of pixels in each direction
+    l1,l2,y1,y2 = l0-(x0)*dl, l0+(float(npixx)-x0)*dl, a0-(y0)*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
+    return (l1,l2,y1,y2) # again, we will use these as the coordinate boundaries for the plots.
+
+
+
+def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=True, redshift=0 ,xcircle=0, ycircle=0, color="Greys-9",val=100):
 	TOOLS="pan,wheel_zoom,box_zoom,reset"
-
-	xPixVal = (x_range / dw)
-	yPixVal = (y_range / dh) 
 
 	data = remapPixels(data)
 
 	img = image(image=[data], 
-		x_range=[0, x_range], 
-		y_range=[0, y_range], 
-		x=x, 
-		y=y, 
-		dw=dw,
-		dh=dh,
+		x_range=[dataBoundaries[0], dataBoundaries[1]], # range of x-values in the Display
+		y_range=[dataBoundaries[2], dataBoundaries[3]], # range of y-values in the Display
+		x=dataBoundaries[0], # x-coordinate of Origin of display 
+		y=dataBoundaries[2], # y-coordinate of Origin of display
+		dw=dataBoundaries[1]-dataBoundaries[0], # number of image pixels in x-range of display
+		dh=dataBoundaries[3]-dataBoundaries[2], # number of image pixels in y-range of display
 		tools=TOOLS,
 		palette=[color],
 		title=title,
-		plot_width=plot_width,
-		plot_height=plot_height,
+		plot_width=plot_width, # size of the diplay in Screen Pixels
+		plot_height=plot_height, # size of the display in Screen pixels
 	)
 
 	hold()
-	#circle(x=[10],y=10,radius=10,fill_color="#df1c1c",line_color="#df1c1c")
-	if xcircle != 0 and ycircle != 0:
-		annulus([xcircle*xPixVal],ycircle*yPixVal,9.9,10,fill_color="#df1c1c", line_color="#df1c1c")
-
-	#pdb.set_trace()
-	
-
+	if type:
+		annulus([ycircle],xcircle,9.9,10,fill_color="#df1c1c", line_color="#df1c1c")
+	else:
+		y = [-2,2]
+		#creation emition lines
+		emlineWavelengthsRest = np.array([3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.])
+		emlineNames = np.array(["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"]) # Can be used to label the vertical lines
+		
+		for index, em in enumerate(emlineWavelengthsRest):
+			emlineWavelengths = em * (1.0 + float(redshift))
+			lin = line([emlineWavelengths,emlineWavelengths],y,color="#df1c1c",line_width=2)
+			text([emlineWavelengths+20],calculatePositionText(index),emlineNames[index],0,text_color="#df1c1c")	
+			
 	resources = Resources("inline")
 
 	plot_script, plot_div = components(img, resources)
@@ -233,6 +271,12 @@ def createBokehImage(data, x_range, y_range, x, y, dw, dh, plot_width, plot_heig
 	figure()
 
 	return html_script, html_div
+
+def calculatePositionText(value):
+	value = float(value)/5 + 0.5
+	if value > 1.0:
+		value = value - 1
+	return value
 
 def getPrevGalaxy(id):
 	previous = None
@@ -273,7 +317,8 @@ def viewGalaxy(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
 	colors = getColors()
 
-	val = request.GET.get("value",100)
+	val = 100
+	redshift = 0
 
 	next = getNextGalaxy(id)
 	previous = getPrevGalaxy(id)
@@ -294,8 +339,8 @@ def viewGalaxy(request, id):
 	
 	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], val)
 
-	g1script, g1div = displayGImage(request, checked[0],checked_short[0])
-	g2script, g2div = displayGImage(request, checked[1],checked_short[1])
+	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshift)
+	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshift)
 
 	
 

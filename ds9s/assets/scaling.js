@@ -1,4 +1,8 @@
 $(document).ready(function(){
+	$(".unsubmitable").submit(function(e){
+		return false;
+	});
+
 	$("#scaling").unbind().change(function(){
 		$("#valScaling").val($(this).val());
 		scaling($(this).val(), $("#colors").val());			
@@ -7,7 +11,7 @@ $(document).ready(function(){
 	$("#valScaling").unbind().change(function(){
 		$("#scaling").val($(this).val());
 		scaling($(this).val(), $("#colors").val());	
-	})
+	});
 
 	function getCookie(name) {
 	    var cookieValue = null;
@@ -76,6 +80,58 @@ $(document).ready(function(){
 			alert("Values already at default value");
 		}
 	})
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+
+	$("#wavelengh").unbind().change(function(){
+		$("#valWavelengh").val($(this).val());
+		wavelenghing($(this).val());			
+	});
+
+	$("#valWavelengh").unbind().change(function(){
+		$("#wavelengh").val($(this).val());
+		wavelenghing($(this).val());	
+	});
+
+	function wavelenghing(redshift){
+		var csrftoken = getCookie('csrftoken');
+
+		url = document.location.href;
+		id = url.split("/")[6];
+
+		$.ajax({
+			url : "/ds9s/fits/wavelenghing/"+id+"/"+redshift+"/",
+			type: "POST",
+		    beforeSend: function(xhr, settings) {
+		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+		            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+		        }
+		    }
+		    })
+			.success(function(data){
+				data = $.parseJSON(data)
+				var g1script = data[0];
+				var g1div = data[1];
+				var g2script = data[2];
+				var g2div = data[3];
+
+				$("#g102").html(g1div);
+				$("#g141").html(g2div);
+				$("#scrG102").html(g1script);
+				$("#scrG141").html(g2script);
+		    }).error(function(xhr, err){
+		    	alert("responseText: "+xhr.responseText);
+		    });
+	}
+
+
+
 
 
 });
+
+

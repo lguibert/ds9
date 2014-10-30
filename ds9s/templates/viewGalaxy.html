@@ -22,23 +22,23 @@ class = 'container-fuild'
 			{% endfor %}
 		</div>	
 	</div>	
-	<div id="scaled">
-		<form>
-			{% csrf_token %}
-			<label for="scaling">Scaling: </label>
-			<input type="number" min="1" value="100" name="valScaling" id="valScaling"/>
-			<select class="form-control" name="colors" id="colors">
-				{% for d in colors.colors %}
-					{% for val in d.values%}
-						<option value="{{d.name}}-{{val}}" {% if d.name == "Greys" and val == 9 %}selected{%endif%}>{{d.name}} - {{val}}</option>	
-					{% endfor %}
-				{% endfor %}
-			</select>
-			<a id="default" class="btn btn-default">Default values</a>
-			<input type="range" id="scaling" name="scaling" min="1" step="1" max="300" value="100"/>
-		</form>
-	</div>
 	<div id="rootFiles" class="container-fluid">
+		<div id="scaled">
+			<form class="unsubmitable">
+				{% csrf_token %}
+				<label for="scaling">Scaling: </label>
+				<input type="number" min="1" value="100" name="valScaling" id="valScaling"/>
+				<select class="form-control" name="colors" id="colors">
+					{% for d in colors.colors %}
+						{% for val in d.values%}
+							<option value="{{d.name}}-{{val}}" {% if d.name == "Greys" and val == 9 %}selected{%endif%}>{{d.name}} - {{val}}</option>	
+						{% endfor %}
+					{% endfor %}
+				</select>
+				<a id="default" class="btn btn-default">Default values</a>
+				<input type="range" id="scaling" name="scaling" min="1" step="1" max="300" value="100"/>
+			</form>
+		</div>
 		<div id="fFiles">
 			<div contenteditable="false" class="row auto">
 				<div id="f110" class='col-xs-6 col-md-6'>
@@ -57,6 +57,14 @@ class = 'container-fuild'
 					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
 				</div>
 			</div>
+		</div>
+		<div id="wavelenghed">
+			<form class="unsubmitable">
+				{% csrf_token %}
+				<label for="wavelengh">Wavelengh change: </label>
+				<input type="number" min="0" step="0.01" max="3" name="valWavelengh" id="valWavelengh"/>
+				<input type="range" id="wavelengh" name="wavelengh" min="0" step="0.01" max="3"/>
+			</form>
 		</div>
 		<div id="gFiles">
 			<div contenteditable="false" class="row auto">
@@ -84,8 +92,8 @@ class = 'container-fuild'
 	{{block.super}}
 		<span id="scrF110">{{f110script}}</span>
 		<span id="scrf160140">{{f160140script}}</span>		
-		{{g1script}}
-		{{g2script}}
+		<span id="scrG102">{{g1script}}</span>
+		<span id="scrG141">{{g2script}}</span>
 		{%load static %}
 		<script type="text/javascript" src='{% static "scaling.js" %}'></script>
   		<script type="text/javascript" src='{% static "coordonatePictures.js" %}'></script>
