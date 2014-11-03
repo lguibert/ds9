@@ -107,8 +107,9 @@ def viewHomeGalaxy(request):
 def test(request):
 	return render(request, 'test.html',locals())
 
+@login_required
 def wavelenghing(request, id, redshift):
-	gal = Galaxy.objects.get(uniq_id=id)
+	gal = get_object_or_404(Galaxy, uniq_id=id)
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
 
@@ -122,7 +123,7 @@ def wavelenghing(request, id, redshift):
 @login_required
 def scaling(request, id, val, color):
 	#pdb.set_trace()
-	gal = Galaxy.objects.get(uniq_id=id)
+	gal = get_object_or_404(Galaxy, uniq_id=id)
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
 

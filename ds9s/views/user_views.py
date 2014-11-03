@@ -85,42 +85,34 @@ def updateUser(request, pk):
 
 
 def connect(request):
-	next = ''
+	if not request.user.is_authenticated():
+		next = ''
 
-	if request.GET:
-		next = request.GET['next']
+		if request.GET:
+			next = request.GET['next']
 
-	if request.method == 'POST':
-		to = request.POST.get('next')
-		form = ConnectForm(request.POST)
-		if form.is_valid():	
-			username = form.cleaned_data['username']
-			password = form.cleaned_data['password']
-			user = authenticate(username=username, password=password)
-			if user:
-				login(request, user)
-				if next == '':
-					return HttpResponseRedirect("/ds9s/")
+		if request.method == 'POST':
+			to = request.POST.get('next')
+			form = ConnectForm(request.POST)
+			if form.is_valid():	
+				username = form.cleaned_data['username']
+				password = form.cleaned_data['password']
+				user = authenticate(username=username, password=password)
+				if user:
+					login(request, user)
+					if next == '':
+						return HttpResponseRedirect("/ds9s/")
+					else:
+						return HttpResponseRedirect(next)		
 				else:
-					return HttpResponseRedirect(next)		
-			else:
-				messages.error(request, u"Bad password or the user doesn't exist")				
-	else:
-		form = ConnectForm()
+					messages.error(request, u"Bad password or the user doesn't exist")				
+		else:
+			form = ConnectForm()
 
-	return render(request,'connect.html',locals())
+		return render(request,'connect.html',locals())
+	else:
+		return redirect('/ds9s/account/')
 
 def deconnect(request):
 	logout(request)
 	return redirect('/ds9s/')
-
-
-
-'''
-class ViewHome(ListView):
-	model = User
-	context_object_name = "users"
-	template_name = "home.html"
-	#paginate_by = 1
-	#queryset = Users.objects.filter(role_id=1) #{can add some filter with queryset}
-'''
