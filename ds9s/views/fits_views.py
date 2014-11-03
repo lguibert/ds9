@@ -104,6 +104,7 @@ def viewHomeGalaxy(request):
 
 	return render(request, 'homeGalaxy.html',locals())
 
+@login_required
 def test(request):
 	return render(request, 'test.html',locals())
 
@@ -254,13 +255,14 @@ def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=
 	else:
 		y = [-2,2]
 		#creation emition lines
-		emlineWavelengthsRest = np.array([3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.])
-		emlineNames = np.array(["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"]) # Can be used to label the vertical lines
-		
+		emlineWavelengthsRest = [3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.]
+		emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"] # Can be used to label the vertical lines
+		colors = ["indianred","steelblue","pink","lightseagreen","cornflowerblue","darkseagreen","darkorchid","lightgoldenrodyellow","palevioletred","yellowgreen"]
+
 		for index, em in enumerate(emlineWavelengthsRest):
 			emlineWavelengths = em * (1.0 + float(redshift))
-			lin = line([emlineWavelengths,emlineWavelengths],y,color="#df1c1c",line_width=2)
-			text([emlineWavelengths+20],calculatePositionText(index),emlineNames[index],0,text_color="#df1c1c")	
+			lin = line([emlineWavelengths,emlineWavelengths],y,color=colors[index],line_width=2)
+			text([emlineWavelengths+20],calculatePositionText(index),emlineNames[index],0,text_color=colors[index])	
 			
 	resources = Resources("inline")
 
@@ -377,6 +379,7 @@ def checkAllFiles(gal_id, par_name):
 	return checked, checked_short
 
 @login_required
+@permission_required("ds9s.add_parfolder", login_url="/ds9s/")
 def newParFile(request):
 	if request.method == 'POST':
 		form = NewParFileForm(request.POST)
