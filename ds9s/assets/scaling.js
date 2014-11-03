@@ -60,10 +60,10 @@ $(document).ready(function(){
 				$("#f160140").html(f160div);
 				$("#scrF110").html(f110script);
 				$("#scrf160140").html(f160script);
-		    }).error(function(xhr, err){
+		    });/*.error(function(xhr, err){
 		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
 		    	alert("responseText: "+xhr.responseText);
-		    });
+		    });*/
 	}
 
 	$("#colors").unbind().change(function(){
@@ -123,8 +123,6 @@ $(document).ready(function(){
 				$("#g141").html(g2div);
 				$("#scrG102").html(g1script);
 				$("#scrG141").html(g2script);
-		    }).error(function(xhr, err){
-		    	alert("responseText: "+xhr.responseText);
 		    });
 	}
 

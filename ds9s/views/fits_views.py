@@ -114,6 +114,11 @@ def wavelenghing(request, id, redshift):
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
 
+	if float(redshift) < 0 :
+		redshift = 0
+	if float(redshift) > 3.:
+		redshift = 3
+
 	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshift)
 	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshift)
 
@@ -125,8 +130,15 @@ def wavelenghing(request, id, redshift):
 def scaling(request, id, val, color):
 	#pdb.set_trace()
 	gal = get_object_or_404(Galaxy, uniq_id=id)
+	colors = getColorsNames()
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
+
+	if int(val) < 1:
+		val = 1
+	if int(val) > 300:
+		val = 300
+
 
 	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val, color)
 	f160script, f160div = displayFImage(request, checked[3], gal, checked_short[3], val, color)
@@ -314,6 +326,15 @@ def getNextGalaxy(id):
 
 def getColors():
 	return json.load(open('/opt/lampp/www/ds9/ds9s/assets/colors.json'))
+
+def getColorsNames():
+	colors = getColors()
+	names = []
+
+	for color in colors["colors"]:
+		names.append(color["name"])
+
+	return names
 
 @login_required
 def viewGalaxy(request, id):
