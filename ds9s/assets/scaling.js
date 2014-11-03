@@ -87,13 +87,15 @@ $(document).ready(function(){
 // --------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------
 
-	$("#wavelengh").unbind().change(function(){
-		$("#valWavelengh").val($(this).val());
+	$(".wavelengh").unbind().change(function(){
+		$(".valWavelengh").val($(this).val());
+		$(".wavelengh").val($(this).val());
 		wavelenghing($(this).val());			
 	});
 
-	$("#valWavelengh").unbind().change(function(){
-		$("#wavelengh").val($(this).val());
+	$(".valWavelengh").unbind().change(function(){
+		$(".wavelengh").val($(this).val());
+		$(".valWavelengh").val($(this).val());
 		wavelenghing($(this).val());	
 	});
 
@@ -118,15 +120,36 @@ $(document).ready(function(){
 				var g1div = data[1];
 				var g2script = data[2];
 				var g2div = data[3];
+				var srcDat102 = data[4];
+				var divDat102 = data[5];
+				var srcDat141 = data[6];
+				var divDat141 = data[7];
 
 				$("#g102").html(g1div);
 				$("#g141").html(g2div);
+				$("#datG102").html(divDat102);
+				$("#dat141").html(divDat141);
+
+
 				$("#scrG102").html(g1script);
 				$("#scrG141").html(g2script);
+				$("#scrG102Dat").html(srcDat102);
+				$("#scrG141Dat").html(srcDat141);
+		    }).error(function(xhr, err){
+		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
+		    	alert("responseText: "+xhr.responseText);
 		    });
 	}
 
-
+	$(".defaultWave").unbind().click(function(){
+		if($(".valWavelengh").val() != 1.5 || $(".wavelengh").val() != 1.5){
+			$(".valWavelengh").val("1.5");
+			$(".wavelengh").val("1.5");
+			wavelenghing($(".wavelengh").val());
+		}else{
+			alert("Value already at default value");
+		}
+	})
 
 
 

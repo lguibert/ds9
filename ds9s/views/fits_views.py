@@ -73,15 +73,25 @@ expression2 = r"^aXeWFC3_G141_mef_ID([0-9]+).fits$"
 f110w = "F110W_rot_drz.fits"
 f160w = "F160W_rot_drz.fits"
 f140w = "F140W_rot_drz.fits"
+
+datFolder = "/Spectra/"
+minG102 = 7900.
+maxG102 = 11700.
+minG141 = 11000.
+maxG141 = 17500.
+
+TOOLS="pan,wheel_zoom,box_zoom,reset"
+
+#            [O II]      [Ne III] Hbeta       [O III]        [O III]      Halpha     [S II]     [S III]               [S III]       He I
+colors = ["indianred","steelblue","pink","lightseagreen","lightseagreen","darkred","darkorchid","palevioletred","palevioletred","yellowgreen"]
 #--------------------------------------------------------------------
 
 
-class ViewHomeFits(ListView):
-	model = Galaxy
-	context_object_name = "galaxys"
-	template_name = "homeGalaxy.html"
-	queryset = Galaxy.objects.values('uniq_id').order_by('uniq_id')
-	paginate_by = 15
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------ VIEW DISPLAY ----------------------------------------------
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
 
 def viewHomeGalaxy(request):
 	galaxy_list = Galaxy.objects.values('uniq_id','id').order_by('uniq_id')
@@ -109,10 +119,118 @@ def test(request):
 	return render(request, 'test.html',locals())
 
 @login_required
+def viewGalaxy(request, id):
+	gal = get_object_or_404(Galaxy, uniq_id=id)
+	colors = getColors()
+
+	val = 100
+	redshift = 0
+
+	next = getNextGalaxy(id)
+	previous = getPrevGalaxy(id)
+
+	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
+
+	try:
+		analysis = Analysis.objects.filter(user_id=request.user, galaxy_id=gal.id)
+	except ObjectDoesNotExist:
+		messages.info(request,'No analysis yet.')
+
+	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
+		
+	#directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
+
+	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val)				
+	
+	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], val)
+
+	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshift)
+	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshift)
+
+	g102DatScript, g102DatDiv = plot1DSpectrum(checked[4],minG102,maxG102,"G102 dat")
+	g141DatScript, g141DatDiv = plot1DSpectrum(checked[5],minG141,maxG141,"G141 dat")
+
+	
+
+	return render(request, 'viewGalaxy.html',locals())
+
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------ IMAGE DISPLAY ---------------------------------------------
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
+
+def read1DSpectrum(pathToASCIISpectrum,minWavelength=None,maxWavelength=None):
+    # The ASCII-format 1D spectrum files are found in the Spectrum/ subdirectory of the data
+    # If a minimum or maximum wavelength are specified, the spectra will be trimmed
+    spectrumData = np.genfromtxt(pathToASCIISpectrum,dtype=np.float64) # Read in the data from file
+    spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumData[0:,0],spectrumData[0:,1],spectrumData[0:,2],spectrumData[0:,3],spectrumData[0:,4]
+    # Filter out NaNs which will cause the plotting functions to fail
+    filter1 = np.logical_or(np.isnan(spectrumWavelengths),np.isnan(spectrumFluxes)) # an element evaluates to true if either is NaN
+    filter2 = np.logical_or(np.isnan(spectrumUncertainties),np.isnan(spectrumContamination)) # an element evaluates to true if either is NaN
+    filter3 = np.logical_not(np.logical_or(filter1,filter2))
+    # apply the filter
+    spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
+    # If minimum or maximum wavelengths are specified, trim spectra accordingly
+    if minWavelength:
+        filter3 = spectrumWavelengths >= minWavelength
+        spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
+    if maxWavelength:
+        filter3 = spectrumWavelengths <= maxWavelength
+        spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
+    return spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders
+
+def plot1DSpectrum(pathToFile,minWavelength, maxWavelength,title,redshift=1.5):
+    # Separately read in the G102 and G141 spectra
+    wl,f,u,c,z = read1DSpectrum(pathToFile, minWavelength, maxWavelength)
+    
+    wlmax = max(wl)
+    wlmin = min(wl)
+    cmax = max(c)
+    cmin = min(c)
+    fmax = max(f)
+    fmin = min(f)
+    xplus = 100
+    yplus = 0.00000000000000001
+
+    mul = multi_line(xs=[wl,wl],
+    	ys=[f,c],
+    	color=["black","red"],
+    	x_range=[wlmin-xplus,wlmax+xplus],
+    	y_range=[cmin-yplus,fmax+yplus],
+    	line_width=2,
+    	tools=TOOLS,
+    	plot_width=800,
+    	plot_height=800,
+    	title=title,
+    )
+
+    hold()
+
+    emlineWavelengthsRest = [3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.]
+    emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"]
+
+    for index, em in enumerate(emlineWavelengthsRest):
+    	emlineWavelengths = em * (1.0 + float(redshift))
+    	lin = line([emlineWavelengths,emlineWavelengths],[cmin,fmax],color=colors[index],line_width=2)
+    	text([emlineWavelengths],(fmax+(index*0.00000000000000002))/2,emlineNames[index],0,text_color=colors[index])	
+
+    resources = Resources("inline")
+
+    plot_script, plot_div = components(mul, resources)
+
+    html_script = mark_safe(encode_utf8(plot_script))
+    html_div = mark_safe(encode_utf8(plot_div))
+
+    figure()
+
+    return html_script, html_div
+
+@login_required
 def wavelenghing(request, id, redshift):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
 
-	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
+	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
 
 	if float(redshift) < 0 :
 		redshift = 0
@@ -121,9 +239,11 @@ def wavelenghing(request, id, redshift):
 
 	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshift)
 	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshift)
+	g102script, g102div = plot1DSpectrum(checked[4],minG102,maxG102,"G102 dat",redshift)
+	g141script, g141div = plot1DSpectrum(checked[5],minG141,maxG141,"G141 dat",redshift)
 
 	#return f110script, f110div, f160script, f160div
-	data = g1script, g1div, g2script, g2div
+	data = g1script, g1div, g2script, g2div, g102script, g102div, g141script, g141div
 	return HttpResponse(json.dumps(data))
 
 @login_required
@@ -132,7 +252,7 @@ def scaling(request, id, val, color):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
 	colors = getColorsNames()
 
-	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
+	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.folderId_par)
 
 	if int(val) < 1:
 		val = 1
@@ -243,8 +363,6 @@ def grismBoundaries(grismStampShape,grismStampHeader):
 
 
 def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=True, redshift=0 ,xcircle=0, ycircle=0, color="Greys-9",val=100):
-	TOOLS="pan,wheel_zoom,box_zoom,reset"
-
 	data = remapPixels(data)
 
 	img = image(image=[data], 
@@ -269,7 +387,6 @@ def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=
 		#creation emition lines
 		emlineWavelengthsRest = [3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.]
 		emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"] # Can be used to label the vertical lines
-		colors = ["indianred","steelblue","pink","lightseagreen","cornflowerblue","darkseagreen","darkorchid","lightgoldenrodyellow","palevioletred","yellowgreen"]
 
 		for index, em in enumerate(emlineWavelengthsRest):
 			emlineWavelengths = em * (1.0 + float(redshift))
@@ -336,41 +453,13 @@ def getColorsNames():
 
 	return names
 
-@login_required
-def viewGalaxy(request, id):
-	gal = get_object_or_404(Galaxy, uniq_id=id)
-	colors = getColors()
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------- PAR FILE -------------------------------------------------
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
 
-	val = 100
-	redshift = 0
-
-	next = getNextGalaxy(id)
-	previous = getPrevGalaxy(id)
-
-	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
-
-	try:
-		analysis = Analysis.objects.filter(user_id=request.user, galaxy_id=gal.id)
-	except ObjectDoesNotExist:
-		messages.info(request,'No analysis yet.')
-
-	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par)
-		
-	#directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
-	
-	
-	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val)				
-	
-	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], val)
-
-	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshift)
-	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshift)
-
-	
-
-	return render(request, 'viewGalaxy.html',locals())
-
-def checkAllFiles(gal_id, par_name):
+def checkAllFiles(gal_id, par_name, par_id):
 	base = basePath + par_name 
 	g102 =  base + findIn + "aXeWFC3_G102_mef_ID"+str(gal_id)+".fits"
 	g141 = base + findIn2 + "aXeWFC3_G141_mef_ID"+str(gal_id)+".fits"
@@ -380,12 +469,14 @@ def checkAllFiles(gal_id, par_name):
 	f160w_f = base_grism + f160w
 	f140w_f = base_grism + f140w
 
+	g102dat = base + datFolder + "Par" + str(par_id) + "_G102_BEAM_" + str(gal_id) + "A.dat" 
+	g141dat = base + datFolder + "Par" + str(par_id) + "_G141_BEAM_" + str(gal_id) + "A.dat" 
 
-	filesToCheck = [g102,g141,f110w_f,f140w_f,f160w_f]
+	filesToCheck = [g102,g141,f110w_f,f140w_f,f160w_f,g102dat,g141dat]
 
 	checked = []
 	checked_short = []
-	for f in filesToCheck:
+	for index, f in enumerate(filesToCheck):
 		if exists(f):
 			checked.append(f)
 			f = split(f,'/')
