@@ -35,7 +35,7 @@ class = 'container-fuild'
 						{% endfor %}
 					{% endfor %}
 				</select>
-				<a id="default" class="btn btn-default">Default values</a>
+				<input type="button" id="default" class="btn btn-default disableCharge" value="Default values"/>
 				<input type="range" class="disableCharge" id="scaling" name="scaling" min="1" step="1" max="300" value="100"/>
 			</form>
 		</div>
@@ -58,15 +58,7 @@ class = 'container-fuild'
 				</div>
 			</div>
 		</div>
-		<div id="wavelenghed">
-			<form class="unsubmitable">
-				{% csrf_token %}
-				<label for="wavelengh">Wavelengh change: </label>
-				<input type="number" min="0" step="0.01" max="3" value="1.5" name="valWavelengh" class="valWavelengh disableCharge"/>
-				<a class="defaultWave btn btn-default">Default value</a>
-				<input type="range" class="wavelengh disableCharge" name="wavelengh" min="0" step="0.01" max="3"/>
-			</form>
-		</div>
+		{% include "controlWave.html" %}
 		<div id="gFiles">
 			<div contenteditable="false" class="row auto">
 				<div id="g102" class="col-xs-6 col-md-6">
@@ -85,15 +77,7 @@ class = 'container-fuild'
 				</div>
 			</div>
 		</div>
-		<div id="wavelenghed">
-			<form class="unsubmitable">
-				{% csrf_token %}
-				<label for="wavelengh">Wavelengh change: </label>
-				<input type="number" min="0" step="0.01" max="3" value="1.5" name="valWavelengh" class="valWavelengh disableCharge"/>
-				<a class="defaultWave btn btn-default">Default value</a>
-				<input type="range" class="wavelengh disableCharge" name="wavelengh" min="0" step="0.01" max="3"/>
-			</form>
-		</div>
+		{% include "controlWave.html" %}
 		<div id="lines">
 			<div contenteditable="false" class="row auto">
 				<div id="datG102" class="col-xs-6 col-md-6">
