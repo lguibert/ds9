@@ -26,7 +26,7 @@ class = 'container-fuild'
 					<form class="unsubmitable">
 						{% csrf_token %}
 						<label for="scaling">Scaling: </label>
-						<input type="number" min="1" value="150" class="disableCharge" name="valScaling" id="valScaling"/>
+						<input type="number" min="1" value="150" class="disableCharge" name="valScaling" id="valScaling" max="300"/>
 						<select class="form-control" name="colors" id="colors">
 							{% for d in colors.colors %}
 								{% for val in d.values%}
@@ -43,7 +43,7 @@ class = 'container-fuild'
 						{{f110div}}
 					</div>
 					
-					<div id="f160140" class='imageBokeh'>
+					<div id="f160140" class='imageBokeh imageSecond'>
 						{{f160140div}}
 					</div>
 				</div>
@@ -56,12 +56,6 @@ class = 'container-fuild'
 							<li><input type="radio" id="galaxyRef" name="choiseRef" value="galaxy"/><label for="galaxyRef">Galaxy</label></li>
 						</ul>
 					</div>
-					
-					<br>
-					<br>
-					<br>
-
-					<input type="button" class="btn btn-danger" value="Validate everything"/>
 				</div>
 				<!--<div contenteditable="false" class="auto">
 					<div id='dataF110' class="">
@@ -79,7 +73,7 @@ class = 'container-fuild'
 					<div id="g102" class="imageBokeh">
 						{{g1div}}
 					</div>
-					<div id="g141" class="imageBokeh">
+					<div id="g141" class="imageBokeh imageSecond">
 						{{g2div}}
 					</div>
 				</div>
@@ -99,12 +93,16 @@ class = 'container-fuild'
 					<div id="datG102" class="imageBokeh">
 						{{g102DatDiv}}
 					</div>
-					<div id="datG141" class="imageBokeh">
+					<div id="datG141" class="imageBokeh imageSecond">
 						{{g141DatDiv}}
 					</div>
 				</div>
 			</div>
 		</div>
+		<div class="clear">
+			<input type="button" class="btn btn-danger" value="Validate everything"/>
+		</div>
+
 	</div>
 
 	{% include "buttonsNextPrev.html" %}

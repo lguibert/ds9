@@ -163,11 +163,15 @@ input[type="range"]{
 }
 
 input[type="number"]{
-	width: 45px;
+	width: 50px;
 }
 
 .imageBokeh{
-	display:inline-block;
+	float: left;
+}
+
+.imageSecond{
+	margin-left: 15px;
 }
 
 #ulRefSpec{

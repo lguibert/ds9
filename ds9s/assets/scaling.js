@@ -74,9 +74,9 @@ $(document).ready(function(){
 	})
 
 	$("#default").unbind().click(function(){
-		if($("#scaling").val() != 100 || $("#colors").val() != "Greys-9"){
-			$("#scaling").val("100");
-			$("#valScaling").val("100");
+		if($("#scaling").val() != 150 || $("#colors").val() != "Greys-9"){
+			$("#scaling").val("150");
+			$("#valScaling").val("150");
 			$("#colors option[value='Greys-9']").attr("selected",true);
 			scaling($("#scaling").val(), $("#colors").val());
 		}else{
@@ -134,7 +134,7 @@ $(document).ready(function(){
 				$("#g102").html(g1div);
 				$("#g141").html(g2div);
 				$("#datG102").html(divDat102);
-				$("#dat141").html(divDat141);
+				$("#datG141").html(divDat141);
 
 
 				$("#scrG102").html(g1script);
@@ -150,9 +150,9 @@ $(document).ready(function(){
 	}
 
 	$(".defaultWave").unbind().click(function(){
-		if($(".valWavelengh").val() != 1.5 || $(".wavelengh").val() != 1.5){
-			$(".valWavelengh").val("1.5");
-			$(".wavelengh").val("1.5");
+		if($(".valWavelengh").val() != 1 || $(".wavelengh").val() != 1){
+			$(".valWavelengh").val("1");
+			$(".wavelengh").val("1");
 			wavelenghing($(".wavelengh").val());
 		}else{
 			alert("Value already at default value");
