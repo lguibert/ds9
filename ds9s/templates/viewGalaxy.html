@@ -3,9 +3,6 @@
 class = 'container-fuild'	
 {% endblock %}
 {% block content %}	
-	{% include "buttonsNextPrev.html" %}
-
-
 	<h1>Galaxy n°{{gal.uniq_id}}</h1>
 
 	<a class='btn btn-default' type='0' id='displayCatData'>See more</a>
@@ -23,68 +20,88 @@ class = 'container-fuild'
 		</div>	
 	</div>	
 	<div id="rootFiles" class="container-fluid">
-		<div id="scaled">
-			<form class="unsubmitable">
-				{% csrf_token %}
-				<label for="scaling">Scaling: </label>
-				<input type="number" min="1" value="100" class="disableCharge" name="valScaling" id="valScaling"/>
-				<select class="form-control" name="colors" id="colors">
-					{% for d in colors.colors %}
-						{% for val in d.values%}
-							<option value="{{d.name}}-{{val}}" {% if d.name == "Greys" and val == 9 %}selected{%endif%}>{{d.name}} - {{val}}</option>	
-						{% endfor %}
-					{% endfor %}
-				</select>
-				<input type="button" id="default" class="btn btn-default disableCharge" value="Default values"/>
-				<input type="range" class="disableCharge" id="scaling" name="scaling" min="1" step="1" max="300" value="100"/>
-			</form>
-		</div>
-		<div id="fFiles">
-			<div contenteditable="false" class="row auto">
-				<div id="f110" class='col-xs-6 col-md-6'>
-					{{f110div}}
+		<div class="row">
+			<div id="fFiles" class="col-xs-6 col-md-6">
+				<div id="scaled">
+					<form class="unsubmitable">
+						{% csrf_token %}
+						<label for="scaling">Scaling: </label>
+						<input type="number" min="1" value="150" class="disableCharge" name="valScaling" id="valScaling"/>
+						<select class="form-control" name="colors" id="colors">
+							{% for d in colors.colors %}
+								{% for val in d.values%}
+									<option value="{{d.name}}-{{val}}" {% if d.name == "Greys" and val == 9 %}selected{%endif%}>{{d.name}} - {{val}}</option>	
+								{% endfor %}
+							{% endfor %}
+						</select>
+						<input type="button" id="default" class="btn btn-default disableCharge" value="Default values"/>
+						<input type="range" class="disableCharge" id="scaling" name="scaling" min="1" step="1" max="300" value="150"/>
+					</form>
 				</div>
-				
-				<div id="f160140" class='col-xs-6 col-md-6'>
-					{{f160140div}}
+				<div contenteditable="false" class="">
+					<div id="f110" class='imageBokeh'>
+						{{f110div}}
+					</div>
+					
+					<div id="f160140" class='imageBokeh'>
+						{{f160140div}}
+					</div>
 				</div>
+				<div class="clear">  
+					<a id="btnDisplayRef" type="0" class="btn btn-default">Show reference</a>
+					<div id="refSpectra">
+						<ul id="ulRefSpec">
+							<li><input type="radio" id="starRef" name="choiseRef" value="star"/><label for="starRef">Star</label></li>
+							<li><input type="radio" id="quadarRef" name="choiseRef" value="quasar"/><label for="quadarRef">Quasar</label></li>
+							<li><input type="radio" id="galaxyRef" name="choiseRef" value="galaxy"/><label for="galaxyRef">Galaxy</label></li>
+						</ul>
+					</div>
+					
+					<br>
+					<br>
+					<br>
+
+					<input type="button" class="btn btn-danger" value="Validate everything"/>
+				</div>
+				<!--<div contenteditable="false" class="auto">
+					<div id='dataF110' class="">
+						<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+					</div>
+					<div id='dataF160140' class="">
+						<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+					</div>
+				</div>-->
 			</div>
-			<div contenteditable="false" class="row auto">
-				<div id='dataF110' class="col-xs-6 col-md-6">
-					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+			
+			<div id="gFiles" class="col-xs-6 col-md-6">
+				{% include "controlWave.html" %}
+				<div contenteditable="false" class="row">
+					<div id="g102" class="imageBokeh">
+						{{g1div}}
+					</div>
+					<div id="g141" class="imageBokeh">
+						{{g2div}}
+					</div>
 				</div>
-				<div id='dataF160140' class="col-xs-6 col-md-6">
-					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
-				</div>
+				<!--<div contenteditable="false" class="auto">
+					<div id='dataG102' class="">
+						<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+					</div>
+					<div id='dataG141' class="">
+						<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
+					</div>
+				</div>-->
 			</div>
-		</div>
-		{% include "controlWave.html" %}
-		<div id="gFiles">
-			<div contenteditable="false" class="row auto">
-				<div id="g102" class="col-xs-6 col-md-6">
-					{{g1div}}
-				</div>
-				<div id="g141" class="col-xs-6 col-md-6">
-					{{g2div}}
-				</div>
-			</div>
-			<div contenteditable="false" class="row auto">
-				<div id='dataG102' class="col-xs-6 col-md-5">
-					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
-				</div>
-				<div id='dataG141' class="col-md-offset-2 col-xs-6 col-md-5">
-					<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
-				</div>
-			</div>
-		</div>
-		{% include "controlWave.html" %}
-		<div id="lines">
-			<div contenteditable="false" class="row auto">
-				<div id="datG102" class="col-xs-6 col-md-6">
-					{{g102DatDiv}}
-				</div>
-				<div id="datG141" class="col-xs-6 col-md-6">
-					{{g141DatDiv}}
+			
+			<div id="lines" class="col-xs-6 col-md-6">
+				{% include "controlWave.html" %}
+				<div contenteditable="false" class="row">
+					<div id="datG102" class="imageBokeh">
+						{{g102DatDiv}}
+					</div>
+					<div id="datG141" class="imageBokeh">
+						{{g141DatDiv}}
+					</div>
 				</div>
 			</div>
 		</div>

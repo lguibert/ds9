@@ -141,7 +141,11 @@ div[class='bk-sidebar'] a[class='bk-logo bk-logo-small']{
 }
 
 .auto{
-	margin: auto;
+	margin: 0 auto;
+}
+
+#refSpectra{
+	display:none;
 }
 
 #colors{
@@ -154,6 +158,26 @@ div[class='bk-sidebar'] a[class='bk-logo bk-logo-small']{
 	margin-left: 20px;
 }
 
-#scaling{
+input[type="range"]{
 	margin-top: 10px;
+}
+
+input[type="number"]{
+	width: 45px;
+}
+
+.imageBokeh{
+	display:inline-block;
+}
+
+#ulRefSpec{
+	margin-top: 15px;
+}
+
+#ulRefSpec li{
+	list-style: none;
+}
+
+#ulRefSpec label{
+	margin-left: 5px;
 }

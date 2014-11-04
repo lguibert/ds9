@@ -16,7 +16,7 @@ $(document).ready(function(){
 		}
 	}
 
-	$('#displayCatData').click(function(){
+	$('#displayCatData').unbind().click(function(){
         if ($(this).attr('type') == 0){
         	showSelector('#dataCatContainer', "slow");
         	$(this).attr('type','1');
@@ -48,4 +48,18 @@ $(document).ready(function(){
 		showSelector("label[for='id_password']");
 		showSelector("label[for='id_passwordCheck']");
 	}
+
+
+	$("#btnDisplayRef").unbind().click(function(){
+		if ($(this).attr('type') == 0){
+        	$(this).attr('type','1');
+        	$(this).html('Hide reference');
+        	showSelector('#refSpectra', "slow");
+        }else{
+        	$(this).attr('type','0');
+        	$(this).html('Show reference');
+        	hideSelector('#refSpectra', "slow");
+        	$("input[name='choiseRef']:checked").prop("checked",false);
+        }
+	});
 })

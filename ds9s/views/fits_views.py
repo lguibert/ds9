@@ -80,10 +80,13 @@ maxG102 = 11700.
 minG141 = 11000.
 maxG141 = 17500.
 
+redshiftDefault = 1
+scalingDefault = 150
+
 TOOLS="pan,wheel_zoom,box_zoom,reset"
 
 #            [O II]      [Ne III] Hbeta       [O III]        [O III]      Halpha     [S II]     [S III]               [S III]       He I
-colors = ["indianred","steelblue","pink","lightseagreen","lightseagreen","darkred","darkorchid","palevioletred","palevioletred","yellowgreen"]
+colors = ["indianred","steelblue","indigo","lightseagreen","lightseagreen","darkred","darkorchid","palevioletred","palevioletred","yellowgreen"]
 #--------------------------------------------------------------------
 
 
@@ -121,10 +124,7 @@ def test(request):
 @login_required
 def viewGalaxy(request, id):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
-	colors = getColors()
-
-	val = 100
-	redshift = 0
+	colors = getColors()	
 
 	next = getNextGalaxy(id)
 	previous = getPrevGalaxy(id)
@@ -140,12 +140,12 @@ def viewGalaxy(request, id):
 		
 	#directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
 
-	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val)				
+	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], scalingDefault)				
 	
-	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], val)
+	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], scalingDefault)
 
-	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshift)
-	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshift)
+	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshiftDefault)
+	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshiftDefault)
 
 	g102DatScript, g102DatDiv = plot1DSpectrum(checked[4],minG102,maxG102,"G102 dat")
 	g141DatScript, g141DatDiv = plot1DSpectrum(checked[5],minG141,maxG141,"G141 dat")
@@ -180,7 +180,7 @@ def read1DSpectrum(pathToASCIISpectrum,minWavelength=None,maxWavelength=None):
         spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
     return spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders
 
-def plot1DSpectrum(pathToFile,minWavelength, maxWavelength,title,redshift=1.5):
+def plot1DSpectrum(pathToFile,minWavelength, maxWavelength,title,redshift=redshiftDefault):
     # Separately read in the G102 and G141 spectra
     wl,f,u,c,z = read1DSpectrum(pathToFile, minWavelength, maxWavelength)
     
@@ -200,8 +200,8 @@ def plot1DSpectrum(pathToFile,minWavelength, maxWavelength,title,redshift=1.5):
     	y_range=[cmin-yplus,fmax+yplus],
     	line_width=2,
     	tools=TOOLS,
-    	plot_width=800,
-    	plot_height=800,
+    	plot_width=400,
+    	plot_height=400,
     	title=title,
     )
 
@@ -291,7 +291,7 @@ def displayFImage(request, file, gal, short_name, val, color="Greys-9"):
 	#iFocus = iData[xcen-val:xcen+val,ycen-val:ycen+val]
 	iFocus = iData[iFocusBoundaries[0]:iFocusBoundaries[1],iFocusBoundaries[2]:iFocusBoundaries[3]]
 
-	script, div = createBokehImage(iFocus,iFocusBoundaries,800,800, short_name, xcircle=xcen, ycircle=ycen, color=color, val=val)
+	script, div = createBokehImage(iFocus,iFocusBoundaries,400,400, short_name, xcircle=xcen, ycircle=ycen, color=color, val=val)
 
 	return script, div
 
@@ -312,7 +312,7 @@ def displayGImage(request, file, short_name, redshift):
 
 	dataBoundaries = grismBoundaries([iData.shape[0],iData.shape[1]],iHdr)
 
-	script, div = createBokehImage(iData, dataBoundaries,865,300,short_name, type=False,redshift=redshift)
+	script, div = createBokehImage(iData, dataBoundaries,430,150,short_name, type=False,redshift=redshift)
 
 	return script, div
 
