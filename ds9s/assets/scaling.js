@@ -47,6 +47,7 @@ $(document).ready(function(){
 		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
 		            xhr.setRequestHeader("X-CSRFToken", csrftoken);
 		        }
+		        $(".disableCharge").prop("disabled",true);
 		    }
 		    })
 			.success(function(data){
@@ -60,10 +61,12 @@ $(document).ready(function(){
 				$("#f160140").html(f160div);
 				$("#scrF110").html(f110script);
 				$("#scrf160140").html(f160script);
-		    });/*.error(function(xhr, err){
+		    }).complete(function(){
+		    	$(".disableCharge").prop("disabled",false);
+		    }).error(function(xhr, err){
 		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
 		    	alert("responseText: "+xhr.responseText);
-		    });*/
+		    });
 	}
 
 	$("#colors").unbind().change(function(){
@@ -94,9 +97,11 @@ $(document).ready(function(){
 	});
 
 	$(".valWavelengh").unbind().change(function(){
-		$(".wavelengh").val($(this).val());
-		$(".valWavelengh").val($(this).val());
-		wavelenghing($(this).val());	
+		var val = $(this).val();
+		$(".wavelengh").val(val);
+		$(".valWavelengh").val(val);
+
+		wavelenghing(val);		
 	});
 
 	function wavelenghing(redshift){
@@ -112,6 +117,7 @@ $(document).ready(function(){
 		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
 		            xhr.setRequestHeader("X-CSRFToken", csrftoken);
 		        }
+		        $(".disableCharge").prop("disabled",true);
 		    }
 		    })
 			.success(function(data){
@@ -135,10 +141,12 @@ $(document).ready(function(){
 				$("#scrG141").html(g2script);
 				$("#scrG102Dat").html(srcDat102);
 				$("#scrG141Dat").html(srcDat141);
-		    }).error(function(xhr, err){
+		    }).complete(function(){
+		    	$(".disableCharge").prop("disabled",false);
+		    });/*.error(function(xhr, err){
 		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
 		    	alert("responseText: "+xhr.responseText);
-		    });
+		    });*/
 	}
 
 	$(".defaultWave").unbind().click(function(){

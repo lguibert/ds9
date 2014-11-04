@@ -212,8 +212,8 @@ def plot1DSpectrum(pathToFile,minWavelength, maxWavelength,title,redshift=1.5):
 
     for index, em in enumerate(emlineWavelengthsRest):
     	emlineWavelengths = em * (1.0 + float(redshift))
-    	lin = line([emlineWavelengths,emlineWavelengths],[cmin,fmax],color=colors[index],line_width=2)
-    	text([emlineWavelengths],(fmax+(index*0.00000000000000002))/2,emlineNames[index],0,text_color=colors[index])	
+    	lin = line([emlineWavelengths,emlineWavelengths],[cmin-yplus,fmax+yplus],color=colors[index],line_width=2)
+    	text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
 
     resources = Resources("inline")
 
@@ -252,7 +252,7 @@ def scaling(request, id, val, color):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
 	colors = getColorsNames()
 
-	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.folderId_par)
+	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
 
 	if int(val) < 1:
 		val = 1
