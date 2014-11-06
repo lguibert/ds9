@@ -39,7 +39,8 @@ import re
 from os import listdir, makedirs, remove
 from os.path import exists
 
-from six.moves import zip
+from scipy.signal import convolve, boxcar, gaussian
+from scipy.interpolate import interp1d
 
 import pdb
 
@@ -85,6 +86,8 @@ scalingDefault = 150
 
 TOOLS="pan,wheel_zoom,box_zoom,reset"
 
+emlineWavelengthsRest = [3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.]
+emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"]
 #            [O II]      [Ne III] Hbeta       [O III]        [O III]      Halpha     [S II]     [S III]               [S III]       He I
 colors = ["indianred","steelblue","indigo","lightseagreen","lightseagreen","darkred","darkorchid","palevioletred","palevioletred","yellowgreen"]
 #--------------------------------------------------------------------
@@ -150,6 +153,8 @@ def viewGalaxy(request, id):
 	g102DatScript, g102DatDiv = plot1DSpectrum(checked[4],minG102,maxG102,"G102 dat")
 	g141DatScript, g141DatDiv = plot1DSpectrum(checked[5],minG141,maxG141,"G141 dat")
 
+	src102, div102, src141, div141 = plotModels(redshiftDefault)
+
 	
 
 	return render(request, 'viewGalaxy.html',locals())
@@ -206,9 +211,6 @@ def plot1DSpectrum(pathToFile,minWavelength, maxWavelength,title,redshift=redshi
     )
 
     hold()
-
-    emlineWavelengthsRest = [3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.]
-    emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"]
 
     for index, em in enumerate(emlineWavelengthsRest):
     	emlineWavelengths = em * (1.0 + float(redshift))
@@ -385,9 +387,6 @@ def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=
 	else:
 		y = [-2,2]
 		#creation emition lines
-		emlineWavelengthsRest = [3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.]
-		emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"] # Can be used to label the vertical lines
-
 		for index, em in enumerate(emlineWavelengthsRest):
 			emlineWavelengths = em * (1.0 + float(redshift))
 			lin = line([emlineWavelengths,emlineWavelengths],y,color=colors[index],line_width=2)
@@ -662,3 +661,181 @@ def defineNumberCatFile(type):
 		return "fin_F140.cat"
 	else:
 		return "fin_F160.cat"
+
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------- REFERENCE ------------------------------------------------
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
+
+def genG102Wavelengths():
+    l = 7319.
+    ls=[]
+    while l<=12623.:
+        ls.append(l)
+        l=l+24.
+    return np.array(ls,dtype=np.float64)
+
+def genG141Wavelengths():
+    l = 9449.
+    ls=[]
+    while l<=18516.5:
+        ls.append(l)
+        l=l+46.5
+    return np.array(ls,dtype=np.float64)
+
+def trimSpec(wavelength,flux,minWavelength,maxWavelength):
+    filt = np.logical_and(wavelength >= minWavelength, wavelength <= maxWavelength)
+    return wavelength[filt],flux[filt]
+
+def smootheInterpolateSpec(wavelength,flux,newWavelength,npixBoxcar):
+    smootheFlux = convolve(flux,boxcar(npixBoxcar),mode="same")
+    #print len(flux),len(smootheFlux)
+    finterp = interp1d(wavelength,smootheFlux,bounds_error=False,fill_value=0.0)
+    smootheFlux = finterp(newWavelength)
+    return smootheFlux/smootheFlux.max()
+
+def Gauss(l,l0,sigma,amp):
+    return amp * np.exp((-1.0*(l-l0)**2)/(2.0*sigma**2))
+
+def createGalaxySpectra(redshift,galaxyFullWidth=4.):
+    # Create three model spectra with different EW for emission lines,  
+    # Adapt to galaxy size and magnitude? Maybe size for now.
+    # Generate observed-frame spectra in X Angs. increments; 
+    # convolve with a gaussian to match galaxy size spread;
+    # smoothe and interpolate.
+    deltal = 2. # set the wavelength scale of the initial spectrum
+    lineFullWidth = deltal * 3. # nyquist sample the lines
+    wavelengths102 = genG102Wavelengths()
+    wavelengths141 = genG141Wavelengths()
+    wavelengthsInit = []
+    l=wavelengths102[0]
+    while l <= wavelengths141[-1]:
+        wavelengthsInit.append(l)
+        l = l + deltal
+    wavelengthsInit = np.array(wavelengthsInit,dtype=np.float64)
+    emlineWavelengths = emlineWavelengthsRest * (1.0 + redshift) # Given a redshift, calculate the wavelength coordinates of the vertical lines
+    emlineStrengths = np.array([5.,0.25,1.0,1.66,5.,4.,0.4,0.133,0.4,0.1],dtype=np.float64) # relative to Hbeta (?)
+    fluxesStrong = np.zeros(len(wavelengthsInit),dtype=np.float64) + 1.0 # Observed Ha EW = 500.
+    fluxesMiddle = np.zeros(len(wavelengthsInit),dtype=np.float64) + 1.0 # Observed Ha EW = 100
+    fluxesWeak = np.zeros(len(wavelengthsInit),dtype=np.float64) + 1.0 # Observed Ha EW = 50.
+    for i in range(len(wavelengthsInit)):
+        for j in range(len(emlineWavelengths)):
+            # EW*F_lambda = S F_lambda dlambda
+            ampFactor = 500. / (lineFullWidth/2.35 * np.sqrt(2.0*pi) * emlineStrengths[5])
+            fluxesStrong[i] = fluxesStrong[i] + Gauss(wavelengthsInit[i],emlineWavelengths[j],lineFullWidth/2.35,ampFactor*emlineStrengths[j])
+            ampFactor = 100. / (lineFullWidth/2.35 * np.sqrt(2.0*pi) * emlineStrengths[5])
+            fluxesMiddle[i] = fluxesMiddle[i] + Gauss(wavelengthsInit[i],emlineWavelengths[j],lineFullWidth/2.35,ampFactor*emlineStrengths[j])
+            ampFactor = 50. / (lineFullWidth/2.35 * np.sqrt(2.0*pi) * emlineStrengths[5])
+            fluxesWeak[i] = fluxesWeak[i] + Gauss(wavelengthsInit[i],emlineWavelengths[j],lineFullWidth/2.35,ampFactor*emlineStrengths[j])
+    # now convolve with the galaxy gaussian
+    nWin = 12
+    pixConvert102 = 24./deltal * galaxyFullWidth/2.35
+    pixConvert141, pixConvert102 = int(pixConvert102*46.5/24.), int(pixConvert102)
+    fStrong102 = convolve(fluxesStrong,gaussian(nWin*pixConvert102,std=pixConvert102),mode="same")
+    fMiddle102 = convolve(fluxesMiddle,gaussian(nWin*pixConvert102,std=pixConvert102),mode="same")
+    fWeak102 = convolve(fluxesWeak,gaussian(nWin*pixConvert102,std=pixConvert102),mode="same")
+    fStrong141 = convolve(fluxesStrong,gaussian(nWin*pixConvert141,std=pixConvert141),mode="same")
+    fMiddle141 = convolve(fluxesMiddle,gaussian(nWin*pixConvert141,std=pixConvert141),mode="same")
+    fWeak141 = convolve(fluxesWeak,gaussian(nWin*pixConvert141,std=pixConvert141),mode="same")
+    finterp = interp1d(wavelengthsInit,fStrong102,bounds_error=False,fill_value=0.0)
+    fStrong102 = finterp(wavelengths102)
+    finterp = interp1d(wavelengthsInit,fMiddle102,bounds_error=False,fill_value=0.0)
+    fMiddle102 = finterp(wavelengths102)
+    finterp = interp1d(wavelengthsInit,fWeak102,bounds_error=False,fill_value=0.0)
+    fWeak102 = finterp(wavelengths102)
+    finterp = interp1d(wavelengthsInit,fStrong141,bounds_error=False,fill_value=0.0)
+    fStrong141 = finterp(wavelengths141)
+    finterp = interp1d(wavelengthsInit,fMiddle141,bounds_error=False,fill_value=0.0)
+    fMiddle141 = finterp(wavelengths141)
+    finterp = interp1d(wavelengthsInit,fWeak141,bounds_error=False,fill_value=0.0)
+    fWeak141 = finterp(wavelengths141)
+    #return wavelengths102,wavelengths141,fStrong102,fMiddle102,fWeak102,fStrong141,fMiddle141,fWeak141
+    galSpec102 = np.zeros((len(wavelengths102),4),dtype=np.float64)
+    galSpec141 = np.zeros((len(wavelengths141),4),dtype=np.float64)
+    galSpec102[0:,0] = wavelengths102
+    galSpec102[0:,1] = fStrong102
+    galSpec102[0:,2] = fMiddle102
+    galSpec102[0:,3] = fWeak102
+    galSpec141[0:,0] = wavelengths141
+    galSpec141[0:,1] = fStrong141
+    galSpec141[0:,2] = fMiddle141
+    galSpec141[0:,3] = fWeak141
+    return galSpec102,galSpec141
+
+def getModels(redshift,mode="star"):
+    if mode=="star":
+        modelSpectraData102=np.load("StellarSpectraG102.npy")
+        modelSpectraData141=np.load("StellarSpectraG141.npy")
+    elif mode=="quasar":
+        modelSpectraData=np.load("QuasarSpectrum.npy")
+        quasarWavelengths, quasarFlux = modelSpectraData[0:,0]*(1.0+redshift), modelSpectraData[0:,1]
+        l102 = genG102Wavelengths()
+        l141 = genG141Wavelengths()
+        dl = (quasarWavelengths[-1] - quasarWavelengths[0])/float(len(quasarWavelengths))
+        modelFlux102 = smootheInterpolateSpec(quasarWavelengths,quasarFlux,l102,int(24./dl))
+        modelFlux141 = smootheInterpolateSpec(quasarWavelengths,quasarFlux,l141,int(46.5/dl))
+        modelSpectraData102=np.zeros((len(l102),2),dtype=np.float64)
+        modelSpectraData141=np.zeros((len(l141),2),dtype=np.float64)
+        modelSpectraData102[0:,0] = l102
+        modelSpectraData102[0:,1] = modelFlux102
+        modelSpectraData141[0:,0] = l141
+        modelSpectraData141[0:,1] = modelFlux141
+    elif mode=="galaxy":
+        modelSpectraData102, modelSpectraData141 =  createGalaxySpectra(redshift)
+    else:
+        return None
+    return modelSpectraData102,modelSpectraData141
+
+'''def plotModels(redshift,mode="star"):
+	#replace all
+    modelSpectra102, modelSpectra141 = getModels(redshift, mode=mode)
+    plt.clf()
+    plt.figure(1, figsize = (7.5,15.))
+    pcolors = ['k','r','b']
+    plt.subplot(1,2,1)
+    for i in range(modelSpectra102.shape[1]-1):
+        plt.plot(modelSpectra102[0:,0],modelSpectra102[0:,i+1],c=pcolors[i%3],linestyle="steps")
+    plt.subplot(1,2,2)
+    for i in range(modelSpectra102.shape[1]-1):
+        plt.plot(modelSpectra141[0:,0],modelSpectra141[0:,i+1],c=pcolors[i%3],linestyle="steps")
+    plt.savefig("test.eps")'''
+
+def plotModels(redshift,mode="star"):
+	modelSpectra102, modelSpectra141 = getModels(redshift, mode=mode)
+
+	script102, div102 = createReference(modelSpectra102,redshift)
+	script141, div141 = createReference(modelSpectra141,redshift)
+
+	return script102, div102, script141, div141
+
+def createReference(data,redshift):
+	print data
+	mul = line(x=[data[0:,0],data[0:,1]],
+		y=[data[0:,0],data[0:,1]],
+		color=["black"],
+		#x_range=[data[0:,0],data[0:,1]],
+		#y_range=[data[0:,0],data[0:,1]],
+		line_width=2,
+		tools=TOOLS,
+		plot_width=400,
+		plot_height=400,
+	)
+
+	hold()
+
+	'''for index, em in enumerate(emlineWavelengthsRest):
+		emlineWavelengths = em * (1.0 + float(redshift))
+		lin = line([emlineWavelengths,emlineWavelengths],[cmin-yplus,fmax+yplus],color=colors[index],line_width=2)
+		text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
+'''
+	resources = Resources("inline")
+
+	plot_script, plot_div = components(mul, resources)
+
+	html_script = mark_safe(encode_utf8(plot_script))
+	html_div = mark_safe(encode_utf8(plot_div))
+
+	figure()
+
+	return html_script, html_div

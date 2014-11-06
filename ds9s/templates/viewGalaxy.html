@@ -1,10 +1,26 @@
 {% extends "base.html" %}
+{% block flyCss %}
+<style>
+	.jumbotron{
+		padding-bottom: 1px;
+		text-align: center;
+	}
+	#headGalaxy{
+		margin: 10px;
+	}
+</style>
+{% endblock %}
+
+
+{% block head %}
+	<h1 id="headGalaxy">Galaxy n°{{gal.uniq_id}}</h1>
+{% endblock %}
+
 {% block classPage %}
 class = 'container-fuild'	
 {% endblock %}
-{% block content %}	
-	<h1>Galaxy n°{{gal.uniq_id}}</h1>
 
+{% block content %}	
 	<a class='btn btn-default' type='0' id='displayCatData'>See more</a>
 	<div id="dataCatContainer" class="none container-fluid">
 		<div class="row">
@@ -98,6 +114,17 @@ class = 'container-fuild'
 					</div>
 				</div>
 			</div>
+
+			<div id="" class="col-xs-6 col-md-6">
+				<div contenteditable="false" class="row">
+					<div id="" class="imageBokeh">
+						{{div102}}
+					</div>
+					<div id="" class="imageBokeh imageSecond">
+						{{div141}}
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="clear">
 			<input type="button" class="btn btn-danger" value="Validate everything"/>
@@ -115,6 +142,8 @@ class = 'container-fuild'
 		<span id="scrG141">{{g2script}}</span>
 		<span id="scrG102Dat">{{g102DatScript}}</span>
 		<span id="scrG141Dat">{{g141DatScript}}</span>
+		<span id="">{{src102}}</span>
+		<span id="">{{src141}}</span>
 		{%load static %}
 		<script type="text/javascript" src='{% static "scaling.js" %}'></script>
   		<script type="text/javascript" src='{% static "coordonatePictures.js" %}'></script>

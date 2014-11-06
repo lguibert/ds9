@@ -68,7 +68,7 @@ label{
 	/*background-color:rgba(86,61,124,0.15);*/
 }
 
-#fFiles, #gFiles div:first-child, #dataCatContainer{
+#fFiles, #dataCatContainer{
 	margin-bottom: 15px;
 }
 
@@ -140,11 +140,15 @@ div[class='bk-sidebar'] a[class='bk-logo bk-logo-small']{
 	}
 }
 
+#headGalaxy{
+	font-size: 36px;
+}
+
 .auto{
 	margin: 0 auto;
 }
 
-#refSpectra{
+#refSpectra, .legendsLines{
 	display:none;
 }
 
@@ -154,11 +158,11 @@ div[class='bk-sidebar'] a[class='bk-logo bk-logo-small']{
 	margin-left: 20px;
 }
 
-#default, .defaultWave{
+#default, .defaultWave, .legendLines{
 	margin-left: 20px;
 }
 
-input[type="range"]{
+input[type="range"], #divLegends{
 	margin-top: 10px;
 }
 
@@ -184,4 +188,50 @@ input[type="number"]{
 
 #ulRefSpec label{
 	margin-left: 5px;
+}
+
+.spanLegend{
+	width:20px;
+	height: 5px;
+	display: inline-block;
+}
+
+.indianred{
+	background-color:indianred;
+}
+
+.steelblue{
+	background-color:steelblue;
+}
+
+.indigo{
+	background-color:indigo;
+}
+
+.lightseagreen{
+	background-color:lightseagreen;
+}
+
+.darkred{
+	background-color:darkred;
+}
+
+.darkorchid{
+	background-color:darkorchid;
+}
+
+.palevioletred{
+	background-color:palevioletred;
+}
+
+.yellowgreen{
+	background-color:yellowgreen;
+}
+
+#containLegend div{
+	width: 100px;
+}
+
+#containLegend, #containLegend div{
+	display: inline-block;
 }

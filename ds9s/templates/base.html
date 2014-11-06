@@ -16,6 +16,8 @@
 
     {%load static %}
    	<link rel="stylesheet" href="{%static 'main.css'%}"/>
+
+    {% block flyCss %}{% endblock %}
     
   </head>
 
@@ -46,6 +48,7 @@
     </div>
 
     <div class="jumbotron">
+      {% block head %}
       <div class="container">
         <h1>{% block headTitle%}Hello, welcome to DS9 Web Application{% endblock %}</h1>
         <p>{% block contentHeadTitle%}You'll be able to work here very soon!{% endblock %}</p>    
@@ -62,6 +65,7 @@
           </form>  
         </div>-->
       </div>
+      {% endblock %}
     </div>
 
     <div {% block classPage%} class="container" {% endblock %}>

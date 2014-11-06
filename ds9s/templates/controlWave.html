@@ -4,6 +4,45 @@
 		<label for="wavelengh">Redshift change: </label>
 		<input type="number" min="0" step="0.01" max="3" value="1" name="valWavelengh" class="valWavelengh disableCharge"/>
 		<input type="button" class="defaultWave btn btn-default disableCharge" value="Default value"/>
+		<a type="0" class="legendLines btn btn-default">Show legend</a>
+
+		<div id="divLegends" class="legendsLines">
+			<div id="containLegend">
+				<div>
+					<span class="indianred spanLegend"></span>
+					<span class="spanLegendText">: [O II]</span>
+				</div>
+				<div>
+					<span class="steelblue spanLegend"></span>
+					<span class="spanLegendText">: [Ne III]</span>
+				</div>
+				<div>
+					<span class="indigo spanLegend"></span>
+					<span class="spanLegendText">: Hbeta</span>
+				</div>
+				<div>
+					<span class="lightseagreen spanLegend"></span>
+					<span class="spanLegendText">: [O III]</span>
+				</div>
+				<div>
+					<span class="darkred spanLegend"></span>
+					<span class="spanLegendText">: Halpha</span>
+				</div>
+				<div>
+					<span class="darkorchid spanLegend"></span>
+					<span class="spanLegendText">: [S II]</span>
+				</div>			
+				<div>
+					<span class="palevioletred spanLegend"></span>
+					<span class="spanLegendText">: [S III]</span>
+				</div>			
+				<div>
+					<span class="yellowgreen spanLegend"></span> 
+					<span class="spanLegendText">: He I</span>
+				</div>	
+			</div>		
+		</div>
+
 		<input type="range" class="wavelengh disableCharge" value="1" name="wavelengh" min="0" step="0.01" max="3"/>
 	</form>
 </div>

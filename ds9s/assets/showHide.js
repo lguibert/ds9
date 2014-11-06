@@ -62,4 +62,16 @@ $(document).ready(function(){
         	$("input[name='choiseRef']:checked").prop("checked",false);
         }
 	});
+
+	$(".legendLines").unbind().click(function(){
+		if ($(this).attr('type') == 0){
+        	$(this).attr('type','1');
+        	$(".legendLines").html('Hide legend');
+        	showSelector('.legendsLines', "slow");
+        }else{
+        	$(this).attr('type','0');
+        	$(".legendLines").html('Show legend');
+        	hideSelector('.legendsLines', "slow");
+        }
+	});
 })
