@@ -54,11 +54,13 @@ $(document).ready(function(){
 		if ($(this).attr('type') == 0){
         	$(this).attr('type','1');
         	$(this).html('Hide reference');
-        	showSelector('#refSpectra', "slow");
+        	$("#refSpectra").css("display","inline-block");
+        	//showSelector('#refSpectra', "slow");
         }else{
         	$(this).attr('type','0');
         	$(this).html('Show reference');
-        	hideSelector('#refSpectra', "slow");
+        	$("#refSpectra").css("display","none");
+        	//hideSelector('#refSpectra', "slow");
         	$("input[name='choiseRef']:checked").prop("checked",false);
         }
 	});
@@ -73,5 +75,13 @@ $(document).ready(function(){
         	$(".legendLines").html('Show legend');
         	hideSelector('.legendsLines', "slow");
         }
+	});
+
+	$("#removeSelec").unbind().click(function(){
+		if($("input[name='choiseRef']").is(':checked')){
+			$("input[name='choiseRef']:checked").prop("checked",false);
+			$("#divRef102").html("");
+			$("#divRef141").html("");
+		}
 	});
 })

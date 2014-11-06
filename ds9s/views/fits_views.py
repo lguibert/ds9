@@ -86,7 +86,7 @@ scalingDefault = 150
 
 TOOLS="pan,wheel_zoom,box_zoom,reset"
 
-emlineWavelengthsRest = [3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.]
+emlineWavelengthsRest = np.array([3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.])
 emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"]
 #            [O II]      [Ne III] Hbeta       [O III]        [O III]      Halpha     [S II]     [S III]               [S III]       He I
 colors = ["indianred","steelblue","indigo","lightseagreen","lightseagreen","darkred","darkorchid","palevioletred","palevioletred","yellowgreen"]
@@ -152,9 +152,6 @@ def viewGalaxy(request, id):
 
 	g102DatScript, g102DatDiv = plot1DSpectrum(checked[4],minG102,maxG102,"G102 dat")
 	g141DatScript, g141DatDiv = plot1DSpectrum(checked[5],minG141,maxG141,"G141 dat")
-
-	src102, div102, src141, div141 = plotModels(redshiftDefault)
-
 	
 
 	return render(request, 'viewGalaxy.html',locals())
@@ -229,7 +226,7 @@ def plot1DSpectrum(pathToFile,minWavelength, maxWavelength,title,redshift=redshi
     return html_script, html_div
 
 @login_required
-def wavelenghing(request, id, redshift):
+def wavelenghing(request, id, redshift,mode="false"):
 	gal = get_object_or_404(Galaxy, uniq_id=id)
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
@@ -246,6 +243,12 @@ def wavelenghing(request, id, redshift):
 
 	#return f110script, f110div, f160script, f160div
 	data = g1script, g1div, g2script, g2div, g102script, g102div, g141script, g141div
+
+	if mode != "false":
+		src102, div102, src141, div141 = plotModels(float(redshift), mode=mode)
+		data = data + (src102, div102, src141, div141)
+
+
 	return HttpResponse(json.dumps(data))
 
 @login_required
@@ -267,6 +270,13 @@ def scaling(request, id, val, color):
 
 	#return f110script, f110div, f160script, f160div
 	data = f110script, f110div, f160script, f160div
+	return HttpResponse(json.dumps(data))
+
+@login_required
+def referencing(request, redshift, mode):
+	src102, div102, src141, div141 = plotModels(float(redshift), mode=mode)
+
+	data = src102, div102, src141, div141
 	return HttpResponse(json.dumps(data))
 
 def displayFImage(request, file, gal, short_name, val, color="Greys-9"):
@@ -787,20 +797,6 @@ def getModels(redshift,mode="star"):
         return None
     return modelSpectraData102,modelSpectraData141
 
-'''def plotModels(redshift,mode="star"):
-	#replace all
-    modelSpectra102, modelSpectra141 = getModels(redshift, mode=mode)
-    plt.clf()
-    plt.figure(1, figsize = (7.5,15.))
-    pcolors = ['k','r','b']
-    plt.subplot(1,2,1)
-    for i in range(modelSpectra102.shape[1]-1):
-        plt.plot(modelSpectra102[0:,0],modelSpectra102[0:,i+1],c=pcolors[i%3],linestyle="steps")
-    plt.subplot(1,2,2)
-    for i in range(modelSpectra102.shape[1]-1):
-        plt.plot(modelSpectra141[0:,0],modelSpectra141[0:,i+1],c=pcolors[i%3],linestyle="steps")
-    plt.savefig("test.eps")'''
-
 def plotModels(redshift,mode="star"):
 	modelSpectra102, modelSpectra141 = getModels(redshift, mode=mode)
 
@@ -810,25 +806,30 @@ def plotModels(redshift,mode="star"):
 	return script102, div102, script141, div141
 
 def createReference(data,redshift):
-	print data
-	mul = line(x=[data[0:,0],data[0:,1]],
-		y=[data[0:,0],data[0:,1]],
-		color=["black"],
-		#x_range=[data[0:,0],data[0:,1]],
-		#y_range=[data[0:,0],data[0:,1]],
-		line_width=2,
-		tools=TOOLS,
-		plot_width=400,
-		plot_height=400,
-	)
+	pcolors = ['black','red','blue']
+
+	maxd = np.amax(data)
+	mind = np.amin(data)
+	mind0 = np.amin(data,axis=0)
+	mind1 = np.amin(data,axis=1)
+
+	for i in range(data.shape[1]-1):
+		mul = line(x=data[0:,0], 
+			y=data[0:,i+1], 
+			tools=TOOLS, 
+			color=pcolors[i%3],
+			plot_width=400,
+			plot_height=400,
+			#x_range=[mind,maxd]
+		)
 
 	hold()
 
-	'''for index, em in enumerate(emlineWavelengthsRest):
+	for index, em in enumerate(emlineWavelengthsRest):
 		emlineWavelengths = em * (1.0 + float(redshift))
-		lin = line([emlineWavelengths,emlineWavelengths],[cmin-yplus,fmax+yplus],color=colors[index],line_width=2)
-		text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
-'''
+		line([emlineWavelengths,emlineWavelengths],[0,1],color=colors[index],line_width=2)
+		#text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
+
 	resources = Resources("inline")
 
 	plot_script, plot_div = components(mul, resources)

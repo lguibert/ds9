@@ -63,16 +63,6 @@ class = 'container-fuild'
 						{{f160140div}}
 					</div>
 				</div>
-				<div class="clear">  
-					<a id="btnDisplayRef" type="0" class="btn btn-default">Show reference</a>
-					<div id="refSpectra">
-						<ul id="ulRefSpec">
-							<li><input type="radio" id="starRef" name="choiseRef" value="star"/><label for="starRef">Star</label></li>
-							<li><input type="radio" id="quadarRef" name="choiseRef" value="quasar"/><label for="quadarRef">Quasar</label></li>
-							<li><input type="radio" id="galaxyRef" name="choiseRef" value="galaxy"/><label for="galaxyRef">Galaxy</label></li>
-						</ul>
-					</div>
-				</div>
 				<!--<div contenteditable="false" class="auto">
 					<div id='dataF110' class="">
 						<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
@@ -82,27 +72,7 @@ class = 'container-fuild'
 					</div>
 				</div>-->
 			</div>
-			
-			<div id="gFiles" class="col-xs-6 col-md-6">
-				{% include "controlWave.html" %}
-				<div contenteditable="false" class="row">
-					<div id="g102" class="imageBokeh">
-						{{g1div}}
-					</div>
-					<div id="g141" class="imageBokeh imageSecond">
-						{{g2div}}
-					</div>
-				</div>
-				<!--<div contenteditable="false" class="auto">
-					<div id='dataG102' class="">
-						<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
-					</div>
-					<div id='dataG141' class="">
-						<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
-					</div>
-				</div>-->
-			</div>
-			
+
 			<div id="lines" class="col-xs-6 col-md-6">
 				{% include "controlWave.html" %}
 				<div contenteditable="false" class="row">
@@ -114,14 +84,35 @@ class = 'container-fuild'
 					</div>
 				</div>
 			</div>
-
-			<div id="" class="col-xs-6 col-md-6">
+			</div>
+			<div class="row">
+			<div id="gFiles" class="col-xs-6 col-md-6">
+				{% include "controlWave.html" %}
 				<div contenteditable="false" class="row">
-					<div id="" class="imageBokeh">
-						{{div102}}
+					<div id="g102" class="imageBokeh">
+						{{g1div}}
 					</div>
-					<div id="" class="imageBokeh imageSecond">
-						{{div141}}
+					<div id="g141" class="imageBokeh imageSecond">
+						{{g2div}}
+					</div>
+				</div>
+			</div>
+			
+			
+
+			<div class="col-xs-6 col-md-6">
+				<div id="refSpectra">
+					<ul id="ulRefSpec">
+						<li><label id="removeSelec"title="Click here to remove selection">Reference: </label></li>
+						<li><input class="disableCharge" type="radio" id="starRef" name="choiseRef" value="star"/><label for="starRef">Star</label></li>
+						<li><input class="disableCharge" type="radio" id="quadarRef" name="choiseRef" value="quasar"/><label for="quadarRef">Quasar</label></li>
+						<li><input class="disableCharge" type="radio" id="galaxyRef" name="choiseRef" value="galaxy"/><label for="galaxyRef">Galaxy</label></li>
+					</ul>
+				</div>
+				<div id="divRef" contenteditable="false" class="row">
+					<div id="divRef102" class="imageBokeh">
+					</div>
+					<div id="divRef141" class="imageBokeh imageSecond">
 					</div>
 				</div>
 			</div>
@@ -142,8 +133,8 @@ class = 'container-fuild'
 		<span id="scrG141">{{g2script}}</span>
 		<span id="scrG102Dat">{{g102DatScript}}</span>
 		<span id="scrG141Dat">{{g141DatScript}}</span>
-		<span id="">{{src102}}</span>
-		<span id="">{{src141}}</span>
+		<span id="scrRef102"></span>
+		<span id="scrRef141"></span>
 		{%load static %}
 		<script type="text/javascript" src='{% static "scaling.js" %}'></script>
   		<script type="text/javascript" src='{% static "coordonatePictures.js" %}'></script>

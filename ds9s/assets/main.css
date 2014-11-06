@@ -148,8 +148,16 @@ div[class='bk-sidebar'] a[class='bk-logo bk-logo-small']{
 	margin: 0 auto;
 }
 
-#refSpectra, .legendsLines{
+.legendsLines{
 	display:none;
+}
+
+#refSpectra ul li, #refSpectra ul{
+	display: inline-block;
+}
+
+#refSpectra{
+	margin-bottom: 13px;
 }
 
 #colors{
@@ -234,4 +242,13 @@ input[type="number"]{
 
 #containLegend, #containLegend div{
 	display: inline-block;
+}
+
+#removeSelec:hover{
+	text-decoration: underline;
+	cursor:pointer;
+}
+
+#removeSelec:active{
+	font-style: italic;
 }

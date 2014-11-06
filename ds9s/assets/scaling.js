@@ -91,9 +91,11 @@ $(document).ready(function(){
 // --------------------------------------------------------------------------------------------------
 
 	$(".wavelengh").unbind().change(function(){
-		$(".valWavelengh").val($(this).val());
-		$(".wavelengh").val($(this).val());
-		wavelenghing($(this).val());			
+		var val = $(this).val();
+		$(".valWavelengh").val(val);
+		$(".wavelengh").val(val);
+
+		wavelenghing(val,undefinedBool($("input[name='choiseRef']:checked").val()));			
 	});
 
 	$(".valWavelengh").unbind().change(function(){
@@ -101,17 +103,25 @@ $(document).ready(function(){
 		$(".wavelengh").val(val);
 		$(".valWavelengh").val(val);
 
-		wavelenghing(val);		
+		wavelenghing(val,undefinedBool($("input[name='choiseRef']:checked").val()));		
 	});
 
-	function wavelenghing(redshift){
+	function undefinedBool(value){
+		if(value == undefined){
+			return false;
+		}else{
+			return value;
+		}
+	}
+
+	function wavelenghing(redshift,mode){
 		var csrftoken = getCookie('csrftoken');
 
 		url = document.location.href;
 		id = url.split("/")[6];
 
 		$.ajax({
-			url : "/ds9s/fits/wavelenghing/"+id+"/"+redshift+"/",
+			url : "/ds9s/fits/wavelenghing/"+id+"/"+redshift+"/"+mode+"/",
 			type: "POST",
 		    beforeSend: function(xhr, settings) {
 		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -131,6 +141,14 @@ $(document).ready(function(){
 				var srcDat141 = data[6];
 				var divDat141 = data[7];
 
+				if(data[8]){
+					$("#divRef102").html(data[9]);
+					$("#divRef141").html(data[11]);
+
+					$("#scrRef102").html(data[8]);
+					$("#scrRef141").html(data[10]);
+				}
+
 				$("#g102").html(g1div);
 				$("#g141").html(g2div);
 				$("#datG102").html(divDat102);
@@ -143,10 +161,10 @@ $(document).ready(function(){
 				$("#scrG141Dat").html(srcDat141);
 		    }).complete(function(){
 		    	$(".disableCharge").prop("disabled",false);
-		    });/*.error(function(xhr, err){
+		    }).error(function(xhr, err){
 		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
 		    	alert("responseText: "+xhr.responseText);
-		    });*/
+		    });
 	}
 
 	$(".defaultWave").unbind().click(function(){
@@ -159,7 +177,49 @@ $(document).ready(function(){
 		}
 	})
 
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 
+	$("input[name='choiseRef']").unbind().click(function(){
+		referencing($(".wavelengh").val(),$(this).val());			
+	});
+
+	function referencing(redshift, mode){
+		var csrftoken = getCookie('csrftoken');
+
+		$.ajax({
+			url : "/ds9s/fits/referencing/"+redshift+"/"+mode+"/",
+			type: "POST",
+		    beforeSend: function(xhr, settings) {
+		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+		            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+		        }
+		        $(".disableCharge").prop("disabled",true);
+		    }
+		    })
+			.success(function(data){
+				data = $.parseJSON(data)
+				var src102 = data[0];
+				var div102 = data[1];
+				var src141 = data[2];
+				var div141 = data[3];			
+
+				$("#divRef102").html(div102);
+				$("#divRef141").html(div141);
+
+				$("#scrRef102").html(src102);
+				$("#scrRef141").html(src141);
+		    }).error(function(xhr, err){
+		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
+		    	alert("responseText: "+xhr.responseText);
+		    }).complete(function(){
+		    	$(".disableCharge").prop("disabled",false);
+		    });
+	}
 
 });
 
