@@ -79,7 +79,7 @@ class Identifications(models.Model):
 	galaxy = models.ForeignKey('Galaxy')
 	galaxytype = models.ForeignKey('GalaxyType')
 	redshift = models.DecimalField(max_digits=19, decimal_places=10)
-	contamined = models.BooleanField(default=False)
+	contaminated = models.BooleanField(default=False)
 
 	def __unicode__(self): 	
 		return "{0} is a {1} for {2}",format(self.galaxy.uniq_id, self.galaxytype.name, self.user.username)

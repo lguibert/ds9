@@ -838,3 +838,38 @@ def createReference(data,redshift):
 	figure()
 
 	return html_script, html_div
+
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
+#---------------------------------- ADD IDENTIFICATION & ANALYSIS -------------------------------------
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
+
+
+def addIdentification(gal_id, user_id, galtype_id, redshift, contaminated):
+	try:
+		iden = Identifcations()
+		iden.galaxy_id = gal_id
+		iden.user_id = user_id
+		iden.galaxytype_id = galtype_id
+		iden.redshift = redshift
+		iden.contaminated = contaminated
+		iden.save() 
+		return True
+	except:
+		return False
+
+def addAnalys(gal_id, user_id, emissionline_id, value):
+	try:
+		aly = Analysis()
+		aly.galaxy_id = gal_id
+		aly.user_id = user_id
+		aly.emissionline_id = emissionline_id
+		aly.value = value
+		aly.save()
+		return True
+	except:
+		return False
+
+#function who will be called by urls to begin adding
+def saveUserReview(gal_id)
