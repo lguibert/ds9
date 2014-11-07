@@ -13,11 +13,11 @@ class Galaxy(models.Model):
 	uniq_id = models.IntegerField(default=0)
 	last_update = models.DateTimeField(auto_now=True)
 	uniq_name = models.CharField(max_length=254,null=True)
-	generated = models.BooleanField(default=False)
 
 	parfolder = models.ForeignKey('ParFolder')	
 	users = models.ManyToManyField(User, through='Analysis')
 	galaxyfields = models.ManyToManyField('GalaxyFields', through='GalaxyFeatures')
+	galaxytype = models.ManyToManyField('GalaxyType', through='Identifications')
 
 	def __unicode__(self):
 		return self.name
@@ -40,7 +40,7 @@ class EmissionLine(models.Model):
 	shortname = models.CharField(max_length=254)
 	emissionlinefields = models.ManyToManyField('EmissionLineFields', through='EmissionFeatures')
 	
-	galaxys = models.ManyToManyField(Galaxy, through='Analysis')
+	galaxys = models.ManyToManyField('Galaxy', through='Analysis')
 
 	def __unicode__(self):
 		return self.name + ' (' +self.shortname +')'
@@ -56,14 +56,30 @@ class EmissionFeatures(models.Model):
 	emissionlinefields = models.ForeignKey('EmissionLineFields')
 	emissionline = models.ForeignKey('EmissionLine')
 
+class GalaxyType(models.Model):
+	name = models.CharField(max_length=254)
+
+	galaxys = models.ManyToManyField('Galaxy', through='Identifications', related_name="galaxytype_galaxys_iden")
+
+	def __unicode__(self):
+		return self.name
+
 class Analysis(models.Model):
 	user = models.ForeignKey(User)
 	galaxy = models.ForeignKey('Galaxy')
 	emissionline = models.ForeignKey('EmissionLine')
 	#approximately one billion with a resolution of 10 decimal
 	value = models.DecimalField(max_digits=19, decimal_places=10)
-	#many more are comming
 
 	def __unicode__(self): 	
 		return "Done by {0} on galaxy number {1}",format(self.user.username, self.galaxy.uniq_id)
 
+class Identifications(models.Model):
+	user = models.ForeignKey(User)
+	galaxy = models.ForeignKey('Galaxy')
+	galaxytype = models.ForeignKey('GalaxyType')
+	redshift = models.DecimalField(max_digits=19, decimal_places=10)
+	contamined = models.BooleanField(default=False)
+
+	def __unicode__(self): 	
+		return "{0} is a {1} for {2}",format(self.galaxy.uniq_id, self.galaxytype.name, self.user.username)

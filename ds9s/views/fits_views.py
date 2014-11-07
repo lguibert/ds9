@@ -809,9 +809,7 @@ def createReference(data,redshift):
 	pcolors = ['black','red','blue']
 
 	maxd = np.amax(data)
-	mind = np.amin(data)
-	mind0 = np.amin(data,axis=0)
-	mind1 = np.amin(data,axis=1)
+	#mind = min(np.amin(data,axis=0)) #big problem here
 
 	for i in range(data.shape[1]-1):
 		mul = line(x=data[0:,0], 
@@ -820,7 +818,7 @@ def createReference(data,redshift):
 			color=pcolors[i%3],
 			plot_width=400,
 			plot_height=400,
-			#x_range=[mind,maxd]
+			x_range=[maxd/2,maxd]
 		)
 
 	hold()
