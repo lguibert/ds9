@@ -17,7 +17,7 @@ class Galaxy(models.Model):
 	parfolder = models.ForeignKey('ParFolder')	
 	users = models.ManyToManyField(User, through='Analysis')
 	galaxyfields = models.ManyToManyField('GalaxyFields', through='GalaxyFeatures')
-	galaxytype = models.ManyToManyField('GalaxyType', through='Identifications')
+	galaxytype = models.ManyToManyField('GalaxyTypes', through='Identifications')
 
 	def __unicode__(self):
 		return self.name
@@ -56,10 +56,11 @@ class EmissionFeatures(models.Model):
 	emissionlinefields = models.ForeignKey('EmissionLineFields')
 	emissionline = models.ForeignKey('EmissionLine')
 
-class GalaxyType(models.Model):
+class GalaxyTypes(models.Model):
 	name = models.CharField(max_length=254)
+	nameForId = models.CharField(max_length=254)
 
-	galaxys = models.ManyToManyField('Galaxy', through='Identifications', related_name="galaxytype_galaxys_iden")
+	galaxys = models.ManyToManyField('Galaxy', through='Identifications', related_name="galaxytypes_galaxys_iden")
 
 	def __unicode__(self):
 		return self.name
@@ -77,7 +78,7 @@ class Analysis(models.Model):
 class Identifications(models.Model):
 	user = models.ForeignKey(User)
 	galaxy = models.ForeignKey('Galaxy')
-	galaxytype = models.ForeignKey('GalaxyType')
+	galaxytype = models.ForeignKey('GalaxyTypes')
 	redshift = models.DecimalField(max_digits=19, decimal_places=10)
 	contaminated = models.BooleanField(default=False)
 

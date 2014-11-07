@@ -118,17 +118,17 @@ class = 'container-fuild'
 			</div>
 		</div>
 		<div class="clear">
-			<form method="post" action="#">
+			<form id="userReview" method="post" action="/ds9s/fits/saveReview/{{gal.id}}/{{gal.uniq_id}}/">
 				{% csrf_token %}
-				<input type="radio" name="typeObject" id="objectStar" value="star"/>
+				<input type="radio" required name="typeObject" id="objectStar" value="star"/>
 					<label for="objectStar">This object is a <strong>star</strong></label>
-				<input type="radio" name="typeObject" id="objectQuasar" value="quasar"/>
+				<input type="radio" required name="typeObject" id="objectQuasar" value="quasar"/>
 					<label for="objectQuasar">This object is a <strong>quasar</strong></label>
-				<input type="radio" name="typeObject" id="objectGalaxyNolines" value="galaxyNolines"/>
+				<input type="radio" required name="typeObject" id="objectGalaxyNolines" value="galaxyNoLines"/>
 					<label for="objectGalaxyNolines">This object is a <strong>galaxy, but without identifiable emission lines</strong></label>
-				<input type="radio" name="typeObject" id="objectGalaxyLines" value="galaxyLines"/>
+				<input type="radio" required name="typeObject" id="objectGalaxyLines" value="galaxyLines"/>
 					<label for="objectGalaxyLines">This object is a <strong>galaxy, with emission lines at the redshift I have identified</strong></label>
-				<input type="checkbox" name="contamination" id="contamination"/><label for="contamination">This object's spectrum suffers from contamination from nearby stars/galaxies</label>
+				<input type="checkbox" name="contaminated" id="contaminated"/><label for="contaminated">This object's spectrum suffers from contamination from nearby stars/galaxies</label>
 				<br>
 				<input type="submit" class="btn btn-danger" value="Validate"/>
 			</form>

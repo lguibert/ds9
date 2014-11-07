@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 #from django.contrib.auth.models import User
-from ds9s.models import Galaxy, ParFolder, Analysis, GalaxyFeatures
+from ds9s.models import Galaxy, ParFolder, Analysis, GalaxyFeatures, GalaxyTypes, Identifications
 from ds9s.forms import UploadFitsForm, NewParFileForm
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
@@ -848,7 +848,7 @@ def createReference(data,redshift):
 
 def addIdentification(gal_id, user_id, galtype_id, redshift, contaminated):
 	try:
-		iden = Identifcations()
+		iden = Identifications()
 		iden.galaxy_id = gal_id
 		iden.user_id = user_id
 		iden.galaxytype_id = galtype_id
@@ -858,6 +858,7 @@ def addIdentification(gal_id, user_id, galtype_id, redshift, contaminated):
 		return True
 	except:
 		return False
+
 
 def addAnalys(gal_id, user_id, emissionline_id, value):
 	try:
@@ -871,5 +872,59 @@ def addAnalys(gal_id, user_id, emissionline_id, value):
 	except:
 		return False
 
+def getGalaxyTypes():
+	return GalaxyTypes.objects.values("id","nameForId")
+
+def getIdOfType(typeObj):
+	types = getGalaxyTypes()
+
+	objId = None
+
+	for t in types:
+		if typeObj == t["nameForId"]:
+			objId = t["id"]
+
+	return objId
+
+def secureRedshift(redshift):
+	if redshift < 0:
+		redshift = 0
+	elif redshift > 3:
+		redshift = 3
+
+	return redshift
+
 #function who will be called by urls to begin adding
-def saveUserReview(gal_id)
+#id is the galaxy id from the database
+def saveUserReview(request, id, uniq_id):
+	user_id = request.user.id
+	check = Identifications.objects.filter(galaxy_id=id, user_id=user_id)
+
+	if not check:
+		typeObj = request.POST.get("typeObject")
+		typeObjId = getIdOfType(typeObj)
+
+		if typeObjId != None:
+			redshift = secureRedshift(request.POST.get("redshift"))
+			contaminated = request.POST.get("contaminated")
+			#lines = [] => array with emission lines
+			#lineCheck = {}
+
+			#for line in lines:
+			#	linecheck.append(addAnalys(id, user_id, line.id, line.value))
+
+			identification = addIdentification(id, user_id, typeObjId, redshift, contaminated)
+
+			if identification:
+				messages.success(request, "You successfully identified this object.")
+				return HttpResponseRedirect("/ds9s/fits/view/"+uniq_id+"/")
+			else:
+				messages.error(request, "Error.")
+				return HttpResponseRedirect("/ds9s/fits/view/"+uniq_id+"/")
+		else:
+			messages.error(request, "Error in the object's value.")
+			return HttpResponseRedirect("/ds9s/fits/view/"+uniq_id+"/")
+	else:
+		messages.error(request, "You already identified this object.")
+		return HttpResponseRedirect("/ds9s/fits/view/"+uniq_id+"/")
+	
