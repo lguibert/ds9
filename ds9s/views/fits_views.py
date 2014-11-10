@@ -125,12 +125,13 @@ def test(request):
 	return render(request, 'test.html',locals())
 
 @login_required
-def viewGalaxy(request, id):
-	gal = get_object_or_404(Galaxy, uniq_id=id)
+def viewGalaxy(request, uid):
+	gal = get_object_or_404(Galaxy, uniq_id=uid)
+	check = getIdentificationUser(gal.id, request.user.id)
 	colors = getColors()	
 
-	next = getNextGalaxy(id)
-	previous = getPrevGalaxy(id)
+	next = getNextGalaxy(uid)
+	previous = getPrevGalaxy(uid)
 
 	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
 
@@ -894,19 +895,26 @@ def secureRedshift(redshift):
 
 	return redshift
 
+def getIdentificationUser(gal_id, user_id):
+	return Identifications.objects.filter(galaxy_id=gal_id, user_id=user_id)
+
 #function who will be called by urls to begin adding
 #id is the galaxy id from the database
 def saveUserReview(request, id, uniq_id):
 	user_id = request.user.id
-	check = Identifications.objects.filter(galaxy_id=id, user_id=user_id)
+	check = getIdentificationUser(id, user_id)
 
 	if not check:
 		typeObj = request.POST.get("typeObject")
 		typeObjId = getIdOfType(typeObj)
 
 		if typeObjId != None:
-			redshift = secureRedshift(request.POST.get("redshift"))
+			redshift = secureRedshift(float(request.POST.get("redshift")))
+
 			contaminated = request.POST.get("contaminated")
+			if contaminated == None:
+				contaminated = 0
+
 			#lines = [] => array with emission lines
 			#lineCheck = {}
 
@@ -917,9 +925,10 @@ def saveUserReview(request, id, uniq_id):
 
 			if identification:
 				messages.success(request, "You successfully identified this object.")
-				return HttpResponseRedirect("/ds9s/fits/view/"+uniq_id+"/")
+				gal = getNextGalaxy(uniq_id)
+				return HttpResponseRedirect("/ds9s/fits/view/"+str(gal.uniq_id)+"/")
 			else:
-				messages.error(request, "Error.")
+				messages.error(request, "Error during saving.")
 				return HttpResponseRedirect("/ds9s/fits/view/"+uniq_id+"/")
 		else:
 			messages.error(request, "Error in the object's value.")

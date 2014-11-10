@@ -49,7 +49,6 @@ $(document).ready(function(){
 		showSelector("label[for='id_passwordCheck']");
 	}
 
-
 	$("#btnDisplayRef").unbind().click(function(){
 		if ($(this).attr('type') == 0){
         	$(this).attr('type','1');
@@ -84,9 +83,6 @@ $(document).ready(function(){
 			$("#divRef141").html("");
 		}
 	});
-
-
-
 
 	$("#userReview").submit(function(e){
 		$('<input />').attr('type', 'hidden')

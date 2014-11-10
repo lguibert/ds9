@@ -148,10 +148,6 @@ div[class='bk-sidebar'] a[class='bk-logo bk-logo-small']{
 	margin: 0 auto;
 }
 
-.legendsLines{
-	display:none;
-}
-
 #refSpectra ul li, #refSpectra ul{
 	display: inline-block;
 }
@@ -251,4 +247,8 @@ input[type="number"]{
 
 #removeSelec:active{
 	font-style: italic;
+}
+
+#validate-review{
+	margin-top: 10px;
 }

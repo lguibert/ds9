@@ -16,7 +16,7 @@ urlpatterns = patterns('ds9s.views',
 	url(r'^/fits/scaling/(?P<id>[0-9]+)/(?P<val>[0-9]+)/(?P<color>[a-zA-Z]{4,8}\-[0-9]{1,2})/?$','scaling'),
 	url(r'^/fits/wavelenghing/(?P<id>[0-9]+)/(?P<redshift>[0-9\.]+)/(?P<mode>[a-z]+)/?$','wavelenghing'),
 	url(r'^/fits/referencing/(?P<redshift>[0-9\.]+)/(?P<mode>[a-z]+)/?$','referencing'),
-	url(r'^/fits/view/(?P<id>[0-9]+)/?$','viewGalaxy'),
+	url(r'^/fits/view/(?P<uid>[0-9]+)/?$','viewGalaxy'),
 	url(r'^/fits/saveReview/(?P<id>[0-9]+)/(?P<uniq_id>[0-9]+)/?$','saveUserReview'),
 	url(r'^/fits/upload/','newParFile'),
 	#url(r'^/fits/zoom/(?P<id>[0-9]+)/?$','zoomFile')

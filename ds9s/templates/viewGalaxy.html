@@ -117,23 +117,49 @@ class = 'container-fuild'
 				</div>
 			</div>
 		</div>
+		{% if not check %}
 		<div class="clear">
 			<form id="userReview" method="post" action="/ds9s/fits/saveReview/{{gal.id}}/{{gal.uniq_id}}/">
 				{% csrf_token %}
-				<input type="radio" required name="typeObject" id="objectStar" value="star"/>
-					<label for="objectStar">This object is a <strong>star</strong></label>
-				<input type="radio" required name="typeObject" id="objectQuasar" value="quasar"/>
-					<label for="objectQuasar">This object is a <strong>quasar</strong></label>
-				<input type="radio" required name="typeObject" id="objectGalaxyNolines" value="galaxyNoLines"/>
-					<label for="objectGalaxyNolines">This object is a <strong>galaxy, but without identifiable emission lines</strong></label>
-				<input type="radio" required name="typeObject" id="objectGalaxyLines" value="galaxyLines"/>
-					<label for="objectGalaxyLines">This object is a <strong>galaxy, with emission lines at the redshift I have identified</strong></label>
-				<input type="checkbox" name="contaminated" id="contaminated"/><label for="contaminated">This object's spectrum suffers from contamination from nearby stars/galaxies</label>
-				<br>
-				<input type="submit" class="btn btn-danger" value="Validate"/>
+				<div class="radio">
+					<label for="objectStar">
+						<input type="radio" required name="typeObject" id="objectStar" value="star"/>
+						This object is a <strong>star</strong>
+					</label>
+				</div>
+				<div class="radio">
+					<label for="objectQuasar">
+						<input type="radio" required name="typeObject" id="objectQuasar" value="quasar"/>
+						This object is a <strong>quasar</strong>
+					</label>
+				</div>
+				<div class="radio">
+					<label for="objectGalaxyNolines">
+						<input type="radio" required name="typeObject" id="objectGalaxyNolines" value="galaxyNoLines"/>
+						This object is a <strong>galaxy, but without identifiable emission lines</strong>
+					</label>
+				</div>
+				<div class="radio">
+					<label for="objectGalaxyLines">
+						<input type="radio" required name="typeObject" id="objectGalaxyLines" value="galaxyLines"/>
+						This object is a <strong>galaxy, with emission lines at the redshift I have identified</strong>
+					</label>
+				</div>
+				<div class="checkbox">
+					<label for="contaminated">
+						<input type="checkbox" name="contaminated" id="contaminated"/>
+						This object's spectrum suffers from contamination from nearby stars/galaxies
+					</label>
+				</div>
+
+				<input type="submit" id="validate-review" class="btn btn-default" value="Validate"/>
 			</form>
 		</div>
-
+		{% else %}
+			<div class="clear">
+				<h3>You already did this object.</h3>
+			</div>
+		{% endif %}
 	</div>
 
 	{% include "buttonsNextPrev.html" %}
