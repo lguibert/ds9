@@ -145,12 +145,19 @@ class = 'container-fuild'
 						This object is a <strong>galaxy, with emission lines at the redshift I have identified</strong>
 					</label>
 				</div>
+				<div class="radio">
+					<label for="objectGalaxyNothing">
+						<input type="radio" required name="typeObject" value="nothing" id="objectGalaxyNothing"/>
+						This object is <strong>nothing</strong>.
+					</label>
+				</div>
 				<div class="checkbox">
 					<label for="contaminated">
 						<input type="checkbox" name="contaminated" id="contaminated"/>
 						This object's spectrum suffers from contamination from nearby stars/galaxies
 					</label>
 				</div>
+
 
 				<input type="submit" id="validate-review" class="btn btn-default" value="Validate"/>
 			</form>

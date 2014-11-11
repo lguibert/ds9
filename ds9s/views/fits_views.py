@@ -120,38 +120,18 @@ def viewHomeGalaxy(request):
 	return render(request, 'homeGalaxy.html',locals())
 
 
-def queue(fieldId=321,act=0):
-	objects = np.genfromtxt("Par"+str(fieldId)+"lines.dat", dtype=np.str)
-	actual = objects[act]
-
-	next = None
-	i = 0
-	wavelenghts = []
-
-	while next == None:
-		test = objects[act + i]
-
-		if test[2] == actual[2]:
-			wavelenghts.append(test[3])
-			i += 1 
-		else:
-			try:
-				test_gal = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [test[2], test[0]])[0]
-				actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]
-				next = test_gal				
-			except IndexError:
-				i += 1
-
-	return actualEnd, next, wavelenghts
-
-
 @login_required
 def test(request):
 	return render(request, 'test.html',locals())
 
 @login_required
-def viewGalaxy(request):
-	gal, next, wavelenghts = queue()
+def viewGalaxy(request, uid=0):
+	if uid != 0:
+		gal, next, wavelenghts = queue(act=getIndexObjectById("321",uid))
+	else:
+		gal, next, wavelenghts = queue()
+
+
 	check = getIdentificationUser(gal.id, request.user.id)
 	colors = getColors()	
 
@@ -169,8 +149,6 @@ def viewGalaxy(request):
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
 		
 	#directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
-
-	print "premier: ",gal.uniq_id
 
 	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], scalingDefault)				
 	
@@ -285,8 +263,6 @@ def scaling(request, val, color):
 	#pdb.set_trace()
 	gal = get_object_or_404(Galaxy, uniq_id=request.session['uidGal'])
 
-
-	print "second: ",gal.uniq_id
 	colors = getColorsNames()
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
@@ -451,57 +427,45 @@ def calculatePositionText(value):
 		value = value - 1
 	return value
 
-def getPrevGalaxy(id):
-	previous = None
 
-	while(previous == None):
-		id = int(id) - 1
-		if id > 0:
-			try:
-				previous = Galaxy.objects.get(uniq_id=id)
-			except:
-				previous = None
-		else:
-			break;
+def createPathParDat(fieldId):
+	return basePath +"Par"+fieldId+"_final/"+"Par"+fieldId+"lines.dat"
 
-	return previous
-
-def getNextGalaxy(fieldId, id):
-	next = None
-
-	latest = Galaxy.objects.latest('uniq_id').uniq_id
-	while(next == None):
-		id = int(id) + 1
-		if id < latest:
-			try:
-				next = Galaxy.objects.get(uniq_id=id)
-			except:
-				next = None
-		else:
-			break;
-
-	return next
-
-	'''objects = np.genfromtxt("Par"+str(fieldId)+"lines.dat", dtype=np.str)
-
-	next = None
-
-	print id
+def getIndexObjectById(fieldId, uniq_id):
+	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
+	index = None
 
 	for i, obj in enumerate(objects):
-		#print obj[2]
-		if obj[2] == id:
-			next = i + 1
+		if obj[2] == str(uniq_id):
+			index = i
+			break
 
-	#print next
+	return index
 
-	nextObj = objects[next]
 
-	#print nextObj
+def queue(fieldId='321',act=0):
+	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
+	actual = objects[act]
 
-	nextGal = Galaxy.objects.get(nextObj[2])
+	next = None
+	i = 0
+	wavelenghts = []
 
-	return nextGal'''
+	while next == None:
+		test = objects[act + i]
+
+		if test[2] == actual[2]:
+			wavelenghts.append(test[3])
+			i += 1 
+		else:
+			try:
+				test_gal = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [test[2], test[0]])[0]
+				actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]
+				next = test_gal				
+			except IndexError:
+				i += 1
+
+	return actualEnd, next, wavelenghts
 
 
 
