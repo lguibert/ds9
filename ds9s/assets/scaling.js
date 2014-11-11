@@ -37,11 +37,8 @@ $(document).ready(function(){
 	function scaling(val,color){
 		var csrftoken = getCookie('csrftoken');
 
-		url = document.location.href;
-		id = url.split("/")[6];
-
 		$.ajax({
-			url : "/ds9s/fits/scaling/"+id+"/"+val+"/"+color+"/",
+			url : "/ds9s/fits/scaling/"+val+"/"+color+"/",
 			type: "POST",
 		    beforeSend: function(xhr, settings) {
 		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -117,11 +114,10 @@ $(document).ready(function(){
 	function wavelenghing(redshift,mode){
 		var csrftoken = getCookie('csrftoken');
 
-		url = document.location.href;
-		id = url.split("/")[6];
+		//id = $("#uidGal").html();
 
 		$.ajax({
-			url : "/ds9s/fits/wavelenghing/"+id+"/"+redshift+"/"+mode+"/",
+			url : "/ds9s/fits/wavelenghing/"+redshift+"/"+mode+"/",
 			type: "POST",
 		    beforeSend: function(xhr, settings) {
 		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {

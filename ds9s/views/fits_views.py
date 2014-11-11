@@ -102,7 +102,6 @@ colors = ["indianred","steelblue","indigo","lightseagreen","lightseagreen","dark
 def viewHomeGalaxy(request):
 	galaxy_list = Galaxy.objects.values('uniq_id','id').order_by('uniq_id')
 	analysis = Analysis.objects.raw('SELECT COUNT(DISTINCT user_id) as count, galaxy_id, id FROM ds9s_analysis group by galaxy_id')
-
 	aly = {}
 	for g in galaxy_list:
 		aly[g['id']] = 0
@@ -120,18 +119,45 @@ def viewHomeGalaxy(request):
 
 	return render(request, 'homeGalaxy.html',locals())
 
+
+def queue(fieldId=321,act=0):
+	objects = np.genfromtxt("Par"+str(fieldId)+"lines.dat", dtype=np.str)
+	actual = objects[act]
+
+	next = None
+	i = 0
+	wavelenghts = []
+
+	while next == None:
+		test = objects[act + i]
+
+		if test[2] == actual[2]:
+			wavelenghts.append(test[3])
+			i += 1 
+		else:
+			try:
+				test_gal = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [test[2], test[0]])[0]
+				actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]
+				next = test_gal				
+			except IndexError:
+				i += 1
+
+	return actualEnd, next, wavelenghts
+
+
 @login_required
 def test(request):
 	return render(request, 'test.html',locals())
 
 @login_required
-def viewGalaxy(request, uid):
-	gal = get_object_or_404(Galaxy, uniq_id=uid)
+def viewGalaxy(request):
+	gal, next, wavelenghts = queue()
 	check = getIdentificationUser(gal.id, request.user.id)
 	colors = getColors()	
 
-	next = getNextGalaxy(uid)
-	previous = getPrevGalaxy(uid)
+	request.session['uidGal'] = gal.uniq_id
+
+	#previous = getPrevGalaxy(uid)
 
 	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
 
@@ -143,6 +169,8 @@ def viewGalaxy(request, uid):
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
 		
 	#directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
+
+	print "premier: ",gal.uniq_id
 
 	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], scalingDefault)				
 	
@@ -227,8 +255,8 @@ def plot1DSpectrum(pathToFile,minWavelength, maxWavelength,title,redshift=redshi
     return html_script, html_div
 
 @login_required
-def wavelenghing(request, id, redshift,mode="false"):
-	gal = get_object_or_404(Galaxy, uniq_id=id)
+def wavelenghing(request, redshift,mode="false"):
+	gal = get_object_or_404(Galaxy, uniq_id=request.session['uidGal'])
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
 
@@ -253,9 +281,12 @@ def wavelenghing(request, id, redshift,mode="false"):
 	return HttpResponse(json.dumps(data))
 
 @login_required
-def scaling(request, id, val, color):
+def scaling(request, val, color):
 	#pdb.set_trace()
-	gal = get_object_or_404(Galaxy, uniq_id=id)
+	gal = get_object_or_404(Galaxy, uniq_id=request.session['uidGal'])
+
+
+	print "second: ",gal.uniq_id
 	colors = getColorsNames()
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
@@ -435,7 +466,7 @@ def getPrevGalaxy(id):
 
 	return previous
 
-def getNextGalaxy(id):
+def getNextGalaxy(fieldId, id):
 	next = None
 
 	latest = Galaxy.objects.latest('uniq_id').uniq_id
@@ -450,6 +481,29 @@ def getNextGalaxy(id):
 			break;
 
 	return next
+
+	'''objects = np.genfromtxt("Par"+str(fieldId)+"lines.dat", dtype=np.str)
+
+	next = None
+
+	print id
+
+	for i, obj in enumerate(objects):
+		#print obj[2]
+		if obj[2] == id:
+			next = i + 1
+
+	#print next
+
+	nextObj = objects[next]
+
+	#print nextObj
+
+	nextGal = Galaxy.objects.get(nextObj[2])
+
+	return nextGal'''
+
+
 
 def getColors():
 	return json.load(open('/opt/lampp/www/ds9/ds9s/assets/colors.json'))
