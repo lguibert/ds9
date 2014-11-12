@@ -75,7 +75,7 @@ class = 'container-fuild'
 
 			<div id="lines" class="col-xs-6 col-md-6">
 				{% include "controlWave.html" %}
-				<div contenteditable="false" class="row">
+				<div contenteditable="false" class="">
 					<div id="datG102" class="imageBokeh">
 						{{g102DatDiv}}
 					</div>
@@ -84,8 +84,7 @@ class = 'container-fuild'
 					</div>
 				</div>
 			</div>
-			</div>
-			<div class="row">
+		</div>
 			<div id="gFiles" class="col-xs-6 col-md-6">
 				{% include "controlWave.html" %}
 				<div contenteditable="false" class="row">
@@ -159,7 +158,7 @@ class = 'container-fuild'
 				</div>
 
 
-				<input type="submit" id="validate-review" class="btn btn-default" value="Validate"/>
+				<input type="submit" id="validate-review" class="btn btn-default" value="Validate & go next"/>
 			</form>
 		</div>
 		{% else %}

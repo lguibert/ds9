@@ -167,7 +167,8 @@ $(document).ready(function(){
 		if($(".valWavelengh").val() != 1 || $(".wavelengh").val() != 1){
 			$(".valWavelengh").val("1");
 			$(".wavelengh").val("1");
-			wavelenghing($(".wavelengh").val());
+			wavelenghing($(".wavelengh").val(),undefinedBool($("input[name='choiseRef']:checked").val()));
+
 		}else{
 			alert("Value already at default value");
 		}

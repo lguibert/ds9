@@ -8,12 +8,10 @@
 		<input class="btn btn-default"  disabled="disabled" type="button" value="Previous" />
 	{% endif %}	
 	<span>—</span>	
-	{%if next %}
-		<form action="/ds9s/fits/view/{{next.uniq_id}}/" method="post">
+	
+		<form action="/ds9s/fits/view/{{gal.uniq_id}}/" method="post">
 			{% csrf_token %}
 			<input class="btn btn-default"  type="submit" value="Next" />
 		</form>
-	{%else%}
-		<input class="btn btn-default"  disabled="disabled" type="button" value="Next" />
-	{% endif %}	
+
 </div>

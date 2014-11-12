@@ -125,11 +125,12 @@ def test(request):
 	return render(request, 'test.html',locals())
 
 @login_required
-def viewGalaxy(request, uid=0):
-	if uid != 0:
-		gal, next, wavelenghts = queue(act=getIndexObjectById("321",uid))
-	else:
-		gal, next, wavelenghts = queue()
+def viewGalaxy(request, uid=1):
+	print uid
+	#if uid != 0:
+	next, gal, wavelenghts = queue(request,act=getIndexObjectById("321",uid))
+	#else:
+	#	gal, next, wavelenghts = queue(request)
 
 
 	check = getIdentificationUser(gal.id, request.user.id)
@@ -157,8 +158,8 @@ def viewGalaxy(request, uid=0):
 	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshiftDefault)
 	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshiftDefault)
 
-	g102DatScript, g102DatDiv = plot1DSpectrum(checked[4],minG102,maxG102,"G102 dat")
-	g141DatScript, g141DatDiv = plot1DSpectrum(checked[5],minG141,maxG141,"G141 dat")
+	g102DatScript, g102DatDiv = plot1DSpectrum(request,checked[4],minG102,maxG102,"G102dat")
+	g141DatScript, g141DatDiv = plot1DSpectrum(request,checked[5],minG141,maxG141,"G141dat")
 	
 
 	return render(request, 'viewGalaxy.html',locals())
@@ -189,24 +190,34 @@ def read1DSpectrum(pathToASCIISpectrum,minWavelength=None,maxWavelength=None):
         spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
     return spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders
 
-def plot1DSpectrum(pathToFile,minWavelength, maxWavelength,title,redshift=redshiftDefault):
+def plot1DSpectrum(request,pathToFile,minWavelength, maxWavelength,title,redshift=redshiftDefault):
     # Separately read in the G102 and G141 spectra
     wl,f,u,c,z = read1DSpectrum(pathToFile, minWavelength, maxWavelength)
     
-    wlmax = max(wl)
-    wlmin = min(wl)
-    cmax = max(c)
-    cmin = min(c)
-    fmax = max(f)
-    fmin = min(f)
+    wlmax = max(wl) #
+    wlmin = min(wl) #
+    #cmax = max(c)
+    cmin = min(c) #
+    fmax = max(f) #
+    #fmin = min(f)
     xplus = 100
     yplus = 0.00000000000000001
+
+    wlmin_f = wlmin-xplus
+    wlmax_f = wlmax+xplus
+    cmin_f = cmin-yplus
+    fmax_f = fmax+yplus
+
+    array = [wlmin_f,wlmax_f]
+
+    request.session['array'+title] = array
+
 
     mul = multi_line(xs=[wl,wl],
     	ys=[f,c],
     	color=["black","red"],
-    	x_range=[wlmin-xplus,wlmax+xplus],
-    	y_range=[cmin-yplus,fmax+yplus],
+    	x_range=[wlmin_f,wlmax_f],
+    	y_range=[cmin_f,fmax_f],
     	line_width=2,
     	tools=TOOLS,
     	plot_width=400,
@@ -219,7 +230,7 @@ def plot1DSpectrum(pathToFile,minWavelength, maxWavelength,title,redshift=redshi
     for index, em in enumerate(emlineWavelengthsRest):
     	emlineWavelengths = em * (1.0 + float(redshift))
     	lin = line([emlineWavelengths,emlineWavelengths],[cmin-yplus,fmax+yplus],color=colors[index],line_width=2)
-    	text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
+    	#text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
 
     resources = Resources("inline")
 
@@ -245,14 +256,14 @@ def wavelenghing(request, redshift,mode="false"):
 
 	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshift)
 	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshift)
-	g102script, g102div = plot1DSpectrum(checked[4],minG102,maxG102,"G102 dat",redshift)
-	g141script, g141div = plot1DSpectrum(checked[5],minG141,maxG141,"G141 dat",redshift)
+	g102script, g102div = plot1DSpectrum(request,checked[4],minG102,maxG102,"G102dat",redshift)
+	g141script, g141div = plot1DSpectrum(request,checked[5],minG141,maxG141,"G141dat",redshift)
 
 	#return f110script, f110div, f160script, f160div
 	data = g1script, g1div, g2script, g2div, g102script, g102div, g141script, g141div
 
 	if mode != "false":
-		src102, div102, src141, div141 = plotModels(float(redshift), mode=mode)
+		src102, div102, src141, div141 = plotModels(request, float(redshift), mode=mode)
 		data = data + (src102, div102, src141, div141)
 
 
@@ -282,7 +293,7 @@ def scaling(request, val, color):
 
 @login_required
 def referencing(request, redshift, mode):
-	src102, div102, src141, div141 = plotModels(float(redshift), mode=mode)
+	src102, div102, src141, div141 = plotModels(request,float(redshift), mode=mode)
 
 	data = src102, div102, src141, div141
 	return HttpResponse(json.dumps(data))
@@ -331,6 +342,8 @@ def displayGImage(request, file, short_name, redshift):
 	yDispSize=xDispSize*float(npixy)/float(npixx)
 
 	dataBoundaries = grismBoundaries([iData.shape[0],iData.shape[1]],iHdr)
+
+
 
 	script, div = createBokehImage(iData, dataBoundaries,430,150,short_name, type=False,redshift=redshift)
 
@@ -408,7 +421,7 @@ def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=
 		for index, em in enumerate(emlineWavelengthsRest):
 			emlineWavelengths = em * (1.0 + float(redshift))
 			lin = line([emlineWavelengths,emlineWavelengths],y,color=colors[index],line_width=2)
-			text([emlineWavelengths+20],calculatePositionText(index),emlineNames[index],0,text_color=colors[index])	
+			#text([emlineWavelengths+20],calculatePositionText(index),emlineNames[index],0,text_color=colors[index])	
 			
 	resources = Resources("inline")
 
@@ -443,7 +456,7 @@ def getIndexObjectById(fieldId, uniq_id):
 	return index
 
 
-def queue(fieldId='321',act=0):
+def queue(request, fieldId='321',act=0):
 	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
 	actual = objects[act]
 
@@ -454,16 +467,22 @@ def queue(fieldId='321',act=0):
 	while next == None:
 		test = objects[act + i]
 
-		if test[2] == actual[2]:
-			wavelenghts.append(test[3])
-			i += 1 
+		gal = Galaxy.objects.get(uniq_id=test[2])
+		check = getIdentificationUser(gal.id,request.user.id)
+
+		if not check:
+			if test[2] == actual[2]:
+				wavelenghts.append(test[3])
+				i += 1 
+			else:
+				try:
+					test_gal = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [test[2], test[0]])[0]
+					actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]
+					next = test_gal				
+				except IndexError:
+					i += 1
 		else:
-			try:
-				test_gal = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [test[2], test[0]])[0]
-				actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]
-				next = test_gal				
-			except IndexError:
-				i += 1
+			i += 1
 
 	return actualEnd, next, wavelenghts
 
@@ -816,18 +835,21 @@ def getModels(redshift,mode="star"):
         return None
     return modelSpectraData102,modelSpectraData141
 
-def plotModels(redshift,mode="star"):
+def plotModels(request, redshift, mode="star"):
 	modelSpectra102, modelSpectra141 = getModels(redshift, mode=mode)
 
-	script102, div102 = createReference(modelSpectra102,redshift)
-	script141, div141 = createReference(modelSpectra141,redshift)
+	g102 = request.session['arrayG102dat']
+	g141 = request.session['arrayG141dat']
+
+	script102, div102 = createReference(modelSpectra102,redshift, g102[0], g102[1])
+	script141, div141 = createReference(modelSpectra141,redshift, g141[0], g141[1])
 
 	return script102, div102, script141, div141
 
-def createReference(data,redshift):
+def createReference(data,redshift, xmin, xmax):
 	pcolors = ['black','red','blue']
 
-	maxd = np.amax(data)
+	#maxd = np.amax(data)
 	#mind = min(np.amin(data,axis=0)) #big problem here
 
 	for i in range(data.shape[1]-1):
@@ -837,7 +859,7 @@ def createReference(data,redshift):
 			color=pcolors[i%3],
 			plot_width=400,
 			plot_height=400,
-			x_range=[maxd/2,maxd]
+			x_range=[xmin,xmax]
 		)
 
 	hold()
@@ -914,7 +936,13 @@ def secureRedshift(redshift):
 	return redshift
 
 def getIdentificationUser(gal_id, user_id):
-	return Identifications.objects.filter(galaxy_id=gal_id, user_id=user_id)
+	try:
+		iden = Identifications.objects.get(galaxy_id=gal_id, user_id=user_id)
+		iden = True
+	except ObjectDoesNotExist:
+		iden = False
+
+	return iden
 
 #function who will be called by urls to begin adding
 #id is the galaxy id from the database
@@ -942,9 +970,9 @@ def saveUserReview(request, id, uniq_id):
 			identification = addIdentification(id, user_id, typeObjId, redshift, contaminated)
 
 			if identification:
+				actual, next, wavelenghts = queue(request, fieldId="321",act=getIndexObjectById("321",uniq_id))
 				messages.success(request, "You successfully identified this object.")
-				gal = getNextGalaxy(uniq_id)
-				return HttpResponseRedirect("/ds9s/fits/view/"+str(gal.uniq_id)+"/")
+				return HttpResponseRedirect("/ds9s/fits/view/"+str(next.uniq_id)+"/")
 			else:
 				messages.error(request, "Error during saving.")
 				return HttpResponseRedirect("/ds9s/fits/view/"+uniq_id+"/")
