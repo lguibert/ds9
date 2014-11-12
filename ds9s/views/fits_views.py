@@ -83,13 +83,14 @@ maxG141 = 17500.
 
 redshiftDefault = 1
 scalingDefault = 150
+crossColor = "cyan"
 
 TOOLS="pan,wheel_zoom,box_zoom,reset"
 
 emlineWavelengthsRest = np.array([3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.])
 emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"]
 #            [O II]      [Ne III] Hbeta       [O III]        [O III]      Halpha     [S II]     [S III]               [S III]       He I
-colors = ["indianred","steelblue","indigo","lightseagreen","lightseagreen","darkred","darkorchid","palevioletred","palevioletred","yellowgreen"]
+colors = ["indianred","steelblue","indigo","orange","orange","darkred","darkorchid","palevioletred","palevioletred","yellowgreen"]
 #--------------------------------------------------------------------
 
 
@@ -125,12 +126,11 @@ def test(request):
 	return render(request, 'test.html',locals())
 
 @login_required
-def viewGalaxy(request, uid=1):
-	print uid
-	#if uid != 0:
-	next, gal, wavelenghts = queue(request,act=getIndexObjectById("321",uid))
-	#else:
-	#	gal, next, wavelenghts = queue(request)
+def viewGalaxy(request, uid=0):
+	if uid == 0:
+		gal, next, wavelenghts = queue(request,act=firstObjectInFile(request))
+	else:
+		gal, next, wavelenghts = queue(request,act=getIndexObjectById("321",uid))
 
 
 	check = getIdentificationUser(gal.id, request.user.id)
@@ -155,11 +155,11 @@ def viewGalaxy(request, uid=1):
 	
 	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], scalingDefault)
 
-	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshiftDefault)
-	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshiftDefault)
+	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshiftDefault)
+	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshiftDefault)
 
-	g102DatScript, g102DatDiv = plot1DSpectrum(request,checked[4],minG102,maxG102,"G102dat")
-	g141DatScript, g141DatDiv = plot1DSpectrum(request,checked[5],minG141,maxG141,"G141dat")
+	g102DatScript, g102DatDiv = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat")
+	g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat")
 	
 
 	return render(request, 'viewGalaxy.html',locals())
@@ -190,7 +190,7 @@ def read1DSpectrum(pathToASCIISpectrum,minWavelength=None,maxWavelength=None):
         spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
     return spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders
 
-def plot1DSpectrum(request,pathToFile,minWavelength, maxWavelength,title,redshift=redshiftDefault):
+def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,title,redshift=redshiftDefault):
     # Separately read in the G102 and G141 spectra
     wl,f,u,c,z = read1DSpectrum(pathToFile, minWavelength, maxWavelength)
     
@@ -227,7 +227,10 @@ def plot1DSpectrum(request,pathToFile,minWavelength, maxWavelength,title,redshif
 
     hold()
 
-    for index, em in enumerate(emlineWavelengthsRest):
+    for wave in wavelenghts:
+    	cross(x=[float(wave)], y=0, size=30,color=crossColor)
+
+    for index, em in enumerate(emlineWavelengthsRest):    	
     	emlineWavelengths = em * (1.0 + float(redshift))
     	lin = line([emlineWavelengths,emlineWavelengths],[cmin-yplus,fmax+yplus],color=colors[index],line_width=2)
     	#text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
@@ -254,10 +257,12 @@ def wavelenghing(request, redshift,mode="false"):
 	if float(redshift) > 3.:
 		redshift = 3
 
-	g1script, g1div = displayGImage(request, checked[0],checked_short[0],redshift)
-	g2script, g2div = displayGImage(request, checked[1],checked_short[1],redshift)
-	g102script, g102div = plot1DSpectrum(request,checked[4],minG102,maxG102,"G102dat",redshift)
-	g141script, g141div = plot1DSpectrum(request,checked[5],minG141,maxG141,"G141dat",redshift)
+	wavelenghts = request.session['waves'+str(gal.uniq_id)]
+
+	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift)
+	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift)
+	g102script, g102div = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift)
+	g141script, g141div = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshift)
 
 	#return f110script, f110div, f160script, f160div
 	data = g1script, g1div, g2script, g2div, g102script, g102div, g141script, g141div
@@ -326,7 +331,7 @@ def displayFImage(request, file, gal, short_name, val, color="Greys-9"):
 
 	return script, div
 
-def displayGImage(request, file, short_name, redshift):
+def displayGImage(request, wavelenghts, file, short_name, redshift):
 	inFits=pyfits.open(file)
 	iHdr=inFits[1].header
 	iData=inFits[1].data
@@ -345,7 +350,7 @@ def displayGImage(request, file, short_name, redshift):
 
 
 
-	script, div = createBokehImage(iData, dataBoundaries,430,150,short_name, type=False,redshift=redshift)
+	script, div = createBokehImage(iData, dataBoundaries,430,150,short_name, type=False,redshift=redshift,wavelenghts=wavelenghts)
 
 	return script, div
 
@@ -395,7 +400,7 @@ def grismBoundaries(grismStampShape,grismStampHeader):
 
 
 
-def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=True, redshift=0 ,xcircle=0, ycircle=0, color="Greys-9",val=100):
+def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=True, redshift=0 ,xcircle=0, ycircle=0, color="Greys-9",val=100, wavelenghts=None):
 	data = remapPixels(data)
 
 	img = image(image=[data], 
@@ -416,6 +421,8 @@ def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=
 	if type:
 		annulus([ycircle],xcircle,9.9,10,fill_color="#df1c1c", line_color="#df1c1c")
 	else:
+		for wave in wavelenghts:
+			cross(x=[float(wave)], y=0, size=30,color=crossColor)
 		y = [-2,2]
 		#creation emition lines
 		for index, em in enumerate(emlineWavelengthsRest):
@@ -449,14 +456,31 @@ def getIndexObjectById(fieldId, uniq_id):
 	index = None
 
 	for i, obj in enumerate(objects):
+		print "test ",obj[2]
 		if obj[2] == str(uniq_id):
+			index = i
+			break
+
+	print "index ",index
+
+	return index
+
+def firstObjectInFile(request,fieldId='321'):
+	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
+
+	index = None
+
+	for i, obj in enumerate(objects):
+		gal = Galaxy.objects.get(uniq_id=obj[2])
+		check = getIdentificationUser(gal.id,request.user.id)
+		if not check:
 			index = i
 			break
 
 	return index
 
-
 def queue(request, fieldId='321',act=0):
+	#pdb.set_trace()
 	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
 	actual = objects[act]
 
@@ -483,6 +507,8 @@ def queue(request, fieldId='321',act=0):
 					i += 1
 		else:
 			i += 1
+
+	request.session['waves'+str(actualEnd.uniq_id)] = wavelenghts
 
 	return actualEnd, next, wavelenghts
 
@@ -961,11 +987,11 @@ def saveUserReview(request, id, uniq_id):
 			if contaminated == None:
 				contaminated = 0
 
-			#lines = [] => array with emission lines
-			#lineCheck = {}
+			'''linecheck = []
+			for index, em in enumerate(emlineWavelengthsRest):
+				value = em * (1.0 + float(redshift))
+				linecheck.append(addAnalys(id, user_id, index,value))'''
 
-			#for line in lines:
-			#	linecheck.append(addAnalys(id, user_id, line.id, line.value))
 
 			identification = addIdentification(id, user_id, typeObjId, redshift, contaminated)
 

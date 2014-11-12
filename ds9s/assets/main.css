@@ -212,8 +212,8 @@ input[type="number"]{
 	background-color:indigo;
 }
 
-.lightseagreen{
-	background-color:lightseagreen;
+.orange{
+	background-color:orange;
 }
 
 .darkred{
@@ -230,6 +230,18 @@ input[type="number"]{
 
 .yellowgreen{
 	background-color:yellowgreen;
+}
+
+.divCross{
+	width: initial!important;
+}
+
+.cross{
+	background-color:cyan;
+}
+
+.crossText{
+	
 }
 
 #containLegend div{

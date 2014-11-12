@@ -9,7 +9,7 @@
 	{% endif %}	
 	<span>—</span>	
 	
-		<form action="/ds9s/fits/view/{{gal.uniq_id}}/" method="post">
+		<form action="/ds9s/fits/view/{{next.uniq_id}}/" method="post">
 			{% csrf_token %}
 			<input class="btn btn-default"  type="submit" value="Next" />
 		</form>
