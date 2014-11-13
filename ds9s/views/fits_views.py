@@ -130,7 +130,11 @@ def viewGalaxy(request, uid=0):
 	if uid == 0:
 		gal, next, wavelenghts = queue(request,act=firstObjectInFile(request))
 	else:
-		gal, next, wavelenghts = queue(request,act=getIndexObjectById("321",uid))
+		act = getIndexObjectById("321",uid)
+		if not act:
+			return HttpResponseRedirect("/ds9s/")
+		else:
+			gal, next, wavelenghts = queue(request,act=act)
 
 
 	check = getIdentificationUser(gal.id, request.user.id)

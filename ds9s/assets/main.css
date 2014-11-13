@@ -64,6 +64,10 @@ label{
 	box-shadow:         6px 0px 12px 0px rgba(50, 50, 50, 0.27);
 }
 
+#rootFiles{
+	/*margin-bottom: 25px;*/
+}
+
 #fFiles div, #gFiles div, .dataCat{
 	/*background-color:rgba(86,61,124,0.15);*/
 }
@@ -267,4 +271,17 @@ input[type="number"]{
 
 #validate-review{
 	margin-top: 10px;
+}
+
+.rootSpeWave{
+	clear: both;
+	text-align: center;
+}
+
+.speWave{
+	width:100px;
+	display: inline-block;
+	text-align: center;
+	margin: auto;
+	margin: 10px 5px 5px 5px;
 }
