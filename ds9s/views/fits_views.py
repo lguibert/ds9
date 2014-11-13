@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 #from django.contrib.auth.models import User
-from ds9s.models import Galaxy, ParFolder, Analysis, GalaxyFeatures, GalaxyTypes, Identifications
+from ds9s.models import Galaxy, ParFolder, Analysis, EmissionLineFields, EmissionLine, GalaxyFeatures, GalaxyTypes, Identifications
 from ds9s.forms import UploadFitsForm, NewParFileForm
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
@@ -61,7 +61,7 @@ import stsci.imagestats as imagestats
 import json
 
 
-#------------------ GLOBAL VARIABLES --------------------------------
+#-------------------------------- GLOBAL VARIABLES --------------------------------
 basePath = "/home/lguibert/test/"
 
 findIn = "/G102_DRIZZLE/"
@@ -91,7 +91,7 @@ emlineWavelengthsRest = np.array([3727., 3869., 4861., 4959., 5007., 6563., 6727
 emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"]
 #            [O II]      [Ne III] Hbeta       [O III]        [O III]      Halpha     [S II]     [S III]               [S III]       He I
 colors = ["indianred","steelblue","indigo","orange","orange","darkred","darkorchid","palevioletred","palevioletred","yellowgreen"]
-#--------------------------------------------------------------------
+#----------------------------------------------------------------------------------
 
 
 #------------------------------------------------------------------------------------------------------
@@ -456,12 +456,9 @@ def getIndexObjectById(fieldId, uniq_id):
 	index = None
 
 	for i, obj in enumerate(objects):
-		print "test ",obj[2]
 		if obj[2] == str(uniq_id):
 			index = i
 			break
-
-	print "index ",index
 
 	return index
 
@@ -764,7 +761,6 @@ def trimSpec(wavelength,flux,minWavelength,maxWavelength):
 
 def smootheInterpolateSpec(wavelength,flux,newWavelength,npixBoxcar):
     smootheFlux = convolve(flux,boxcar(npixBoxcar),mode="same")
-    #print len(flux),len(smootheFlux)
     finterp = interp1d(wavelength,smootheFlux,bounds_error=False,fill_value=0.0)
     smootheFlux = finterp(newWavelength)
     return smootheFlux/smootheFlux.max()
@@ -927,17 +923,49 @@ def addIdentification(gal_id, user_id, galtype_id, redshift, contaminated):
 		return False
 
 
-def addAnalys(gal_id, user_id, emissionline_id, value):
+def addAnalys(gal_id, user_id, emissionline_id, emissionlinefield_id, value):
 	try:
 		aly = Analysis()
 		aly.galaxy_id = gal_id
 		aly.user_id = user_id
 		aly.emissionline_id = emissionline_id
+		aly.emissionlinefield_id = emissionlinefield_id
 		aly.value = value
 		aly.save()
 		return True
 	except:
 		return False
+
+def getEmissionLineFields():
+	return EmissionLineFields.objects.all()
+
+def getIdEmissionLineFieldByName(name):
+	fields = getEmissionLineFields()
+
+	id = None
+
+	for field in fields:
+		if field.name == name:
+			id = field.id
+			break
+
+	return id
+
+
+def getEmissionLines():
+	return EmissionLine.objects.all()
+
+def getIdEmissionLineByName(name):
+	lines = getEmissionLines()
+
+	id = None
+
+	for line in lines:
+		if line.name == name:
+			id = line.id
+			break
+
+	return id
 
 def getGalaxyTypes():
 	return GalaxyTypes.objects.values("id","nameForId")

@@ -132,6 +132,10 @@ div[class='bk-sidebar'] a[class='bk-logo bk-logo-small']{
 		width:1800px;
 		margin: auto;
 	}
+
+	footer{
+		padding-left: 25px;
+	}
 }
 
 @media (max-width: 1500px){

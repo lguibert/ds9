@@ -38,9 +38,7 @@ class GalaxyFeatures(models.Model):
 class EmissionLine(models.Model):
 	name = models.CharField(max_length=254)
 	shortname = models.CharField(max_length=254)
-	emissionlinefields = models.ManyToManyField('EmissionLineFields', through='EmissionFeatures')
-	
-	galaxys = models.ManyToManyField('Galaxy', through='Analysis')
+	emissionlinefields = models.ManyToManyField('EmissionLineFields', through='Analysis')
 
 	def __unicode__(self):
 		return self.name + ' (' +self.shortname +')'
@@ -52,9 +50,9 @@ class EmissionLineFields(models.Model):
 	def __unicode__(self):
 		return self.name + ' (' +self.shortname +')'
 
-class EmissionFeatures(models.Model):
+'''class EmissionFeatures(models.Model):
 	emissionlinefields = models.ForeignKey('EmissionLineFields')
-	emissionline = models.ForeignKey('EmissionLine')
+	emissionline = models.ForeignKey('EmissionLine')'''
 
 class GalaxyTypes(models.Model):
 	name = models.CharField(max_length=254)
@@ -69,6 +67,7 @@ class Analysis(models.Model):
 	user = models.ForeignKey(User)
 	galaxy = models.ForeignKey('Galaxy')
 	emissionline = models.ForeignKey('EmissionLine')
+	emissionlinefield = models.ForeignKey('EmissionLineFields')
 	#approximately one billion with a resolution of 10 decimal
 	value = models.DecimalField(max_digits=19, decimal_places=10)
 
