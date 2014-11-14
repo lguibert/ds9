@@ -106,7 +106,7 @@ $(document).ready(function(){
         	$("#firstTable").addClass("table-hover")
 			$(".secondTable").removeClass("table-hover")
 
-        	$("+ .secondLine", this).hide(500);        	
+        	$("+ .secondLine", this).hide(200);        	
         }
 
 	});

@@ -290,6 +290,10 @@ input[type="number"]{
 	margin: 10px 5px 5px 5px;
 }
 
+.firstLine{
+	cursor: pointer;
+}
+
 .secondLine{
 	display:none;
 }
