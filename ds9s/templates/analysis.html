@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+	{% if identifications %}
+		<table id="firstTable" class="table table-hover">
+			<thead>
+				<tr>
+					<th>Unique id</th>
+					<th>Field id</th>
+					<th>Contaminated</th>
+					<th>Date</th>
+					<th>Go to the page</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for iden in identifications %}
+					<tr class="firstLine" type='0' title="Click for more informations">
+						<td>{{iden.galaxy.uniq_id}}</td>
+						<td>{{iden.galaxy.parfolder.fieldId_par}}</td>
+						<td>{{iden.contaminated}}</td>
+						<td>{{iden.date}}</td>
+						<td><a class="btn btn-default" href="/ds9s/fits/view/{{iden.galaxy.uniq_name}}/">Go</a></td>
+					</tr>
+					<tr class="secondLine">
+						<td colspan="5">
+							<table class="table secondTable">
+								<thead>
+									<tr>
+										<th>Galaxy type</th>
+										<th>Last update</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>{{iden.galaxytype}}</td> 
+										<td>{{iden.galaxy.last_update}}</td>	
+									</tr>
+								</tbody>
+							</table>	
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<h1>You didn't do any review... Click <a href="/ds9s/fits/view/">here</a> to beggin !</h1>
+	{% endif %}
+{% endblock %}

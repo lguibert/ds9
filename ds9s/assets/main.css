@@ -1,3 +1,7 @@
+html, body{
+	height: 100%;
+}
+
 .pagination{
 	clear:both;
 	display:block;
@@ -284,4 +288,8 @@ input[type="number"]{
 	text-align: center;
 	margin: auto;
 	margin: 10px 5px 5px 5px;
+}
+
+.secondLine{
+	display:none;
 }

@@ -69,8 +69,8 @@
       {% endblock %}
     </div>
 
-    <div {% block classPage%} class="container" {% endblock %}>
-      <div class="row">
+    <div id="root"  {% block classPage%} class="container" {% endblock %}>
+      <div id="main" class="row">
         {% if messages %}
         <ul class="messages">
             {% for message in messages %}
@@ -93,7 +93,7 @@
           <li><a class="btn btn-primary btn-lg" href="/ds9s/started/">Getting started</a></li>
         </ul>
       </footer>
-  </div>
+    </div>
 
   {% block js %}
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>

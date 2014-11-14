@@ -120,7 +120,7 @@ class = 'container-fuild'
 		</div>
 		{% if not check %}
 		<div class="clear">
-			<form id="userReview" method="post" action="/ds9s/fits/saveReview/{{gal.id}}/{{gal.uniq_id}}/">
+			<form id="userReview" method="post" action="/ds9s/fits/saveReview/{{gal.id}}/{{gal.uniq_name}}/">
 				{% csrf_token %}
 				<div class="radio">
 					<label for="objectStar">

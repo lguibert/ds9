@@ -1,5 +1,4 @@
 #-*- coding: utf-8 -*-
-import time
 from django.conf import settings
 import matplotlib
 import matplotlib.cm as cm
@@ -8,7 +7,6 @@ matplotlib.rc_file("/etc/matplotlibrc")
 import matplotlib.pyplot as plt
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
-#from django.contrib.auth.models import User
 from ds9s.models import Galaxy, ParFolder, Analysis, EmissionLineFields, EmissionLine, GalaxyFeatures, GalaxyTypes, Identifications
 from ds9s.forms import UploadFitsForm, NewParFileForm
 from django.db import IntegrityError
@@ -17,7 +15,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
-from django.views.generic import TemplateView, ListView
 from django.db.models import Count
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -44,17 +41,12 @@ from scipy.interpolate import interp1d
 
 import pdb
 
-from itertools import repeat
-
 from django.utils.safestring import mark_safe
 
 from bokeh.plotting import *
 from bokeh.embed import components
 from bokeh.resources import Resources
-from bokeh.templates import RESOURCES
 from bokeh.utils import encode_utf8
-from bokeh.objects import HoverTool
-from collections import OrderedDict
 
 import stsci.imagestats as imagestats
 
@@ -101,7 +93,7 @@ colors = ["indianred","steelblue","indigo","orange","orange","darkred","darkorch
 #------------------------------------------------------------------------------------------------------
 
 def viewHomeGalaxy(request):
-	galaxy_list = Galaxy.objects.values('uniq_id','id').order_by('uniq_id')
+	galaxy_list = Galaxy.objects.values('uniq_id','id','uniq_name').order_by('uniq_id')
 	analysis = Analysis.objects.raw('SELECT COUNT(DISTINCT user_id) as count, galaxy_id, id FROM ds9s_analysis group by galaxy_id')
 	aly = {}
 	for g in galaxy_list:
@@ -125,22 +117,49 @@ def viewHomeGalaxy(request):
 def test(request):
 	return render(request, 'test.html',locals())
 
+def getGalaxyByUniqName(name):
+	gal = None
+
+	try:
+		gal = Galaxy.objects.get(uniq_name=name)
+	except:
+		gal = None
+
+	return gal
+
+def getGalaxyUidByUniqName(name):
+	try:
+		gal = Galaxy.objects.get(uniq_name=name)
+		uid = gal.uniq_id
+		parfolderId = gal.parfolder.fieldId_par
+	except:
+		uid = None
+		parfolderId = None
+
+	return uid, parfolderId
+
+
 @login_required
-def viewGalaxy(request, uid=0):
-	if uid == 0:
+def viewGalaxy(request, name=None):
+	if name == None:
 		gal, next, wavelenghts = queue(request,act=firstObjectInFile(request))
 	else:
-		act = getIndexObjectById("321",uid)
-		if not act:
-			return HttpResponseRedirect("/ds9s/")
+		uid, parfolderId = getGalaxyUidByUniqName(name)
+		if uid != None and parfolderId != None:
+			act = getIndexObjectById(str(parfolderId), str(uid))
+			if act == None:
+				return HttpResponseRedirect("/ds9s/")
+			else:
+				gal, next, wavelenghts = queue(request,act=act)
 		else:
-			gal, next, wavelenghts = queue(request,act=act)
+			print "no uid or folderid"
+			return HttpResponseRedirect("/ds9s/")
 
 
 	check = getIdentificationUser(gal.id, request.user.id)
 	colors = getColors()	
 
-	request.session['uidGal'] = gal.uniq_id
+	request.session['unameGal'] = gal.uniq_name
 
 	#previous = getPrevGalaxy(uid)
 
@@ -252,7 +271,7 @@ def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,t
 
 @login_required
 def wavelenghing(request, redshift,mode="false"):
-	gal = get_object_or_404(Galaxy, uniq_id=request.session['uidGal'])
+	gal = get_object_or_404(Galaxy, uniq_name=request.session['unameGal'])
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
 
@@ -261,7 +280,7 @@ def wavelenghing(request, redshift,mode="false"):
 	if float(redshift) > 3.:
 		redshift = 3
 
-	wavelenghts = request.session['waves'+str(gal.uniq_id)]
+	wavelenghts = request.session['waves'+str(gal.uniq_name)]
 
 	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift)
 	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift)
@@ -281,7 +300,7 @@ def wavelenghing(request, redshift,mode="false"):
 @login_required
 def scaling(request, val, color):
 	#pdb.set_trace()
-	gal = get_object_or_404(Galaxy, uniq_id=request.session['uidGal'])
+	gal = get_object_or_404(Galaxy, uniq_name=request.session['unameGal'])
 
 	colors = getColorsNames()
 
@@ -453,6 +472,7 @@ def calculatePositionText(value):
 
 
 def createPathParDat(fieldId):
+	fieldId = str(fieldId)
 	return basePath +"Par"+fieldId+"_final/"+"Par"+fieldId+"lines.dat"
 
 def getIndexObjectById(fieldId, uniq_id):
@@ -509,7 +529,7 @@ def queue(request, fieldId='321',act=0):
 		else:
 			i += 1
 
-	request.session['waves'+str(actualEnd.uniq_id)] = wavelenghts
+	request.session['waves'+str(actualEnd.uniq_name)] = wavelenghts
 
 	return actualEnd, next, wavelenghts
 
@@ -1004,7 +1024,7 @@ def getIdentificationUser(gal_id, user_id):
 
 #function who will be called by urls to begin adding
 #id is the galaxy id from the database
-def saveUserReview(request, id, uniq_id):
+def saveUserReview(request, id, uniq_name):
 	user_id = request.user.id
 	check = getIdentificationUser(id, user_id)
 
@@ -1028,16 +1048,17 @@ def saveUserReview(request, id, uniq_id):
 			identification = addIdentification(id, user_id, typeObjId, redshift, contaminated)
 
 			if identification:
-				actual, next, wavelenghts = queue(request, fieldId="321",act=getIndexObjectById("321",uniq_id))
+				gal = getGalaxyByUniqName(uniq_name)
+				actual, next, wavelenghts = queue(request, fieldId="321",act=getIndexObjectById(gal.parfolder.fieldId_par,gal.uniq_id))
 				messages.success(request, "You successfully identified this object.")
-				return HttpResponseRedirect("/ds9s/fits/view/"+str(next.uniq_id)+"/")
+				return HttpResponseRedirect("/ds9s/fits/view/"+str(next.uniq_name)+"/")
 			else:
 				messages.error(request, "Error during saving.")
-				return HttpResponseRedirect("/ds9s/fits/view/"+uniq_id+"/")
+				return HttpResponseRedirect("/ds9s/fits/view/"+uniq_name+"/")
 		else:
 			messages.error(request, "Error in the object's value.")
-			return HttpResponseRedirect("/ds9s/fits/view/"+uniq_id+"/")
+			return HttpResponseRedirect("/ds9s/fits/view/"+uniq_name+"/")
 	else:
 		messages.error(request, "You already identified this object.")
-		return HttpResponseRedirect("/ds9s/fits/view/"+uniq_id+"/")
+		return HttpResponseRedirect("/ds9s/fits/view/"+uniq_name+"/")
 	
