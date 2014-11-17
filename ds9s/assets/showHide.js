@@ -94,7 +94,7 @@ $(document).ready(function(){
 
 
 
-	$(".firstLine").click(function(){
+	/*$(".firstLine").click(function(){
 		if ($(this).attr('type') == 0){
 			$(this).attr('type','1');
 			$("#firstTable").removeClass("table-hover")
@@ -108,6 +108,15 @@ $(document).ready(function(){
 
         	$("+ .secondLine", this).hide(200);        	
         }
+	});*/
 
+	$(".speWaveTitle").unbind().click(function(){
+		if ($(this).attr('type') == 0){
+			$(this).attr('type','1');
+        	$("+ .speWaveValues", this).show("slow");
+        }else{
+        	$(this).attr('type','0');
+        	$("+ .speWaveValues", this).hide("slow");        	
+        }
 	});
 })

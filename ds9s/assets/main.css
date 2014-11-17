@@ -290,10 +290,14 @@ input[type="number"]{
 	margin: 10px 5px 5px 5px;
 }
 
-.firstLine{
+.speWaveValues{
+	display:none;
+}
+
+.speWaveTitle{
 	cursor: pointer;
 }
 
-.secondLine{
-	display:none;
+.speWaveTitle:hover{
+	text-decoration: underline;
 }

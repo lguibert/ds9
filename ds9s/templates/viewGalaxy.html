@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+{% block flyJs %}
+	    <script type="text/javascript" src='http://cdn.pydata.org/bokeh-0.6.1.min.js'></script>
+{% endblock %}
+
+
 {% block flyCss %}
 <style>
 	.jumbotron{
@@ -119,49 +124,55 @@ class = 'container-fuild'
 			</div>
 		</div>
 		{% if not check %}
-		<div class="clear">
-			<form id="userReview" method="post" action="/ds9s/fits/saveReview/{{gal.id}}/{{gal.uniq_name}}/">
-				{% csrf_token %}
-				<div class="radio">
-					<label for="objectStar">
-						<input type="radio" required name="typeObject" id="objectStar" value="star"/>
-						This object is a <strong>star</strong>
-					</label>
-				</div>
-				<div class="radio">
-					<label for="objectQuasar">
-						<input type="radio" required name="typeObject" id="objectQuasar" value="quasar"/>
-						This object is a <strong>quasar</strong>
-					</label>
-				</div>
-				<div class="radio">
-					<label for="objectGalaxyNolines">
-						<input type="radio" required name="typeObject" id="objectGalaxyNolines" value="galaxyNoLines"/>
-						This object is a <strong>galaxy, but without identifiable emission lines</strong>
-					</label>
-				</div>
-				<div class="radio">
-					<label for="objectGalaxyLines">
-						<input type="radio" required name="typeObject" id="objectGalaxyLines" value="galaxyLines"/>
-						This object is a <strong>galaxy, with emission lines at the redshift I have identified</strong>
-					</label>
-				</div>
-				<div class="radio">
-					<label for="objectGalaxyNothing">
-						<input type="radio" required name="typeObject" value="nothing" id="objectGalaxyNothing"/>
-						This object is <strong>nothing</strong>.
-					</label>
-				</div>
-				<div class="checkbox">
-					<label for="contaminated">
-						<input type="checkbox" name="contaminated" id="contaminated"/>
-						This object's spectrum suffers from contamination from nearby stars/galaxies
-					</label>
-				</div>
+		<div class="clear container-fluid">
+			<div class="col-xs-6 col-md-6">
+				<form id="userReview" method="post" action="/ds9s/fits/saveReview/{{gal.id}}/{{gal.uniq_name}}/">
+					{% csrf_token %}
+					<div class="radio">
+						<label for="objectStar">
+							<input type="radio" required name="typeObject" id="objectStar" value="star"/>
+							This object is a <strong>star</strong>
+						</label>
+					</div>
+					<div class="radio">
+						<label for="objectQuasar">
+							<input type="radio" required name="typeObject" id="objectQuasar" value="quasar"/>
+							This object is a <strong>quasar</strong>
+						</label>
+					</div>
+					<div class="radio">
+						<label for="objectGalaxyNolines">
+							<input type="radio" required name="typeObject" id="objectGalaxyNolines" value="galaxyNoLines"/>
+							This object is a <strong>galaxy, but without identifiable emission lines</strong>
+						</label>
+					</div>
+					<div class="radio">
+						<label for="objectGalaxyLines">
+							<input type="radio" required name="typeObject" id="objectGalaxyLines" value="galaxyLines"/>
+							This object is a <strong>galaxy, with emission lines at the redshift I have identified</strong>
+						</label>
+					</div>
+					<div class="radio">
+						<label for="objectGalaxyNothing">
+							<input type="radio" required name="typeObject" value="nothing" id="objectGalaxyNothing"/>
+							This object is <strong>nothing</strong>.
+						</label>
+					</div>
+					<div class="checkbox">
+						<label for="contaminated">
+							<input type="checkbox" name="contaminated" id="contaminated"/>
+							This object's spectrum suffers from contamination from nearby stars/galaxies
+						</label>
+					</div>
 
 
-				<input type="submit" id="validate-review" class="btn btn-default" value="Validate & go next"/>
-			</form>
+					<input type="submit" id="validate-review" class="btn btn-default" 
+					value="Validate & go next"/>
+				</form>
+			</div>
+			<div id="checkRef" class="col-xs-6 col-md-6">
+				<div id="divCheckRef"></div>
+			</div>
 		</div>
 		{% else %}
 			<div class="clear">
@@ -184,6 +195,6 @@ class = 'container-fuild'
 		<span id="scrRef141"></span>
 		{%load static %}
 		<script type="text/javascript" src='{% static "scaling.js" %}'></script>
-  		<script type="text/javascript" src='{% static "coordonatePictures.js" %}'></script>
+  		<script type="text/javascript" src='{% static "reference.js" %}'></script>
 	{% endblock %}
 {% endblock %}

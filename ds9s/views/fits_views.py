@@ -1058,7 +1058,10 @@ def saveUserReview(request, id, uniq_name):
 		typeObjId = getIdOfType(typeObj)
 
 		if typeObjId != None:
-			redshift = secureRedshift(float(request.POST.get("redshift")))
+			if typeObjId == 5:
+				redshift = None
+			else:
+				redshift = secureRedshift(float(request.POST.get("redshift")))
 
 			contaminated = request.POST.get("contaminated")
 			if contaminated == None:
@@ -1074,8 +1077,8 @@ def saveUserReview(request, id, uniq_name):
 
 			if identification:
 				gal = getGalaxyByUniqName(uniq_name)
-				actual, next, wavelenghts = queue(request, fieldId="321",act=getIndexObjectById(gal.parfolder.fieldId_par,gal.uniq_id))
-				messages.success(request, "You successfully identified this object.")
+				actual, next, wavelenghts = queue(request, fieldId=gal.parfolder.fieldId_par,act=getIndexObjectById(gal.parfolder.fieldId_par,gal.uniq_id))
+				messages.success(request, "You successfully identified the object.")
 				return HttpResponseRedirect("/ds9s/fits/view/"+str(next.uniq_name)+"/")
 			else:
 				messages.error(request, "Error during saving.")

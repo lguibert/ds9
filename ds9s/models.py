@@ -78,7 +78,7 @@ class Identifications(models.Model):
 	user = models.ForeignKey(User)
 	galaxy = models.ForeignKey('Galaxy')
 	galaxytype = models.ForeignKey('GalaxyTypes')
-	redshift = models.DecimalField(max_digits=19, decimal_places=10)
+	redshift = models.DecimalField(max_digits=19, decimal_places=10,null=True)
 	contaminated = models.BooleanField(default=False)
 	date = models.DateTimeField(auto_now_add=True, auto_now=False)
 

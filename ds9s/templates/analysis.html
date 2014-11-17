@@ -1,4 +1,25 @@
 {% extends "base.html" %}
+
+{% block flyJs %}
+	<script type="text/javascript" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js"></script>
+
+      <script type="text/javascript">
+        $(document).ready(function(){
+          $("#firstTable").DataTable({
+          	"columnDefs": [
+          		{ "orderable": false, "targets": 7 }
+          	]
+          });
+        });        
+          
+      </script>
+{% endblock %}
+
+{% block flyCss %}
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css">
+{% endblock %}
+
+
 {% block content %}
 	{% if identifications %}
 		<table id="firstTable" class="table table-hover">
@@ -8,36 +29,44 @@
 					<th>Field id</th>
 					<th>Contaminated</th>
 					<th>Review's date</th>
+					<th>Galaxy type</th>
+					<th>Redshift</th>
+					<th>Last update</th>
 					<th>Go to the page</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for iden in identifications %}
-					<tr class="firstLine" type='0' title="Click for more informations">
+					<tr class="firstLine" title="Click for more informations">
 						<td>{{iden.galaxy.uniq_id}}</td>
 						<td>{{iden.galaxy.parfolder.fieldId_par}}</td>
 						<td>{{iden.contaminated}}</td>
 						<td>{{iden.date}}</td>
+						<td>{{iden.galaxytype}}</td> 
+						<td>{{iden.galaxy.last_update}}</td>
+						<td>{{iden.redshift}}</td>	
 						<td><a class="btn btn-default" href="/ds9s/fits/view/{{iden.galaxy.uniq_name}}/">Go</a></td>
 					</tr>
-					<tr class="secondLine">
+					<!--<tr class="secondLine">
 						<td colspan="5">
 							<table class="table secondTable">
 								<thead>
 									<tr>
 										<th>Galaxy type</th>
 										<th>Last update</th>
+										<th>Redshift</th>
 									</tr>
 								</thead>
 								<tbody>
 									<tr>
 										<td>{{iden.galaxytype}}</td> 
-										<td>{{iden.galaxy.last_update}}</td>	
+										<td>{{iden.galaxy.last_update}}</td>
+										<td>{{iden.redshift}}</td>	
 									</tr>
 								</tbody>
 							</table>	
 						</td>
-					</tr>
+					</tr>-->
 				{% endfor %}
 			</tbody>
 		</table>
