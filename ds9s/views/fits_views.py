@@ -146,14 +146,14 @@ def getOlderParFolder():
 
 	return parfolder
 
-
+'''
 def getQueueWithAct(request, parfolderId, uid):
 	act = getIndexObjectById(str(parfolderId), str(uid))
 	if act == None:
 		return HttpResponseRedirect("/ds9s/")
 	else:
 		return queue(request,parfolderId, act=act)
-
+'''
 @login_required
 def viewGalaxy(request, name=None):
 	if name == None:
@@ -162,7 +162,11 @@ def viewGalaxy(request, name=None):
 	else:
 		uid, parfolderId = getGalaxyUidByUniqName(name)
 		if uid != None and parfolderId != None:
-			gal, next, wavelenghts = getQueueWithAct(request, parfolderId, uid)
+			act = getIndexObjectById(str(parfolderId), str(uid))
+			if act == None:
+				return HttpResponseRedirect("/ds9s/")
+			else:
+				gal, next, wavelenghts = queue(request, parfolderId, act=act)
 		else:
 			return HttpResponseRedirect("/ds9s/")
 
@@ -487,15 +491,18 @@ def createPathParDat(fieldId):
 	return basePath +"Par"+fieldId+"_final/"+"Par"+fieldId+"lines.dat"
 
 def getIndexObjectById(fieldId, uniq_id):
-	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
-	index = None
+	try:
+		objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
+		index = None
 
-	for i, obj in enumerate(objects):
-		if obj[2] == str(uniq_id):
-			index = i
-			break
+		for i, obj in enumerate(objects):
+			if obj[2] == str(uniq_id):
+				index = i
+				break
 
-	return index
+		return index
+	except:
+		return None
 
 def firstObjectInFile(request,fieldId):
 	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
