@@ -138,21 +138,32 @@ def getGalaxyUidByUniqName(name):
 
 	return uid, parfolderId
 
+def getOlderParFolder():
+	try:
+		parfolder = ParFolder.objects.order_by('-date_upload')[0]
+	except:
+		parfolder = None
+
+	return parfolder
+
+
+def getQueueWithAct(request, parfolderId, uid):
+	act = getIndexObjectById(str(parfolderId), str(uid))
+	if act == None:
+		return HttpResponseRedirect("/ds9s/")
+	else:
+		return queue(request,parfolderId, act=act)
 
 @login_required
 def viewGalaxy(request, name=None):
 	if name == None:
-		gal, next, wavelenghts = queue(request,act=firstObjectInFile(request))
+		parfolder = getOlderParFolder()
+		gal, next, wavelenghts = queue(request, parfolder.fieldId_par, act=firstObjectInFile(request, parfolder.fieldId_par))
 	else:
 		uid, parfolderId = getGalaxyUidByUniqName(name)
 		if uid != None and parfolderId != None:
-			act = getIndexObjectById(str(parfolderId), str(uid))
-			if act == None:
-				return HttpResponseRedirect("/ds9s/")
-			else:
-				gal, next, wavelenghts = queue(request,act=act)
+			gal, next, wavelenghts = getQueueWithAct(request, parfolderId, uid)
 		else:
-			print "no uid or folderid"
 			return HttpResponseRedirect("/ds9s/")
 
 
@@ -165,10 +176,10 @@ def viewGalaxy(request, name=None):
 
 	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
 
-	try:
+	'''try:
 		analysis = Analysis.objects.filter(user_id=request.user, galaxy_id=gal.id)
 	except ObjectDoesNotExist:
-		messages.info(request,'No analysis yet.')
+		messages.info(request,'No analysis yet.')'''
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
 		
@@ -486,7 +497,7 @@ def getIndexObjectById(fieldId, uniq_id):
 
 	return index
 
-def firstObjectInFile(request,fieldId='321'):
+def firstObjectInFile(request,fieldId):
 	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
 
 	index = None
@@ -500,7 +511,14 @@ def firstObjectInFile(request,fieldId='321'):
 
 	return index
 
-def queue(request, fieldId='321',act=0):
+def getLastGalaxyReviewed(user_id):
+	try :
+		iden = Identifications.objects.filter(user_id=user_id).order_by('-date')[0]
+	except:
+		iden = None
+	return iden
+
+def queue(request, fieldId,act=0):
 	#pdb.set_trace()
 	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
 	actual = objects[act]
