@@ -73,7 +73,6 @@ maxG102 = 11700.
 minG141 = 11000.
 maxG141 = 17500.
 
-redshiftDefault = 1
 scalingDefault = 150
 crossColor = "cyan"
 
@@ -172,8 +171,10 @@ def viewGalaxy(request, name=None):
 
 	check = getIdentificationUser(gal.id, request.user.id)
 
-	if check.redshift:
+	if check.redshift :
 		redshiftDefault = check.redshift
+	else:
+		redshiftDefault = 1
 
 	colors = getColors()	
 
