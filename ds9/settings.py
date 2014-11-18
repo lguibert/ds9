@@ -97,6 +97,7 @@ APPEND_SLASH = True
 
 MEDIA_URL = "/upload/"
 MEDIA_ROOT = "/opt/lampp/www/ds9/ds9s/upload"
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 LOGIN_URL="/ds9s/login/"
 
