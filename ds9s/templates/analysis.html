@@ -7,7 +7,7 @@
         $(document).ready(function(){
           $("#firstTable").DataTable({
           	"columnDefs": [
-          		{ "orderable": false, "targets": 7 }
+          		{ "orderable": false, "targets": 6 }
           	]
           });
         });        
@@ -28,7 +28,6 @@
 					<th>Unique id</th>
 					<th>Field id</th>
 					<th>Contaminated</th>
-					<th>Review's date</th>
 					<th>Galaxy type</th>
 					<th>Redshift</th>
 					<th>Last update</th>
@@ -41,10 +40,9 @@
 						<td>{{iden.galaxy.uniq_id}}</td>
 						<td>{{iden.galaxy.parfolder.fieldId_par}}</td>
 						<td>{{iden.contaminated}}</td>
-						<td>{{iden.date}}</td>
 						<td>{{iden.galaxytype}}</td> 
-						<td>{{iden.galaxy.last_update}}</td>
 						<td>{{iden.redshift}}</td>	
+						<td>{{iden.last_update}}</td>						
 						<td><a class="btn btn-default" href="/ds9s/fits/view/{{iden.galaxy.uniq_name}}/">Go</a></td>
 					</tr>
 					<!--<tr class="secondLine">

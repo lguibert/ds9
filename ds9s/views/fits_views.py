@@ -170,8 +170,11 @@ def viewGalaxy(request, name=None):
 		else:
 			return HttpResponseRedirect("/ds9s/")
 
-
 	check = getIdentificationUser(gal.id, request.user.id)
+
+	if check.redshift:
+		redshiftDefault = check.redshift
+
 	colors = getColors()	
 
 	request.session['unameGal'] = gal.uniq_name
@@ -196,8 +199,8 @@ def viewGalaxy(request, name=None):
 	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshiftDefault)
 	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshiftDefault)
 
-	g102DatScript, g102DatDiv = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat")
-	g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat")
+	g102DatScript, g102DatDiv = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshiftDefault)
+	g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshiftDefault)
 	
 
 	return render(request, 'viewGalaxy.html',locals())
@@ -228,7 +231,7 @@ def read1DSpectrum(pathToASCIISpectrum,minWavelength=None,maxWavelength=None):
         spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
     return spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders
 
-def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,title,redshift=redshiftDefault):
+def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,title,redshift):
     # Separately read in the G102 and G141 spectra
     wl,f,u,c,z = read1DSpectrum(pathToFile, minWavelength, maxWavelength)
     
@@ -1041,15 +1044,28 @@ def secureRedshift(redshift):
 def getIdentificationUser(gal_id, user_id):
 	try:
 		iden = Identifications.objects.get(galaxy_id=gal_id, user_id=user_id)
-		iden = True
 	except ObjectDoesNotExist:
 		iden = False
 
 	return iden
 
+def setNoneRedshist(typeObjId, redshift):
+	if typeObjId == 5:
+		redshift = None
+	else:
+		redshift = secureRedshift(float(redshift))
+
+	return redshift
+
+def secureContaminated(contaminated):
+	if contaminated == None:
+		contaminated = 0
+
+	return contaminated
+
 #function who will be called by urls to begin adding
 #id is the galaxy id from the database
-def saveUserReview(request, id, uniq_name):
+def saveUserReview(request, id, uniq_name, next_uniq_name):
 	user_id = request.user.id
 	check = getIdentificationUser(id, user_id)
 
@@ -1058,14 +1074,9 @@ def saveUserReview(request, id, uniq_name):
 		typeObjId = getIdOfType(typeObj)
 
 		if typeObjId != None:
-			if typeObjId == 5:
-				redshift = None
-			else:
-				redshift = secureRedshift(float(request.POST.get("redshift")))
+			redshift = setNoneRedshist(typeObjId, request.POST.get("redshift"))
 
-			contaminated = request.POST.get("contaminated")
-			if contaminated == None:
-				contaminated = 0
+			contaminated = secureContaminated(request.POST.get("contaminated"))
 
 			'''linecheck = []
 			for index, em in enumerate(emlineWavelengthsRest):
@@ -1075,11 +1086,9 @@ def saveUserReview(request, id, uniq_name):
 
 			identification = addIdentification(id, user_id, typeObjId, redshift, contaminated)
 
-			if identification:
-				gal = getGalaxyByUniqName(uniq_name)
-				actual, next, wavelenghts = queue(request, fieldId=gal.parfolder.fieldId_par,act=getIndexObjectById(gal.parfolder.fieldId_par,gal.uniq_id))
+			if identification:				
 				messages.success(request, "You successfully identified the object.")
-				return HttpResponseRedirect("/ds9s/fits/view/"+str(next.uniq_name)+"/")
+				return HttpResponseRedirect("/ds9s/fits/view/"+str(next_uniq_name)+"/")
 			else:
 				messages.error(request, "Error during saving.")
 				return HttpResponseRedirect("/ds9s/fits/view/"+uniq_name+"/")
@@ -1089,4 +1098,43 @@ def saveUserReview(request, id, uniq_name):
 	else:
 		messages.error(request, "You already identified this object.")
 		return HttpResponseRedirect("/ds9s/fits/view/"+uniq_name+"/")
+
+def getIdenById(iden_id):
+	#try:
+	iden = Identifications.objects.get(id=iden_id)
+	#except:
+	#	iden = None
+
+	return iden
+
+def updateIden(iden, typeObjId, redshift, contaminated):
+	try:
+		iden.galaxytype_id = typeObjId
+		iden.redshift = redshift
+		iden.contaminated = contaminated
+		iden.save()
+		return True
+	except:
+		return False
+
+def updateUserReview(request, rev_id):
+	typeObj = request.POST.get("typeObject")
+	typeObjId = getIdOfType(typeObj)
+
+	if typeObjId != None:
+		redshift = setNoneRedshist(typeObjId, request.POST.get("redshift"))
+
+		contaminated = secureContaminated(request.POST.get("contaminated"))
+
+		iden = getIdenById(rev_id)
+		checkUpdate = updateIden(iden, typeObjId, redshift, contaminated)
+
+		if checkUpdate:
+			messages.success(request, "You successfully updated your review.")			
+		else:
+			messages.error(request, "Error during saving.")
+
+	return HttpResponseRedirect("/ds9s/account/reviews/")
+
+
 	

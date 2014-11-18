@@ -11,7 +11,7 @@ class ParFolder(models.Model):
 
 class Galaxy(models.Model):
 	uniq_id = models.IntegerField(default=0)
-	last_update = models.DateTimeField(auto_now=True)
+	add_date = models.DateTimeField(auto_now=True)
 	uniq_name = models.CharField(max_length=254,null=True)
 
 	parfolder = models.ForeignKey('ParFolder')	
@@ -78,9 +78,9 @@ class Identifications(models.Model):
 	user = models.ForeignKey(User)
 	galaxy = models.ForeignKey('Galaxy')
 	galaxytype = models.ForeignKey('GalaxyTypes')
-	redshift = models.DecimalField(max_digits=19, decimal_places=10,null=True)
+	redshift = models.DecimalField(max_digits=3, decimal_places=2,null=True)
 	contaminated = models.BooleanField(default=False)
-	date = models.DateTimeField(auto_now_add=True, auto_now=False)
+	last_update = models.DateTimeField(auto_now_add=False, auto_now=True)
 
 	def __unicode__(self): 	
 		return "{0} is a {1} for {2}",format(self.galaxy.uniq_id, self.galaxytype.name, self.user.username)
