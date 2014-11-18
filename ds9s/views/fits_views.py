@@ -73,6 +73,7 @@ maxG102 = 11700.
 minG141 = 11000.
 maxG141 = 17500.
 
+redshiftDefault = 1
 scalingDefault = 150
 crossColor = "cyan"
 
@@ -145,36 +146,37 @@ def getOlderParFolder():
 
 	return parfolder
 
-'''
-def getQueueWithAct(request, parfolderId, uid):
-	act = getIndexObjectById(str(parfolderId), str(uid))
-	if act == None:
-		return HttpResponseRedirect("/ds9s/")
-	else:
-		return queue(request,parfolderId, act=act)
-'''
+def openQueueFile(fieldId):
+	return np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
+
+
 @login_required
 def viewGalaxy(request, name=None):
 	if name == None:
 		parfolder = getOlderParFolder()
-		gal, next, wavelenghts = queue(request, parfolder.fieldId_par, act=firstObjectInFile(request, parfolder.fieldId_par))
+		objects = openQueueFile(parfolder.fieldId_par)
+		gal, next, wavelenghts = queue(request, objects, parfolder.fieldId_par, act=firstObjectInFile(request, parfolder.fieldId_par))
 	else:
 		uid, parfolderId = getGalaxyUidByUniqName(name)
 		if uid != None and parfolderId != None:
-			act = getIndexObjectById(str(parfolderId), str(uid))
+			objects = openQueueFile(parfolderId)
+			act = getIndexObjectById(objects, str(parfolderId), str(uid))
 			if act == None:
 				return HttpResponseRedirect("/ds9s/")
 			else:
-				gal, next, wavelenghts = queue(request, parfolderId, act=act)
+				gal, next, wavelenghts = queue(request, objects, parfolderId, act=act)
 		else:
 			return HttpResponseRedirect("/ds9s/")
 
 	check = getIdentificationUser(gal.id, request.user.id)
 
-	if check.redshift :
-		redshiftDefault = check.redshift
+	if check:
+		if check.redshift:
+			redshift = check.redshift
+		else:
+			redshift = redshiftDefault
 	else:
-		redshiftDefault = 1
+		redshift = redshiftDefault
 
 	colors = getColors()	
 
@@ -197,11 +199,11 @@ def viewGalaxy(request, name=None):
 	
 	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], scalingDefault)
 
-	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshiftDefault)
-	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshiftDefault)
+	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift)
+	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift)
 
-	g102DatScript, g102DatDiv = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshiftDefault)
-	g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshiftDefault)
+	g102DatScript, g102DatDiv = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift)
+	g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshift)
 	
 
 	return render(request, 'viewGalaxy.html',locals())
@@ -494,9 +496,8 @@ def createPathParDat(fieldId):
 	fieldId = str(fieldId)
 	return basePath +"Par"+fieldId+"_final/"+"Par"+fieldId+"lines.dat"
 
-def getIndexObjectById(fieldId, uniq_id):
+def getIndexObjectById(objects, fieldId, uniq_id):
 	try:
-		objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
 		index = None
 
 		for i, obj in enumerate(objects):
@@ -529,9 +530,8 @@ def getLastGalaxyReviewed(user_id):
 		iden = None
 	return iden
 
-def queue(request, fieldId,act=0):
+def queue(request, objects, fieldId,act=0):
 	#pdb.set_trace()
-	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
 	actual = objects[act]
 
 	next = None
