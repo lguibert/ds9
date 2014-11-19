@@ -1,6 +1,6 @@
 <div id="buttons">
 	{% if previous %}
-		<form action="/ds9s/fits/view/{{previous.uniq_id}}/" method="post">
+		<form action="/ds9s/view/{{previous.uniq_id}}/" method="post">
 			{% csrf_token %}
 			<input class="btn btn-default"  type="submit" value="Previous" />
 		</form>
@@ -9,7 +9,7 @@
 	{% endif %}	
 	<span>—</span>	
 	
-		<form action="/ds9s/fits/view/{{next.uniq_name}}/" method="post">
+		<form action="/ds9s/view/{{next.uniq_name}}/" method="post">
 			{% csrf_token %}
 			<input class="btn btn-default"  type="submit" value="Next" />
 		</form>

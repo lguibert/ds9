@@ -1,3 +1,4 @@
+<!-- 2810 -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -13,8 +14,6 @@
 
    	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 
-    <link rel="stylesheet" type="text/css" href="http://cdn.pydata.org/bokeh-0.6.1.min.css">
-
     {%load static %}
    	<link rel="stylesheet" href="{%static 'main.css'%}"/>
 
@@ -29,12 +28,12 @@
         <div class="navbar-header">
           <a class="navbar-brand" href="/ds9s/">Home</a>
           {% if user.is_authenticated %}    
-            <a class="navbar-brand" href="/ds9s/fits/view/">Let's go !</a>
+            <a class="navbar-brand" href="/ds9s/view/">Let's go !</a>
             <a class="navbar-brand" href="/ds9s/account/reviews/">Previous reviews</a>
           {% endif %}
-          <a class="navbar-brand navbar-right" href="/ds9s/fits/test/">Test page</a>   
+          <a class="navbar-brand navbar-right" href="/ds9s/test/">Test page</a>   
           {% if perms.can_add_parfolder %}   
-          <a class="navbar-brand navbar-right" href="/ds9s/fits/upload/">Add new ParXXX</a>
+          <a class="navbar-brand navbar-right" href="/ds9s/upload/">Add new ParXXX</a>
           {% endif %}
         </div>
         <div class="navbar-collapse collapse">
@@ -60,7 +59,7 @@
         <p>{% block contentHeadTitle%}You'll be able to work here very soon!{% endblock %}</p>    
 
         <!--<div class="row">
-          <form method='post' action='/ds9s/fits/search/'>
+          <form method='post' action='/ds9s/search/'>
             {% csrf_token %}
             <div class="col-xs-2">
               <input class="form-control" type="search" name='search' placeholder='Search...'/>
@@ -106,4 +105,5 @@
   {% endblock %}
   
   </body>
+<!-- 2810 -->
 </html>

@@ -637,7 +637,7 @@ def newParFile(request):
 					if(exists(basePath+"Par"+str(data)+"_final")):
 						uploaded = uploadParFile(request, "Par"+str(data)+"_final")
 						if uploaded:
-							return redirect("/ds9s/fits/")
+							return redirect("/ds9s/")
 					else:
 						messages.error(request, 'No file with this number.')
 						return render(request, 'newParFits.html',locals())
@@ -656,7 +656,7 @@ def newParFile(request):
 def uploadParFile(request, name=None):
 	if name is None:
 		messages.error('Error in the folder\'s name')
-		return redirect("/ds9s/fits/newParFile/")
+		return redirect("/ds9s/newParFile/")
 	else:
 		fileExist = ParFolder.objects.filter(name_par=name)
 		if not fileExist:
@@ -1106,16 +1106,16 @@ def saveUserReview(request, id, uniq_name, next_uniq_name):
 
 			if identification:				
 				messages.success(request, "You successfully identified the object.")
-				return HttpResponseRedirect("/ds9s/fits/view/"+str(next_uniq_name)+"/")
+				return HttpResponseRedirect("/ds9s/view/"+str(next_uniq_name)+"/")
 			else:
 				messages.error(request, "Error during saving.")
-				return HttpResponseRedirect("/ds9s/fits/view/"+uniq_name+"/")
+				return HttpResponseRedirect("/ds9s/view/"+uniq_name+"/")
 		else:
 			messages.error(request, "Error in the object's value.")
-			return HttpResponseRedirect("/ds9s/fits/view/"+uniq_name+"/")
+			return HttpResponseRedirect("/ds9s/view/"+uniq_name+"/")
 	else:
 		messages.error(request, "You already identified this object.")
-		return HttpResponseRedirect("/ds9s/fits/view/"+uniq_name+"/")
+		return HttpResponseRedirect("/ds9s/view/"+uniq_name+"/")
 
 def getIdenById(iden_id):
 	#try:

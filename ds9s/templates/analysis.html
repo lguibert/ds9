@@ -36,14 +36,14 @@
 			</thead>
 			<tbody>
 				{% for iden in identifications %}
-					<tr class="firstLine" title="Click for more informations">
+					<tr class="firstLine">
 						<td>{{iden.galaxy.uniq_id}}</td>
 						<td>{{iden.galaxy.parfolder.fieldId_par}}</td>
 						<td>{{iden.contaminated}}</td>
 						<td>{{iden.galaxytype}}</td> 
 						<td>{{iden.redshift}}</td>	
 						<td>{{iden.last_update}}</td>						
-						<td><a class="btn btn-default" href="/ds9s/fits/view/{{iden.galaxy.uniq_name}}/">Go</a></td>
+						<td><a class="btn btn-default" href="/ds9s/view/{{iden.galaxy.uniq_name}}/">Go</a></td>
 					</tr>
 					<!--<tr class="secondLine">
 						<td colspan="5">
@@ -69,6 +69,6 @@
 			</tbody>
 		</table>
 	{% else %}
-		<h1>You didn't do any review... Click <a href="/ds9s/fits/view/">here</a> to beggin !</h1>
+		<h1>You didn't do any review... Click <a href="/ds9s/view/">here</a> to beggin !</h1>
 	{% endif %}
 {% endblock %}

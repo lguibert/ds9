@@ -7,7 +7,7 @@
 				<h1 class="first-uppercase">Galaxy n°{{gal.uniq_id}}</h1>
 				<h2>Field n°{{gal.parfolder}}</h2>
 				{% if user.is_authenticated%}
-					<a class="btn btn-default" href="/ds9s/fits/view/{{gal.uniq_name}}/">See more</a>
+					<a class="btn btn-default" href="/ds9s/view/{{gal.uniq_name}}/">See more</a>
 				{% endif %}	
 				<div class='nunAnaly'>{{aly|keyvalue:gal.id}} analysis yet</div>		
 			<hr>
@@ -24,6 +24,6 @@
 			{% endif %}
 		</div>
 	{% else %}
-		<h1>No data yet. <a href="/ds9s/fits/upload/">Add some !</a></h1>
+		<h1>No data yet. <a href="/ds9s/upload/">Add some !</a></h1>
 	{% endif %}
 {% endblock %}
