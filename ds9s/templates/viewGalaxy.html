@@ -13,12 +13,15 @@
 	#headGalaxy{
 		margin: 10px;
 	}
+	#headGalaxy:hover{
+		text-decoration: underline;		
+	}
 </style>
 {% endblock %}
 
 
 {% block head %}
-	<h1 id="headGalaxy">Galaxy n°<span id="uidGal">{{gal.uniq_id}}</span></h1>
+	<h1 id="headGalaxy" title="Field id: {{gal.parfolder.fieldId_par}}">Galaxy n°<span id="uidGal">{{gal.uniq_id}}</span></h1>
 {% endblock %}
 
 {% block classPage %}

@@ -101,7 +101,7 @@ PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 LOGIN_URL="/ds9s/login/"
 
-SESSION_COOKIE_AGE = 86400 #24h
+SESSION_COOKIE_AGE = 43200 #12h
 
 
 # Static files (CSS, JavaScript, Images)

@@ -54,7 +54,7 @@ import json
 
 
 #-------------------------------- GLOBAL VARIABLES --------------------------------
-basePath = "/home/lguibert/test/"
+basePath = "/home/lguibert/test/" #folder where all the ParXXX are
 
 findIn = "/G102_DRIZZLE/"
 findIn2 = "/G141_DRIZZLE/"
@@ -73,11 +73,11 @@ maxG102 = 11700.
 minG141 = 11000.
 maxG141 = 17500.
 
-redshiftDefault = 1
-scalingDefault = 150
+redshiftDefault = 1 #default redshift's value. Will be use for the bokeh image
+scalingDefault = 150 #default zoom. Will be use for the bokeh image
 crossColor = "cyan"
 
-TOOLS="pan,wheel_zoom,box_zoom,reset"
+TOOLS="pan,wheel_zoom,box_zoom,reset" #all the tools for the bokeh images
 
 emlineWavelengthsRest = np.array([3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.])
 emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"]
@@ -92,15 +92,19 @@ colors = ["indianred","steelblue","indigo","orange","orange","darkred","darkorch
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
 
+#This function is for displaying the home page. 
 def viewHomeGalaxy(request):
-	galaxy_list = Galaxy.objects.values('uniq_id','id','uniq_name').order_by('uniq_id')
-	analysis = Analysis.objects.raw('SELECT COUNT(DISTINCT user_id) as count, galaxy_id, id FROM ds9s_analysis group by galaxy_id')
+	galaxy_list = Galaxy.objects.values('uniq_id','id','uniq_name','parfolder').order_by('uniq_id') #get here all the needed information from galaxys
+	analysis = Analysis.objects.raw('SELECT COUNT(DISTINCT user_id) as count, galaxy_id, id FROM ds9s_analysis group by galaxy_id') #how many analysis was done on galaxys
+	
+	#here, we just create a dictionnary with for key the galaxy's id and the number of analysis for value
 	aly = {}
 	for g in galaxy_list:
 		aly[g['id']] = 0
 	for a in analysis:
 		aly[a.galaxy_id] = a.count
 
+	#Django stuff to create pages
 	paginator = Paginator(galaxy_list, 15)
 	page = request.GET.get('page')
 	try:
@@ -110,6 +114,7 @@ def viewHomeGalaxy(request):
 	except EmptyPage:
 		galaxys = paginator.page(paginator.num_pages)
 
+	#send all the previous values to the homeGalaxy template
 	return render(request, 'homeGalaxy.html',locals())
 
 
@@ -117,9 +122,8 @@ def viewHomeGalaxy(request):
 def test(request):
 	return render(request, 'test.html',locals())
 
+#A simple function to find the galaxy with a unique name. If the name isn't defined any galaxy, the return is none.
 def getGalaxyByUniqName(name):
-	gal = None
-
 	try:
 		gal = Galaxy.objects.get(uniq_name=name)
 	except:
@@ -127,83 +131,91 @@ def getGalaxyByUniqName(name):
 
 	return gal
 
-def getGalaxyUidByUniqName(name):
+#This function is basicly the same as the previous one. But, we just return the uid and the folderid. It's useful in the code
+def getGalaxyInfodByUniqName(name):
 	try:
 		gal = Galaxy.objects.get(uniq_name=name)
 		uid = gal.uniq_id
-		parfolderId = gal.parfolder.fieldId_par
+		fieldId = gal.parfolder.fieldId_par
+		parId = gal.parfolder.id
 	except:
 		uid = None
-		parfolderId = None
+		fieldId = None
+		parId = None
 
-	return uid, parfolderId
+	return uid, fieldId, parId
 
+#Here, we just get the older parFolder. We need this to define on witch folder the user will work first.
 def getOlderParFolder():
 	try:
-		parfolder = ParFolder.objects.order_by('-date_upload')[0]
+		parfolder = ParFolder.objects.order_by('date_upload')[0]
 	except:
 		parfolder = None
 
 	return parfolder
 
+#The function return the ParXXX file with the data about the queue. 
 def openQueueFile(fieldId):
 	return np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
 
-
+#the most important function in this file. This one is called each time the user will want to access to a galaxy's page.
+#More informations with the comments in the function
 @login_required
 def viewGalaxy(request, name=None):
+#name is in default at none because we need a begging for the queue.
 	if name == None:
-		parfolder = getOlderParFolder()
-		objects = openQueueFile(parfolder.fieldId_par)
-		gal, next, wavelenghts = queue(request, objects, parfolder.fieldId_par, act=firstObjectInFile(request, parfolder.fieldId_par))
+		parfolder = getOlderParFolder() #we take the older folder
+		objects = openQueueFile(parfolder.fieldId_par)#open the relative file
+		#get all what we need to display the page
+		gal, next, wavelenghts = queue(request, objects, parfolder.fieldId_par, parfolder.id, act=firstObjectInFile(request, parfolder.fieldId_par, parfolder.id))
 	else:
-		uid, parfolderId = getGalaxyUidByUniqName(name)
-		if uid != None and parfolderId != None:
-			objects = openQueueFile(parfolderId)
-			act = getIndexObjectById(objects, str(parfolderId), str(uid))
-			if act == None:
-				return HttpResponseRedirect("/ds9s/")
+		uid, parfolderId, parId = getGalaxyInfodByUniqName(name) #get the galaxy with the name
+		if uid != None and parfolderId != None: #if we have something
+			objects = openQueueFile(parfolderId) #open the queue file
+			act = getIndexObjectById(objects, str(uid)) #get the index in the file for the uniq_id
+			if act == None: #if we don't have a index
+				return HttpResponseRedirect("/ds9s/") #redirect the user on home page
 			else:
-				gal, next, wavelenghts = queue(request, objects, parfolderId, act=act)
+				gal, next, wavelenghts = queue(request, objects, parfolderId, parId, act=act)#else, get the galaxy in the queue
 		else:
 			return HttpResponseRedirect("/ds9s/")
 
-	check = getIdentificationUser(gal.id, request.user.id)
+	check = getIdentificationUser(gal.id, request.user.id) #here, we just take the user's previous review on this galaxy
 
-	if check:
-		if check.redshift:
-			redshift = check.redshift
+	if check: #if there is a previous review
+		if check.redshift: #if the review has a redshift value
+			redshift = check.redshift #we take the value for the galaxy's redshift
 		else:
-			redshift = redshiftDefault
+			redshift = redshiftDefault #else, we take the default value
 	else:
-		redshift = redshiftDefault
+		redshift = redshiftDefault #same thing
 
-	colors = getColors()	
+	colors = getColors() #we take all the colors for the images
 
-	request.session['unameGal'] = gal.uniq_name
+	request.session['unameGal'] = gal.uniq_name #set in session the value of the galaxy's unique name
 
 	#previous = getPrevGalaxy(uid)
 
-	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id)
+	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id) # we take the galaxy's features (values from the .cat files)
 
 	'''try:
 		analysis = Analysis.objects.filter(user_id=request.user, galaxy_id=gal.id)
 	except ObjectDoesNotExist:
 		messages.info(request,'No analysis yet.')'''
 
-	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
+	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par) #if all files exists
 		
 	#directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
 
-	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], scalingDefault)				
+	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], scalingDefault)	#create the f110's image			
 	
-	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], scalingDefault)
+	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], scalingDefault) #create the f160 or f140's image
 
-	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift)
-	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift)
+	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift) #create the g102 2D's image
+	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift)#create the g141 2D's image
 
-	g102DatScript, g102DatDiv = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift)
-	g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshift)
+	g102DatScript, g102DatDiv = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift) #create the g102 1D's image
+	g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshift) #create the g141 1D's image
 	
 
 	return render(request, 'viewGalaxy.html',locals())
@@ -496,7 +508,7 @@ def createPathParDat(fieldId):
 	fieldId = str(fieldId)
 	return basePath +"Par"+fieldId+"_final/"+"Par"+fieldId+"lines.dat"
 
-def getIndexObjectById(objects, fieldId, uniq_id):
+def getIndexObjectById(objects, uniq_id):
 	try:
 		index = None
 
@@ -509,13 +521,13 @@ def getIndexObjectById(objects, fieldId, uniq_id):
 	except:
 		return None
 
-def firstObjectInFile(request,fieldId):
+def firstObjectInFile(request,fieldId, parId):
 	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
 
 	index = None
 
 	for i, obj in enumerate(objects):
-		gal = Galaxy.objects.get(uniq_id=obj[2])
+		gal = Galaxy.objects.get(uniq_id=obj[2],parfolder_id=parId)
 		check = getIdentificationUser(gal.id,request.user.id)
 		if not check:
 			index = i
@@ -530,7 +542,7 @@ def getLastGalaxyReviewed(user_id):
 		iden = None
 	return iden
 
-def queue(request, objects, fieldId,act=0):
+def queue(request, objects, fieldId, parId, act=0):
 	#pdb.set_trace()
 	actual = objects[act]
 
@@ -541,7 +553,7 @@ def queue(request, objects, fieldId,act=0):
 	while next == None:
 		test = objects[act + i]
 
-		gal = Galaxy.objects.get(uniq_id=test[2])
+		gal = Galaxy.objects.get(uniq_id=test[2],parfolder_id=parId)
 		check = getIdentificationUser(gal.id,request.user.id)
 
 		if not check:
@@ -663,26 +675,31 @@ def uploadParFile(request, name=None):
 				ids_final = checkFilesGtype(ids1,ids2)
 
 				try:
-					addFileDatabase(ids_final, par.id, getTypeSecondFiles())
+					addFileDatabase(ids_final, par.id, getTypeSecondFiles(par.fieldId_par))
 				except:
-					messages.error(request, u"Error during the saveing.")
+					messages.error(request, u"Error during the saving.")
 					par.delete()
-					return False;
+					return False
 
 				messages.success(request, u"File saved in database.")
-				return True;
+				return True
 		else:
 			messages.error(request, u"File already in database.")
-			return False;	
+			return False	
 
-def getTypeSecondFiles():
-	toCheck = basePath + grismFolder + f140w
-	toCheck2 = basePath + grismFolder + f160w
+def getTypeSecondFiles(fieldId):
+	value = None
+	par = "Par"+fieldId+"_final"
+
+	toCheck = basePath + par +grismFolder + f140w
+	toCheck2 = basePath + par +grismFolder + f160w
 
 	if exists(toCheck):
-		return True
+		value = True
 	elif exists(toCheck2):
-		return False
+		value = False
+
+	return value
 
 def saveParFile(fieldNum, name):
 	try:
