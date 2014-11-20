@@ -301,3 +301,48 @@ input[type="number"]{
 .speWaveTitle:hover{
 	text-decoration: underline;
 }
+
+.linkLogin{
+	text-align: right;
+}
+
+#linkLogin{
+	color:#777;
+}
+
+#linkLogin:hover{
+	text-decoration: none;
+	color:white;
+}
+
+.linkLogin:hover  #loginFormDiv{
+	display: block;
+}
+
+#loginFormDiv{
+	color:initial !important;
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-size: initial !important;
+	font-weight: initial !important;
+	display: none;
+	width: 245px;
+	padding:5px;
+	margin-top: 15px;
+	text-align: center;
+	background-color: #222;
+	position: relative;
+	left:105px;
+}
+
+#loginFormDiv label[for='id_password']{
+	margin-top: 10px;
+}
+
+#loginFormDiv label, #loginFormDiv p{
+	color:#777;
+}
+
+#loginFormDiv button{
+	margin-top:10px;
+	margin-bottom: 10px;
+}
