@@ -145,9 +145,10 @@ def getGalaxyInfodByUniqName(name):
 
 	return uid, fieldId, parId
 
-#Here, we just get the older parFolder. We need this to define on witch folder the user will work first.
+
 def getNextParFolder(user_id):
 	parfolder = None
+	act = None
 	try:
 		last_iden = Identifications.objects.filter(user_id=user_id).order_by('-id')[0]
 
@@ -159,13 +160,14 @@ def getNextParFolder(user_id):
 				parfolder = getNextParFolderByAct(last_iden.galaxy.parfolder_id)
 			else:
 				parfolder = last_iden.galaxy.parfolder
+				act = getIndexObjectById(objects, last_iden.galaxy.uniq_id)
 		else:
 			parfolder = getOlderParFolder()
 
 	except:
 		parfolder = getOlderParFolder()
 
-	return parfolder
+	return parfolder, act
 
 def getNextParFolderByAct(act_id):
 	next = None
@@ -185,7 +187,7 @@ def getNextParFolderByAct(act_id):
 
 	return next
 
-
+#Here, we just get the older parFolder. We need this to define on witch folder the user will work first.
 def getOlderParFolder():
 	try:
 		parfolder = ParFolder.objects.order_by('date_upload')[0]
@@ -198,19 +200,37 @@ def getOlderParFolder():
 def openQueueFile(fieldId):
 	return np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
 
+def getNextIndexQueue(objects, act):
+	next = None
+	actual = objects[act]
+
+	for i, obj in enumerate(objects):
+		if i > act:
+			if obj[2] != actual[2]:
+				next = i
+
+	return next
+
+
+
 #the most important function in this file. This one is called each time the user will want to access to a galaxy's page.
 #More informations with the comments in the function
 @login_required
 def viewGalaxy(request, name=None): #name is in default at none because we need a begging for the queue.
 	if name == None:
-		parfolder = getNextParFolder(request.user.id) #we take the older folder
+		parfolder, act = getNextParFolder(request.user.id) #we take the older folder
 		if parfolder == None:
 			messages.error(request,"You did all the available galaxy.")
 			return redirect("/ds9s/account/reviews/")
 		else:
 			objects = openQueueFile(parfolder.fieldId_par)#open the relative file
 			#get all what we need to display the page
-			gal, next, wavelenghts = queue(request, objects, parfolder.fieldId_par, parfolder.id, act=firstObjectInFile(request, parfolder.fieldId_par, parfolder.id))
+			if act == None:
+				act = firstObjectInFile(request, parfolder.fieldId_par, parfolder.id)
+			else:
+				act = getNextIndexQueue(objects, act)
+
+			gal, next, wavelenghts = queue(request, objects, parfolder.fieldId_par, parfolder.id, act=act)
 	else:
 		uid, parfolderId, parId = getGalaxyInfodByUniqName(name) #get the galaxy with the name
 		if uid != None and parfolderId != None: #if we have something
@@ -554,9 +574,9 @@ def createPathParDat(fieldId):
 def getIndexObjectById(objects, uniq_id):
 	try:
 		index = None
-
+		uniq_id = str(uniq_id)
 		for i, obj in enumerate(objects):
-			if obj[2] == str(uniq_id):
+			if obj[2] == uniq_id:
 				index = i
 				break
 
@@ -587,31 +607,41 @@ def getLastGalaxyReviewed(user_id):
 
 def queue(request, objects, fieldId, parId, act=0):
 	#pdb.set_trace()
+	print "act: ", act
 	actual = objects[act]
+
+	print "actual: ",actual[2]
 
 	maxValue = len(objects)
 	i = 0
 	wavelenghts = []
-	done = False
+	next = None
 
-	while done == False:
+	while act + i < maxValue:		
 		nextInFile = objects[act + i]
+		print "i: ",i
+		print "add: ", act + i
+		print "nextInFile1: ", nextInFile[2]
 
 		gal = Galaxy.objects.get(uniq_id=nextInFile[2],parfolder_id=parId)
 		check = getIdentificationUser(gal.id,request.user.id)
 
 		if not check:
+			print "nextInFile2: ", nextInFile[2]
 			if nextInFile[2] == actual[2]:
+				print "wave add"
 				wavelenghts.append(nextInFile[3])
 				i += 1
-			else:
-				next = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [nextInFile[2], nextInFile[0]])[0]
-				actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]
-				request.session['waves'+str(actualEnd.uniq_name)] = wavelenghts
-				done = True
+			else: 
+				print "next"
+				next = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [nextInFile[2], nextInFile[0]])[0]			
+				break
 		else:
 			i += 1 
 
+	print "end: ",wavelenghts
+	actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]
+	request.session['waves'+str(actualEnd.uniq_name)] = wavelenghts
 
 	return actualEnd, next, wavelenghts
 
