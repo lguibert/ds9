@@ -136,8 +136,13 @@ class = 'container-fuild'
 			{% include "reviewChoise.html" %}
 		{% endif %}
 	</div>
-
-	{% include "buttonsNextPrev.html" %}
+	{% if not check %}
+		{% if not next %}
+			<h1>Last object of this list.</h1>
+		{% else %}
+			{% include "buttonsNextPrev.html" %}
+		{% endif %}
+	{% endif %}
 
 	{% block js %}
 	{{block.super}}

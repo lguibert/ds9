@@ -146,6 +146,46 @@ def getGalaxyInfodByUniqName(name):
 	return uid, fieldId, parId
 
 #Here, we just get the older parFolder. We need this to define on witch folder the user will work first.
+def getNextParFolder(user_id):
+	parfolder = None
+	try:
+		last_iden = Identifications.objects.filter(user_id=user_id).order_by('-id')[0]
+
+		if last_iden:
+			objects = openQueueFile(last_iden.galaxy.parfolder.fieldId_par)
+			lastobject = objects[-1]
+
+			if str(lastobject[2]) == str(last_iden.galaxy.uniq_id):
+				parfolder = getNextParFolderByAct(last_iden.galaxy.parfolder_id)
+			else:
+				parfolder = last_iden.galaxy.parfolder
+		else:
+			parfolder = getOlderParFolder()
+
+	except:
+		parfolder = getOlderParFolder()
+
+	return parfolder
+
+def getNextParFolderByAct(act_id):
+	next = None
+	i = 1
+	biggerIdParfolder = ParFolder.objects.order_by("-id")[0]
+
+	while next == None:
+		try:
+			value = int(act_id)+i
+			if value > biggerIdParfolder.id:
+				break
+			else:
+				par = ParFolder.objects.get(id=value)
+				next = par
+		except:
+			i += 1
+
+	return next
+
+
 def getOlderParFolder():
 	try:
 		parfolder = ParFolder.objects.order_by('date_upload')[0]
@@ -161,13 +201,16 @@ def openQueueFile(fieldId):
 #the most important function in this file. This one is called each time the user will want to access to a galaxy's page.
 #More informations with the comments in the function
 @login_required
-def viewGalaxy(request, name=None):
-#name is in default at none because we need a begging for the queue.
+def viewGalaxy(request, name=None): #name is in default at none because we need a begging for the queue.
 	if name == None:
-		parfolder = getOlderParFolder() #we take the older folder
-		objects = openQueueFile(parfolder.fieldId_par)#open the relative file
-		#get all what we need to display the page
-		gal, next, wavelenghts = queue(request, objects, parfolder.fieldId_par, parfolder.id, act=firstObjectInFile(request, parfolder.fieldId_par, parfolder.id))
+		parfolder = getNextParFolder(request.user.id) #we take the older folder
+		if parfolder == None:
+			messages.error(request,"You did all the available galaxy.")
+			return redirect("/ds9s/account/reviews/")
+		else:
+			objects = openQueueFile(parfolder.fieldId_par)#open the relative file
+			#get all what we need to display the page
+			gal, next, wavelenghts = queue(request, objects, parfolder.fieldId_par, parfolder.id, act=firstObjectInFile(request, parfolder.fieldId_par, parfolder.id))
 	else:
 		uid, parfolderId, parId = getGalaxyInfodByUniqName(name) #get the galaxy with the name
 		if uid != None and parfolderId != None: #if we have something
@@ -546,31 +589,29 @@ def queue(request, objects, fieldId, parId, act=0):
 	#pdb.set_trace()
 	actual = objects[act]
 
-	next = None
+	maxValue = len(objects)
 	i = 0
 	wavelenghts = []
+	done = False
 
-	while next == None:
-		test = objects[act + i]
+	while done == False:
+		nextInFile = objects[act + i]
 
-		gal = Galaxy.objects.get(uniq_id=test[2],parfolder_id=parId)
+		gal = Galaxy.objects.get(uniq_id=nextInFile[2],parfolder_id=parId)
 		check = getIdentificationUser(gal.id,request.user.id)
 
 		if not check:
-			if test[2] == actual[2]:
-				wavelenghts.append(test[3])
-				i += 1 
+			if nextInFile[2] == actual[2]:
+				wavelenghts.append(nextInFile[3])
+				i += 1
 			else:
-				try:
-					test_gal = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [test[2], test[0]])[0]
-					actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]
-					next = test_gal				
-				except IndexError:
-					i += 1
+				next = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [nextInFile[2], nextInFile[0]])[0]
+				actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]
+				request.session['waves'+str(actualEnd.uniq_name)] = wavelenghts
+				done = True
 		else:
-			i += 1
+			i += 1 
 
-	request.session['waves'+str(actualEnd.uniq_name)] = wavelenghts
 
 	return actualEnd, next, wavelenghts
 
@@ -628,7 +669,9 @@ def checkAllFiles(gal_id, par_name, par_id):
 @login_required
 @permission_required("ds9s.add_parfolder", login_url="/ds9s/")
 def newParFile(request):
-	if request.method == 'POST':
+	parfolders, parids = getParfoldersAndId()
+
+	if request.method == 'POST':		
 		form = NewParFileForm(request.POST)
 		if form.is_valid():
 			data = form.cleaned_data['name']
@@ -639,7 +682,7 @@ def newParFile(request):
 						if uploaded:
 							return redirect("/ds9s/")
 					else:
-						messages.error(request, 'No file with this number.')
+						messages.error(request, 'No file with this number.')						
 						return render(request, 'newParFits.html',locals())
 			except ValueError:
 				messages.error(request, 'The value is not a number.')
@@ -647,10 +690,46 @@ def newParFile(request):
 		else:
 			messages.error(request, 'Error in the file.')
 			return render(request, 'newParFits.html',locals())
-	else:
+	else:		
 		form = NewParFileForm()
 
 	return render(request, 'newParFits.html',locals())
+
+def getParfoldersAndId():
+	parfolders = getParfoldersBaseDirectory()
+	parids = getFieldIdFromParfolder(parfolders)
+
+	return parfolders, parids
+
+def getParfoldersBaseDirectory():
+	folders = listdir(basePath)
+	parfolders = []
+	exp = "Par[0-9]+_final"
+
+	parfolderUploaded = ParFolder.objects.values("name_par")
+	names = []
+
+	for par in parfolderUploaded:
+		names.append(par['name_par'])
+
+	for folder in folders:
+		if re.match(exp, folder) is not None: 
+			if folder not in names:
+				parfolders.append(folder)
+
+	return parfolders
+
+def getFieldIdFromParfolder(parfolders):
+	fieldids = []
+
+	for parfolder in parfolders:
+		parid = split(parfolder, "_")
+		parid = parid[0]
+		parid = split(parid, 'Par')
+		parid = parid[1]
+		fieldids.append(parid)
+
+	return fieldids
 
 
 def uploadParFile(request, name=None):

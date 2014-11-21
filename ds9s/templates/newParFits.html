@@ -1,9 +1,24 @@
 {% extends "base.html" %}
-{% block content %}
-	<form method="post" action=".">
-	    {% csrf_token %}
-	    {{ form.as_p }}
-		<input class="btn btn-default" type="submit" value="Upload"/>			    
-	</form>
+{% load ds9s_extras %}
+{% block flyJs %}
+	{%load static %}
+	<script type="text/javascript" src='{% static "parfolder.js" %}'></script>
+{% endblock %}
 
+{% block content %}
+	{% if parfolders %}
+		<h1>Available folder{{parfolders|pluralize}}:</h1>
+		<ul id="parfolderList">
+			{% for parfolder in parfolders %}
+			<li value="{{parids|keyvalue:forloop.counter0}}" class="parfolderList">{{parfolder}}</li>
+			{% endfor %}
+		</ul>
+		<form method="post" action=".">
+		    {% csrf_token %}
+		    {{ form.as_p }}
+			<input class="btn btn-default" type="submit" value="Upload"/>			    
+		</form>
+	{% else %}
+		<h1>No ParXXX folder available.</h1>
+	{% endif %}
 {% endblock %}

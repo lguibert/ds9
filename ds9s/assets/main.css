@@ -12,6 +12,10 @@ html, body{
 	clear:both;
 }
 
+.margin-top-10{
+	margin-top: 10px;
+}
+
 label{
 	min-width: 175px;
 }
@@ -345,4 +349,13 @@ input[type="number"]{
 #loginFormDiv button{
 	margin-top:10px;
 	margin-bottom: 10px;
+}
+
+#parfolderList{
+	margin-bottom: 30px;
+}
+
+#parfolderList li:hover{
+	text-decoration: underline;
+	cursor: pointer;
 }
