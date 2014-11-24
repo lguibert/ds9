@@ -1177,7 +1177,7 @@ def getIdentificationUser(gal_id, user_id):
 	return iden
 
 def setNoneRedshist(typeObjId, redshift):
-	if typeObjId == 5:
+	if typeObjId in [5,1]:
 		redshift = None
 	else:
 		redshift = secureRedshift(float(redshift))

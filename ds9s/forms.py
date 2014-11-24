@@ -13,7 +13,7 @@ class CreateUserForm(forms.Form):
 	username = forms.CharField(label="Your username")
 	password = forms.CharField(widget=forms.PasswordInput)
 	passwordCheck = forms.CharField(widget=forms.PasswordInput, label=u"Password confirmation")
-	email = forms.EmailField(label=u'Your mail')	
+	email = forms.EmailField(label=u'Your email')	
 	first_name = forms.CharField(label=u"First name")
 	last_name = forms.CharField(label=u"Last name")
 
