@@ -1,7 +1,9 @@
 <div class="clear container-fluid">
 	<div class="col-xs-6 col-md-6">
 		<form id="userReview" method="post" 
-		{% if not check %}
+		{% if not next %}
+			action="/ds9s/saveReview/{{gal.id}}/{{gal.uniq_name}}/None/"			
+		{% elif not check %}
 			action="/ds9s/saveReview/{{gal.id}}/{{gal.uniq_name}}/{{next.uniq_name}}/"
 		{% else %}
 			action="/ds9s/updateReview/{{check.id}}/"

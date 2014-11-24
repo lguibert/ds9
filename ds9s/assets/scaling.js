@@ -38,7 +38,7 @@ $(document).ready(function(){
 		var csrftoken = getCookie('csrftoken');
 
 		$.ajax({
-			url : "/ds9s/fits/scaling/"+val+"/"+color+"/",
+			url : "/ds9s/scaling/"+val+"/"+color+"/",
 			type: "POST",
 		    beforeSend: function(xhr, settings) {
 		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -117,7 +117,7 @@ $(document).ready(function(){
 		//id = $("#uidGal").html();
 
 		$.ajax({
-			url : "/ds9s/fits/wavelenghing/"+redshift+"/"+mode+"/",
+			url : "/ds9s/wavelenghing/"+redshift+"/"+mode+"/",
 			type: "POST",
 		    beforeSend: function(xhr, settings) {
 		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -189,7 +189,7 @@ $(document).ready(function(){
 		var csrftoken = getCookie('csrftoken');
 
 		$.ajax({
-			url : "/ds9s/fits/referencing/"+redshift+"/"+mode+"/",
+			url : "/ds9s/referencing/"+redshift+"/"+mode+"/",
 			type: "POST",
 		    beforeSend: function(xhr, settings) {
 		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {

@@ -1214,8 +1214,13 @@ def saveUserReview(request, id, uniq_name, next_uniq_name):
 			identification = addIdentification(id, user_id, typeObjId, redshift, contaminated)
 
 			if identification:				
-				messages.success(request, "You successfully identified the object.")
-				return HttpResponseRedirect("/ds9s/view/"+str(next_uniq_name)+"/")
+				if next_uniq_name == "None":
+					messages.success(request, "You successfully identified the object and finish this queue. Click again on 'Let's Go'.")
+					return HttpResponseRedirect("/ds9s/account/reviews/")
+				else:
+					messages.success(request, "You successfully identified the object.")
+					return HttpResponseRedirect("/ds9s/view/"+str(next_uniq_name)+"/")
+				
 			else:
 				messages.error(request, "Error during saving.")
 				return HttpResponseRedirect("/ds9s/view/"+uniq_name+"/")
