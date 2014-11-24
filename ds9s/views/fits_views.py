@@ -208,6 +208,7 @@ def getNextIndexQueue(objects, act):
 		if i > act:
 			if obj[2] != actual[2]:
 				next = i
+				break
 
 	return next
 
@@ -607,10 +608,7 @@ def getLastGalaxyReviewed(user_id):
 
 def queue(request, objects, fieldId, parId, act=0):
 	#pdb.set_trace()
-	print "act: ", act
 	actual = objects[act]
-
-	print "actual: ",actual[2]
 
 	maxValue = len(objects)
 	i = 0
@@ -619,27 +617,20 @@ def queue(request, objects, fieldId, parId, act=0):
 
 	while act + i < maxValue:		
 		nextInFile = objects[act + i]
-		print "i: ",i
-		print "add: ", act + i
-		print "nextInFile1: ", nextInFile[2]
 
 		gal = Galaxy.objects.get(uniq_id=nextInFile[2],parfolder_id=parId)
 		check = getIdentificationUser(gal.id,request.user.id)
 
 		if not check:
-			print "nextInFile2: ", nextInFile[2]
 			if nextInFile[2] == actual[2]:
-				print "wave add"
 				wavelenghts.append(nextInFile[3])
 				i += 1
 			else: 
-				print "next"
 				next = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [nextInFile[2], nextInFile[0]])[0]			
 				break
 		else:
 			i += 1 
 
-	print "end: ",wavelenghts
 	actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]
 	request.session['waves'+str(actualEnd.uniq_name)] = wavelenghts
 
