@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 
+import pdb
+
 
 
 @login_required
@@ -29,13 +31,14 @@ def newUser(request):
 		form = CreateUserForm(request.POST)
 		if form.is_valid():
 			user = User()
-			user.username = form.cleaned_data['username']
-			user.email = form.cleaned_data['email']
+			user.username = None
+			user.email = form.cleaned_data['emailUser']
 			user.password = make_password(form.cleaned_data['password'])
 			user.first_name = form.cleaned_data['first_name']
 			user.last_name = form.cleaned_data['last_name']
-			try:
-				user.save()				
+			
+			user.save()	
+			try:			
 				u = User.objects.latest('id') #get the id of the user
 				messages.success(request, u"User saved.")
 				return redirect("/ds9s/account/") #redirect to the userpage
@@ -56,7 +59,7 @@ def updateUser(request, pk):
 			form = UpdateUserForm(request.POST, instance=data)
 			if form.is_valid():
 				user = User(pk)	
-				user.username = form.cleaned_data['username']
+				user.username = None
 				user.email = form.cleaned_data['email']
 
 				if form.cleaned_data['password'] != '':
@@ -95,9 +98,10 @@ def connect(request):
 			to = request.POST.get('next')
 			form = ConnectForm(request.POST)
 			if form.is_valid():	
-				username = form.cleaned_data['username']
+				#username = form.cleaned_data['username']
+				email = form.cleaned_data['email']
 				password = form.cleaned_data['password']
-				user = authenticate(username=username, password=password)
+				user = authenticate(username=email, password=password)
 				if user:
 					login(request, user)
 					if next == '':

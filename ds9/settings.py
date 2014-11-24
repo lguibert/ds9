@@ -103,6 +103,10 @@ LOGIN_URL="/ds9s/login/"
 
 SESSION_COOKIE_AGE = 43200 #12h
 
+AUTHENTICATION_BACKENDS = ('ds9.backends.EmailAuthBackend.EmailAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/

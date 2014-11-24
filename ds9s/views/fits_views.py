@@ -75,7 +75,7 @@ maxG141 = 17500.
 
 redshiftDefault = 1 #default redshift's value. Will be use for the bokeh image
 scalingDefault = 150 #default zoom. Will be use for the bokeh image
-crossColor = "cyan"
+crossColor = "lime"
 
 TOOLS="pan,wheel_zoom,box_zoom,reset" #all the tools for the bokeh images
 
@@ -348,7 +348,8 @@ def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,t
     hold()
 
     for wave in wavelenghts:
-    	cross(x=[float(wave)], y=0, size=30,color=crossColor)
+    	wave = float(wave)
+    	line([wave, wave],y=[cmin-yplus,fmax+yplus],color=crossColor,line_width=2, line_dash="dotted")
 
     for index, em in enumerate(emlineWavelengthsRest):    	
     	emlineWavelengths = em * (1.0 + float(redshift))
@@ -541,9 +542,11 @@ def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=
 	if type:
 		annulus([ycircle],xcircle,9.9,10,fill_color="#df1c1c", line_color="#df1c1c")
 	else:
-		for wave in wavelenghts:
-			cross(x=[float(wave)], y=0, size=30,color=crossColor)
 		y = [-2,2]
+		for wave in wavelenghts:
+			wave = float(wave)
+			line([wave, wave],y=y,color=crossColor,line_width=2, line_dash="dotted")
+		
 		#creation emition lines
 		for index, em in enumerate(emlineWavelengthsRest):
 			emlineWavelengths = em * (1.0 + float(redshift))
@@ -629,6 +632,8 @@ def queue(request, objects, fieldId, parId, act=0):
 				next = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [nextInFile[2], nextInFile[0]])[0]			
 				break
 		else:
+			if nextInFile[2] == actual[2]:
+				wavelenghts.append(nextInFile[3])
 			i += 1 
 
 	actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]

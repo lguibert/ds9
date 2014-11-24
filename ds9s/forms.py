@@ -5,15 +5,16 @@ from string import split
 from django.utils.safestring import mark_safe
 
 class ConnectForm(forms.Form):
-	username = forms.CharField(max_length=50)
+	#username = forms.CharField(max_length=50)
+	email = forms.EmailField()
 	password = forms.CharField(widget=forms.PasswordInput)
 
 
 class CreateUserForm(forms.Form):
-	username = forms.CharField(label="Your username")
+	emailUser = forms.EmailField(label=u'Your email')
+	#username = forms.CharField(label="Your username")
 	password = forms.CharField(widget=forms.PasswordInput)
-	passwordCheck = forms.CharField(widget=forms.PasswordInput, label=u"Password confirmation")
-	email = forms.EmailField(label=u'Your email')	
+	passwordCheck = forms.CharField(widget=forms.PasswordInput, label=u"Password confirmation")	
 	first_name = forms.CharField(label=u"First name")
 	last_name = forms.CharField(label=u"Last name")
 
@@ -30,7 +31,7 @@ class CreateUserForm(forms.Form):
 
 		return cleaned_data
 
-	def clean_username(self):
+	'''def clean_username(self):
 		cleaned_data = super(CreateUserForm, self).clean()
 		name = cleaned_data.get('username')
 		user = User.objects.filter(username=name)		
@@ -39,7 +40,7 @@ class CreateUserForm(forms.Form):
 			self._errors['username'] = self.error_class([msg])
 			del cleaned_data['username']
 
-		return cleaned_data
+		return cleaned_data'''
 
 	def clean_email(self):
 		cleaned_data = super(CreateUserForm, self).clean()
@@ -54,7 +55,7 @@ class CreateUserForm(forms.Form):
 
 
 class UpdateUserForm(forms.ModelForm):
-	username = forms.CharField(label="Your username")
+	#username = forms.CharField(label="Your username")
 	email = forms.EmailField(label=u'Your email')	
 	first_name = forms.CharField(label=u"First name")
 	last_name = forms.CharField(label=u"Last name")
