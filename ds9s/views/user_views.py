@@ -51,40 +51,37 @@ def newUser(request):
 	return render(request, 'newUser.html',locals())
 
 @login_required
-def updateUser(request, pk):
-	if int(pk) == int(request.user.id):
-		formType = True #change the <form> in the template
-		data = User.objects.get(id=pk)
-		if request.method == 'POST':
-			form = UpdateUserForm(request.POST, instance=data)
-			if form.is_valid():
-				user = User(pk)	
-				user.username = None
-				user.email = form.cleaned_data['email']
+def updateUser(request):
+	formType = True #change the <form> in the template
+	data = User.objects.get(id=request.user.id)
+	if request.method == 'POST':
+		form = UpdateUserForm(request.POST, instance=data)
+		if form.is_valid():
+			user = User(pk)	
+			user.username = None
+			user.email = form.cleaned_data['email']
 
-				if form.cleaned_data['password'] != '':
-					user.password = make_password(form.cleaned_data['password'])
-				else:
-					user.password = request.user.password
+			if form.cleaned_data['password'] != '':
+				user.password = make_password(form.cleaned_data['password'])
+			else:
+				user.password = request.user.password
 
-				user.first_name = form.cleaned_data['first_name']
-				user.last_name = form.cleaned_data['last_name']
-				user.is_superuser = data.is_superuser
-				user.is_staff = data.is_staff
-				#user.is_active = data.is_active
-				try:
-					user.save()
-					messages.success(request, u"User updated.")
-					return redirect('/ds9s/account/')
-				except IntegrityError as e:
-					messages.error(request, u"Username already in use")
-					return render(request, 'newUser.html',locals())
-		else:
-			form = UpdateUserForm(instance=data)		
-		
-		return render(request, 'newUser.html',locals())
+			user.first_name = form.cleaned_data['first_name']
+			user.last_name = form.cleaned_data['last_name']
+			user.is_superuser = data.is_superuser
+			user.is_staff = data.is_staff
+			#user.is_active = data.is_active
+			try:
+				user.save()
+				messages.success(request, u"User updated.")
+				return redirect('/ds9s/account/')
+			except IntegrityError as e:
+				messages.error(request, u"Username already in use")
+				return render(request, 'newUser.html',locals())
 	else:
-		return redirect('/ds9s/account/')
+		form = UpdateUserForm(instance=data)		
+		
+	return render(request, 'newUser.html',locals())
 
 
 def connect(request):
