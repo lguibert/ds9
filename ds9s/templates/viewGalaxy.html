@@ -1,6 +1,17 @@
 {% extends "base.html" %}
 {% block flyJs %}
 	    <script type="text/javascript" src='http://cdn.pydata.org/bokeh-0.6.1.min.js'></script>
+	    <script type="text/javascript">
+	    $(document).ready(function(){
+		    $("#userReview").submit(function(e){
+				$('<input />').attr('type', 'hidden')
+		          .attr('name', "redshift")
+		          .attr('value', $(".wavelengh").val())
+		          .appendTo('#userReview');
+		      	return true;
+			});
+		});
+	    </script>
 {% endblock %}
 
 
@@ -31,19 +42,8 @@ class = 'container-fuild'
 
 {% block content %}	
 	<a class='btn btn-default' type='0' id='displayCatData'>See more</a>
-	<div id="dataCatContainer" class="none container-fluid">
-		<div class="row">
-			{% for f in features%}
-				<div class="dataCat col-md-3 col-xs-3">
-					<h6>
-						{{f.galaxyfields.name}}
-						({{f.galaxyfields.shortname}})
-					</h6>
-					<p>{{f.value}}</p>
-				</div>
-			{% endfor %}
-		</div>	
-	</div>	
+	{% include 'seeMoreInfo.html' %}
+
 	<div id="rootFiles" class="container-fluid">
 		<div class="row">
 			<div id="fFiles" class="col-xs-6 col-md-6">
@@ -92,26 +92,15 @@ class = 'container-fuild'
 						{{g141DatDiv}}
 					</div>
 				</div>
-				{% include "displaySpecialWaves.html" %}
 			</div>
-		</div>
-			<div id="gFiles" class="col-xs-6 col-md-6">
-				{% include "controlWave.html" %}
-				<div contenteditable="false" class="row">
-					<div id="g102" class="imageBokeh">
-						{{g1div}}
+			<div class="row">				
+				<div id="divRef" contenteditable="false" class="col-md-offset-6 col-xs-6 col-md-6">
+					<div id="divRef102" class="imageBokeh">
 					</div>
-					<div id="g141" class="imageBokeh imageSecond">
-						{{g2div}}
+					<div id="divRef141" class="imageBokeh imageSecond">
 					</div>
 				</div>
-				{% include "displaySpecialWaves.html" %}
-			</div>
-			
-			
-
-			<div class="col-xs-6 col-md-6">
-				<div id="refSpectra">
+				<div id="refSpectra" class="col-md-offset-6 col-xs-6 col-md-6">
 					<ul id="ulRefSpec">
 						<li><label id="removeSelec"title="Click here to remove selection">Reference: </label></li>
 						<li><input class="disableCharge" type="radio" id="starRef" name="choiseRef" value="star"/><label for="starRef">Star</label></li>
@@ -119,11 +108,16 @@ class = 'container-fuild'
 						<li><input class="disableCharge" type="radio" id="galaxyRef" name="choiseRef" value="galaxy"/><label for="galaxyRef">Galaxy</label></li>
 					</ul>
 				</div>
-				<div id="divRef" contenteditable="false" class="row">
-					<div id="divRef102" class="imageBokeh">
-					</div>
-					<div id="divRef141" class="imageBokeh imageSecond">
-					</div>
+			</div>
+
+		</div>
+			<div id="gFiles" class="row">
+				{% include "controlWave.html" %}
+				<div id="g102" class="imageBokeh col-xs-6 col-md-6">
+					{{g1div}}
+				</div>
+				<div id="g141" class="imageBokeh col-xs-6 col-md-6">
+					{{g2div}}
 				</div>
 			</div>
 		</div>
@@ -139,8 +133,6 @@ class = 'container-fuild'
 	
 	{% if not next %}
 		<h1>Last object of this list.</h1>
-	{% else %}
-		{% include "buttonsNextPrev.html" %}
 	{% endif %}
 	
 

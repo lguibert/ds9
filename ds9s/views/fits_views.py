@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from ds9s.models import Galaxy, ParFolder, Analysis, EmissionLineFields, EmissionLine, GalaxyFeatures, GalaxyTypes, Identifications
-from ds9s.forms import UploadFitsForm, NewParFileForm
+from ds9s.forms import NewParFileForm
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, login, logout
@@ -471,7 +471,7 @@ def displayGImage(request, wavelenghts, file, short_name, redshift):
 
 
 
-	script, div = createBokehImage(iData, dataBoundaries,430,150,short_name, type=False,redshift=redshift,wavelenghts=wavelenghts)
+	script, div = createBokehImage(iData, dataBoundaries,800,280,short_name, type=False,redshift=redshift,wavelenghts=wavelenghts)
 
 	return script, div
 
@@ -781,8 +781,12 @@ def uploadParFile(request, name=None):
 
 				try:
 					addFileDatabase(ids_final, par.id, getTypeSecondFiles(par.fieldId_par))
+				except IOError, e:
+					messages.error(request, u"Error during the save: some file(s) are missing.")
+					par.delete()
+					return False
 				except:
-					messages.error(request, u"Error during the saving.")
+					messages.error(request, u"Error during the save.")
 					par.delete()
 					return False
 

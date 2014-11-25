@@ -13,10 +13,10 @@
 			<li value="{{parids|keyvalue:forloop.counter0}}" class="parfolderList">{{parfolder}}</li>
 			{% endfor %}
 		</ul>
-		<form method="post" action=".">
+		<form id="uploadParForm" method="post" action=".">
 		    {% csrf_token %}
 		    {{ form.as_p }}
-			<input class="btn btn-default" type="submit" value="Upload"/>			    
+			<input id='btnUploadPar' class="btn btn-default" type="submit" value="Upload"/>			    
 		</form>
 	{% else %}
 		<h1>No ParXXX folder available.</h1>

@@ -1,0 +1,24 @@
+<div id="dataCatContainer" class="none container-fluid">
+	<div class="row">
+		<h3 class="titleMoreInfo col-md-12 col-xs-12">Galaxy's information</h3>
+		{% for f in features%}
+			<div class="dataCat col-md-3 col-xs-3">
+				<h6>
+					{{f.galaxyfields.name}}
+					({{f.galaxyfields.shortname}})
+				</h6>
+				<p>{{f.value}}</p>
+			</div>
+		{% endfor %}
+		<h3 class="titleMoreInfo col-md-12 col-xs-12">Specials Wavelengts</h3>
+		<div class="speWaveValues">
+			{% for wave in wavelenghts %}
+				<div class="dataCat col-md-3 col-xs-3">
+					<h6>
+						{{wave}}
+					</h6>
+				</div>
+			{% endfor %}
+		</div>
+	</div>	
+</div>	

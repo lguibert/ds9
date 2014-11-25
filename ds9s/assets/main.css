@@ -194,10 +194,6 @@ input[type="number"]{
 	float: left;
 }
 
-.imageSecond{
-	margin-left: 15px;
-}
-
 #ulRefSpec{
 	margin-top: 15px;
 }
@@ -281,29 +277,9 @@ input[type="number"]{
 	margin-top: 10px;
 }
 
-.rootSpeWave{
-	clear: both;
-	text-align: center;
-}
-
-.speWave{
-	width:100px;
-	display: inline-block;
-	text-align: center;
-	margin: auto;
-	margin: 10px 5px 5px 5px;
-}
-
-.speWaveValues{
-	display:none;
-}
-
-.speWaveTitle{
-	cursor: pointer;
-}
-
-.speWaveTitle:hover{
-	text-decoration: underline;
+.titleMoreInfo{
+	margin-top: 10px;
+	margin-bottom: 10px;
 }
 
 .linkLogin{

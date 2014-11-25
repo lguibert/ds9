@@ -80,18 +80,4 @@ class UpdateUserForm(forms.ModelForm):
 
 
 class NewParFileForm(forms.Form):
-	name = forms.CharField(label=mark_safe("Number of the Par<span class='precision'>XXX</span>"))
-
-class UploadFitsForm(forms.Form):
-	name = forms.CharField(label="File's name")
-	upload = forms.FileField(label="File (only .fits)")
-
-	def clean_uploadFile(self):
-		cleaned_data = super(UploadFitsForm, self).clean()
-		file = cleaned_data.get('upload')
-		if file:
-			ext = str(file).split(".")
-			if ext[-1] != "fits":
-				msg = u"File much be at .fits format."
-				self._errors['upload'] = self.error_class([msg])
-				del cleaned_data['upload']
+	name = forms.CharField(label=mark_safe("Number of the Par<span class='precision'>XXX</span>"),required=True)

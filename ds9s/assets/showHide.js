@@ -84,14 +84,6 @@ $(document).ready(function(){
 		}
 	});
 
-	$("#userReview").submit(function(e){
-		$('<input />').attr('type', 'hidden')
-          .attr('name', "redshift")
-          .attr('value', $(".wavelengh").val())
-          .appendTo('#userReview');
-      	return true;
-	});
-
 
 
 	/*$(".firstLine").click(function(){
