@@ -368,20 +368,38 @@ def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,t
     return html_script, html_div
 
 @login_required
-def wavelenghing(request, redshift,mode="false"):
+def coloring(request, val, redshift, color):
 	gal = get_object_or_404(Galaxy, uniq_name=request.session['unameGal'])
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
 
-	if float(redshift) < 0 :
-		redshift = 0
-	if float(redshift) > 3.:
-		redshift = 3
+	redshift = secureRedshift(redshift)
 
 	wavelenghts = request.session['waves'+str(gal.uniq_name)]
 
-	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift)
-	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift)
+	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val, color)
+	f160script, f160div = displayFImage(request, checked[3], gal, checked_short[3], val, color)
+	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color)
+	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift,color)
+
+	data = f110script, f110div, f160script, f160div, g1script, g1div, g2script, g2div
+
+	return HttpResponse(json.dumps(data))
+
+@login_required
+def wavelenghing(request, redshift,mode="false",color="Greys-9"):
+	gal = get_object_or_404(Galaxy, uniq_name=request.session['unameGal'])
+
+	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
+
+	redshift = secureRedshift(float(redshift))
+
+	wavelenghts = request.session['waves'+str(gal.uniq_name)]
+
+	print redshift
+
+	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color)
+	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift,color)
 	g102script, g102div = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift)
 	g141script, g141div = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshift)
 
@@ -452,7 +470,7 @@ def displayFImage(request, file, gal, short_name, val, color="Greys-9"):
 
 	return script, div
 
-def displayGImage(request, wavelenghts, file, short_name, redshift):
+def displayGImage(request, wavelenghts, file, short_name, redshift, color="Greys-9"):
 	inFits=pyfits.open(file)
 	iHdr=inFits[1].header
 	iData=inFits[1].data
@@ -471,7 +489,7 @@ def displayGImage(request, wavelenghts, file, short_name, redshift):
 
 
 
-	script, div = createBokehImage(iData, dataBoundaries,800,280,short_name, type=False,redshift=redshift,wavelenghts=wavelenghts)
+	script, div = createBokehImage(iData, dataBoundaries,800,280,short_name, type=False,redshift=redshift,wavelenghts=wavelenghts, color=color)
 
 	return script, div
 
@@ -542,7 +560,7 @@ def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=
 	if type:
 		annulus([ycircle],xcircle,9.9,10,fill_color="#df1c1c", line_color="#df1c1c")
 	else:
-		y = [-2,2]
+		y = [-3.2,3]
 		for wave in wavelenghts:
 			wave = float(wave)
 			line([wave, wave],y=y,color=crossColor,line_width=2, line_dash="dotted")

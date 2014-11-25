@@ -52,7 +52,7 @@ class = 'container-fuild'
 						{% csrf_token %}
 						<label for="scaling">Scaling: </label>
 						<input type="number" min="1" value="150" class="disableCharge" name="valScaling" id="valScaling" max="300"/>
-						<select class="form-control" name="colors" id="colors">
+						<select class="form-control colors" name="colors">
 							{% for d in colors.colors %}
 								{% for val in d.values%}
 									<option value="{{d.name}}-{{val}}" {% if d.name == "Greys" and val == 9 %}selected{%endif%}>{{d.name}} - {{val}}</option>	
@@ -83,7 +83,7 @@ class = 'container-fuild'
 			</div>
 
 			<div id="lines" class="col-xs-6 col-md-6">
-				{% include "controlWave.html" %}
+				{% include "controlWave1d.html" %}
 				<div contenteditable="false" class="">
 					<div id="datG102" class="imageBokeh">
 						{{g102DatDiv}}
@@ -112,7 +112,7 @@ class = 'container-fuild'
 
 		</div>
 			<div id="gFiles" class="row">
-				{% include "controlWave.html" %}
+				{% include "controlWave2d.html" %}
 				<div id="g102" class="imageBokeh col-xs-6 col-md-6">
 					{{g1div}}
 				</div>

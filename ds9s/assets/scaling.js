@@ -5,12 +5,12 @@ $(document).ready(function(){
 
 	$("#scaling").unbind().change(function(){
 		$("#valScaling").val($(this).val());
-		scaling($(this).val(), $("#colors").val());			
+		scaling($(this).val(), $(".colors").val());			
 	});
 
 	$("#valScaling").unbind().change(function(){
 		$("#scaling").val($(this).val());
-		scaling($(this).val(), $("#colors").val());	
+		scaling($(this).val(), $(".colors").val());	
 	});
 
 	function getCookie(name) {
@@ -68,10 +68,6 @@ $(document).ready(function(){
 		    });
 	}
 
-	$("#colors").unbind().change(function(){
-		scaling($("#scaling").val(), $(this).val());	
-	})
-
 	$("#default").unbind().click(function(){
 		if($("#scaling").val() != 150 || $("#colors").val() != "Greys-9"){
 			$("#scaling").val("150");
@@ -94,7 +90,7 @@ $(document).ready(function(){
 		$(".valWavelengh").val(val);
 		$(".wavelengh").val(val);
 
-		wavelenghing(val,undefinedBool($("input[name='choiseRef']:checked").val()));			
+		wavelenghing(val,undefinedBool($("input[name='choiseRef']:checked").val()),$(".colors").val());			
 	});
 
 	$(".valWavelengh").unbind().change(function(){
@@ -102,7 +98,7 @@ $(document).ready(function(){
 		$(".wavelengh").val(val);
 		$(".valWavelengh").val(val);
 
-		wavelenghing(val,undefinedBool($("input[name='choiseRef']:checked").val()));		
+		wavelenghing(val,undefinedBool($("input[name='choiseRef']:checked").val()),$(".colors").val());		
 	});
 
 	function undefinedBool(value){
@@ -113,13 +109,13 @@ $(document).ready(function(){
 		}
 	}
 
-	function wavelenghing(redshift,mode){
+	function wavelenghing(redshift,mode,color){
 		var csrftoken = getCookie('csrftoken');
 
 		//id = $("#uidGal").html();
 
 		$.ajax({
-			url : "/ds9s/wavelenghing/"+redshift+"/"+mode+"/",
+			url : "/ds9s/wavelenghing/"+redshift+"/"+mode+"/"+color+"/",
 			type: "POST",
 		    beforeSend: function(xhr, settings) {
 		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -224,6 +220,62 @@ $(document).ready(function(){
 		    });
 	}
 
+
+
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
+
+	$(".colors").unbind().change(function(){
+		$(".colors").val($(this).val());
+		coloring($("#scaling").val(), $(".valWavelengh").val(), $(this).val());	
+	})
+
+	function coloring(val, redshift, color){
+		var csrftoken = getCookie('csrftoken');
+
+		$.ajax({
+			url : "/ds9s/coloring/"+val+"/"+redshift+"/"+color+"/",
+			type: "POST",
+		    beforeSend: function(xhr, settings) {
+		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+		            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+		        }
+		        $(".disableCharge").prop("disabled",true);
+		        $("*").css("cursor","progress");
+		    }
+		    })
+			.success(function(data){
+				data = $.parseJSON(data)
+
+				var f110script = data[0];
+				var f110div = data[1];
+				var f160script = data[2];
+				var f160div = data[3];
+				var g1script = data[4];
+				var g1div = data[5];
+				var g2script = data[6];
+				var g2div = data[7];			
+
+				$("#f110").html(f110div);
+				$("#f160140").html(f160div);
+				$("#scrF110").html(f110script);
+				$("#scrf160140").html(f160script);
+
+				$("#g102").html(g1div);
+				$("#g141").html(g2div);
+				$("#scrG102").html(g1script);
+				$("#scrG141").html(g2script);
+		    }).error(function(xhr, err){
+		    	alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
+		    	alert("responseText: "+xhr.responseText);
+		    }).complete(function(){
+		    	$(".disableCharge").prop("disabled",false);
+		    	$("*").css("cursor","initial");
+		    });
+	}
+
 });
-
-
