@@ -69,11 +69,11 @@ $(document).ready(function(){
 	}
 
 	$("#default").unbind().click(function(){
-		if($("#scaling").val() != 150 || $("#colors").val() != "Greys-9"){
+		if($("#scaling").val() != 150 || $(".colors").val() != "Greys-9"){
 			$("#scaling").val("150");
 			$("#valScaling").val("150");
-			$("#colors option[value='Greys-9']").attr("selected",true);
-			scaling($("#scaling").val(), $("#colors").val());
+			$(".colors option[value='Greys-9']").attr("selected",true);
+			coloring($("#scaling").val(), $(".valWavelengh").val(), $(".colors").val());
 		}else{
 			alert("Values already at default value");
 		}
@@ -167,7 +167,20 @@ $(document).ready(function(){
 		if($(".valWavelengh").val() != 1 || $(".wavelengh").val() != 1){
 			$(".valWavelengh").val("1");
 			$(".wavelengh").val("1");
-			wavelenghing($(".wavelengh").val(),undefinedBool($("input[name='choiseRef']:checked").val()));
+			wavelenghing($(".wavelengh").val(),undefinedBool($("input[name='choiseRef']:checked").val()),$(".colors").val());
+			scaling($("#scaling").val(), $(".colors").val());
+		}else{
+			alert("Value already at default value");
+		}
+	})
+
+	$(".defaultWaveColor").unbind().click(function(){
+		if($(".valWavelengh").val() != 1 || $(".wavelengh").val() != 1 || $(".colors").val() != "Greys-9"){
+			$(".valWavelengh").val("1");
+			$(".wavelengh").val("1");
+			$(".colors option[value='Greys-9']").attr("selected",true);
+
+			coloring($("#scaling").val(), $(".valWavelengh").val(), $(".colors").val());
 
 		}else{
 			alert("Value already at default value");

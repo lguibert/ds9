@@ -15,7 +15,10 @@
 		</ul>
 		<form id="uploadParForm" method="post" action=".">
 		    {% csrf_token %}
-		    {{ form.as_p }}
+		    <p>
+			    <label for="id_name">Field id from Par<span class="precision">XXX</span>:</label>
+			    <input required id="id_name" name="name" type="text">
+			</p>
 			<input id='btnUploadPar' class="btn btn-default" type="submit" value="Upload"/>			    
 		</form>
 	{% else %}

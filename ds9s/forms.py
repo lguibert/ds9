@@ -80,4 +80,4 @@ class UpdateUserForm(forms.ModelForm):
 
 
 class NewParFileForm(forms.Form):
-	name = forms.CharField(label=mark_safe("Number of the Par<span class='precision'>XXX</span>"),required=True)
+	name = forms.CharField(required=True, label=mark_safe("Field id from Par<span class='precision'>XXX</span>"))

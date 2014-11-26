@@ -77,6 +77,8 @@ redshiftDefault = 1 #default redshift's value. Will be use for the bokeh image
 scalingDefault = 150 #default zoom. Will be use for the bokeh image
 crossColor = "lime"
 
+databaseIdsRedshiftZero = [1, 5]
+
 TOOLS="pan,wheel_zoom,box_zoom,reset" #all the tools for the bokeh images
 
 emlineWavelengthsRest = np.array([3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.])
@@ -227,7 +229,7 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 			objects = openQueueFile(parfolder.fieldId_par)#open the relative file
 			#get all what we need to display the page
 			if act == None:
-				act = firstObjectInFile(request, parfolder.fieldId_par, parfolder.id)
+				act = firstObjectInFile(request, objects, parfolder.fieldId_par, parfolder.id)
 			else:
 				act = getNextIndexQueue(objects, act)
 
@@ -606,9 +608,7 @@ def getIndexObjectById(objects, uniq_id):
 	except:
 		return None
 
-def firstObjectInFile(request,fieldId, parId):
-	objects = np.genfromtxt(createPathParDat(fieldId), dtype=np.str)
-
+def firstObjectInFile(request, objects, fieldId, parId):
 	index = None
 
 	for i, obj in enumerate(objects):
@@ -721,8 +721,9 @@ def newParFile(request):
 			data = form.cleaned_data['name']
 			try:
 				if(int(data)): 
-					if(exists(basePath+"Par"+str(data)+"_final")):
-						uploaded = uploadParFile(request, "Par"+str(data)+"_final")
+					data = str(data)
+					if(exists(basePath+"Par"+data+"_final")):
+						uploaded = uploadParFile(request, "Par"+data+"_final")
 						if uploaded:
 							return redirect("/ds9s/")
 					else:
@@ -732,7 +733,7 @@ def newParFile(request):
 				messages.error(request, 'The value is not a number.')
 				return render(request, 'newParFits.html',locals())
 		else:
-			messages.error(request, 'Error in the file.')
+			messages.error(request, 'Error.')
 			return render(request, 'newParFits.html',locals())
 	else:		
 		form = NewParFileForm()
@@ -1195,7 +1196,7 @@ def getIdentificationUser(gal_id, user_id):
 	return iden
 
 def setNoneRedshist(typeObjId, redshift):
-	if typeObjId in [5,1]:
+	if typeObjId in databaseIdsRedshiftZero:
 		redshift = None
 	else:
 		redshift = secureRedshift(float(redshift))
