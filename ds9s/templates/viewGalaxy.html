@@ -102,10 +102,10 @@ class = 'container-fuild'
 				</div>
 				<div id="refSpectra" class="col-md-offset-6 col-xs-6 col-md-6">
 					<ul id="ulRefSpec">
-						<li><label id="removeSelec"title="Click here to remove selection">Reference: </label></li>
-						<li><input class="disableCharge" type="radio" id="starRef" name="choiseRef" value="star"/><label for="starRef">Star</label></li>
-						<li><input class="disableCharge" type="radio" id="quadarRef" name="choiseRef" value="quasar"/><label for="quadarRef">Quasar</label></li>
-						<li><input class="disableCharge" type="radio" id="galaxyRef" name="choiseRef" value="galaxy"/><label for="galaxyRef">Galaxy</label></li>
+						<li><label id="removeSelec" title="Click here to remove selection" class="pointer">Reference: </label></li>
+						<li><input class="disableCharge pointer" type="radio" id="starRef" name="choiseRef" value="star"/><label for="starRef" class="pointer">Star</label></li>
+						<li><input class="disableCharge pointer" type="radio" id="quadarRef" name="choiseRef" value="quasar"/><label for="quadarRef" class="pointer">Quasar</label></li>
+						<li><input class="disableCharge pointer" type="radio" id="galaxyRef" name="choiseRef" value="galaxy"/><label for="galaxyRef" class="pointer">Galaxy</label></li>
 					</ul>
 				</div>
 			</div>
@@ -122,7 +122,9 @@ class = 'container-fuild'
 			</div>
 		</div>
 		{% if not check %}
+			<hr class="hrReview">
 			{% include "reviewChoise.html" %}
+			<hr class="hrReview">
 		{% else %}
 			<div class="clear">
 				<h3>You already did this object, but you can update your previous review.</h3>

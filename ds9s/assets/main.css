@@ -3,7 +3,7 @@ html, body{
 }
 
 .btn{
-	cursor: pointer;
+	cursor: pointer !important;
 }
 
 .pagination{
@@ -103,7 +103,7 @@ label{
 
 .figure:hover{
 	-webkit-box-shadow: 0 3px 10px #666; -moz-box-shadow: 0 3px 10px #666;
-	cursor:pointer;
+	cursor:pointer !important;
 }
 
 .figure:focus{
@@ -127,7 +127,7 @@ label{
 }
 
 .pointer:hover{
-	cursor:pointer;
+	cursor:pointer !important;
 }
 
 .nunAnaly{
@@ -270,7 +270,7 @@ input[type="number"]{
 
 #removeSelec:hover{
 	text-decoration: underline;
-	cursor:pointer;
+	cursor:pointer !important;
 }
 
 #removeSelec:active{
@@ -337,9 +337,19 @@ input[type="number"]{
 
 #parfolderList li:hover{
 	text-decoration: underline;
-	cursor: pointer;
+	cursor: pointer !important;
 }
 
-#reviewChoises label, #reviewChoises input[type='radio']{
-	cursor: pointer;
+#reviewChoises label, #reviewChoises input[type='radio'], #reviewChoises input[type='checkbox']{
+	cursor: pointer !important;
+}
+
+.pointer{
+	cursor: pointer !important;
+}
+
+.hrReview{
+    border: 0;
+    border-bottom: 1px dashed #ccc;
+    background: #999;
 }

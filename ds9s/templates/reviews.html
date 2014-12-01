@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block flyJs %}
+	<script type="text/javascript" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js"></script>
+
+      <script type="text/javascript">
+        $(document).ready(function(){
+          $("#allReviewsTab").DataTable();
+        });        
+          
+      </script>
+{% endblock %}
+
+{% block flyCss %}
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css">
+{% endblock %}
+
+
+
+{% block content %}
+	<h1>Reviews Page</h1>
+
+	<table id='allReviewsTab' class="table table-hover">
+			<thead>
+				<tr>
+					<th>Unique id</th>
+					<th>Field id</th>
+					<th>Contaminated</th>
+					<th>Galaxy type</th>
+					<th>Redshift</th>
+					<th>Last update</th>
+					<th>User</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for iden in idens %}
+					<tr class="firstLine">
+						<td>{{iden.galaxy.uniq_id}}</td>
+						<td>{{iden.galaxy.parfolder.fieldId_par}}</td>
+						<td>{{iden.contaminated}}</td>
+						<td>{{iden.galaxytype}}</td> 
+						<td>{{iden.redshift}}</td>	
+						<td>{{iden.last_update}}</td>						
+						<td>{{iden.user.first_name}} {{iden.user.last_name}}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+{% endblock %}

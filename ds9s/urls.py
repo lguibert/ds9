@@ -27,4 +27,5 @@ urlpatterns = patterns('ds9s.views',
 	#url(r'^/zoom/(?P<id>[0-9]+)/?$','zoomFile')
 
 	url(r'^/account/reviews/?$','getReviewUser'),
+	url(r'^/reviews/?$','viewAllReviews'),
 )
