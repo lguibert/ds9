@@ -2,14 +2,27 @@
 
 {% block flyJs %}
 	<script type="text/javascript" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js"></script>
-
       <script type="text/javascript">
         $(document).ready(function(){
-          $("#firstTable").DataTable({
+        	$('#firstTable tfoot th').each( function () {
+		    	var title = $('#firstTable thead th').eq( $(this).index() ).text();
+		        $(this).html( '<input type="text" placeholder="'+title+'" />' );
+		    });
+
+        	var table = $("#firstTable").DataTable({
           	"columnDefs": [
           		{ "orderable": false, "targets": 6 }
           	]
           });
+
+	        table.columns().eq( 0 ).each( function ( colIdx ) {
+		        $( 'input', table.column( colIdx ).footer() ).on( 'keyup change', function () {
+		            table
+		                .column( colIdx )
+		                .search( this.value )
+		                .draw();
+		        } );
+		    });
         });        
           
       </script>
@@ -31,9 +44,20 @@
 					<th>Galaxy type</th>
 					<th>Redshift</th>
 					<th>Last update</th>
-					<th>Go to the page</th>
+					<th></th>
 				</tr>
 			</thead>
+			<tfoot>
+	            <tr>
+	                <th>Unique id</th>
+					<th>Field id</th>
+					<th>Contaminated</th>
+					<th>Galaxy type</th>
+					<th>Redshift</th>
+					<th>Last update</th>
+					<th class="displayChildNone"></th>
+	            </tr>
+        	</tfoot>
 			<tbody>
 				{% for iden in identifications %}
 					<tr class="firstLine">

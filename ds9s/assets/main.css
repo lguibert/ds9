@@ -2,6 +2,10 @@ html, body{
 	height: 100%;
 }
 
+tfoot tr th {
+    padding: 8px !important;
+}
+
 .btn{
 	cursor: pointer !important;
 }
@@ -10,6 +14,10 @@ html, body{
 	clear:both;
 	display:block;
 	padding-top:55px;
+}
+
+.displayChildNone input{
+	display: none;
 }
 
 .clear{

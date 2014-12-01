@@ -5,7 +5,21 @@
 
       <script type="text/javascript">
         $(document).ready(function(){
-          $("#allReviewsTab").DataTable();
+        	$('#allReviewsTab tfoot th').each( function () {
+		    	var title = $('#allReviewsTab thead th').eq( $(this).index() ).text();
+		        $(this).html( '<input type="text" placeholder="'+title+'" />' );
+		    });
+
+        	var table = $("#allReviewsTab").DataTable();
+
+	        table.columns().eq( 0 ).each( function ( colIdx ) {
+		        $( 'input', table.column( colIdx ).footer() ).on( 'keyup change', function () {
+		            table
+		                .column( colIdx )
+		                .search( this.value )
+		                .draw();
+		        } );
+		    });
         });        
           
       </script>
@@ -13,6 +27,11 @@
 
 {% block flyCss %}
     <link rel="stylesheet" href="//cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css">
+    <style type="text/css">
+    	#root{
+    		width:1400px;
+    	}
+    </style>
 {% endblock %}
 
 
@@ -32,6 +51,18 @@
 					<th>User</th>
 				</tr>
 			</thead>
+
+			<tfoot>
+	            <tr>
+	                <th>Unique id</th>
+					<th>Field id</th>
+					<th>Contaminated</th>
+					<th>Galaxy type</th>
+					<th>Redshift</th>
+					<th>Last update</th>
+					<th>User</th>
+	            </tr>
+        	</tfoot>
 			<tbody>
 				{% for iden in idens %}
 					<tr class="firstLine">
