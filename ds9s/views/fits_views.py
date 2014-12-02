@@ -97,7 +97,7 @@ colors = ["indianred","steelblue","indigo","orange","orange","darkred","darkorch
 #This function is for displaying the home page. 
 def viewHomeGalaxy(request):
 	galaxy_list = Galaxy.objects.values('uniq_id','id','uniq_name','parfolder').order_by('uniq_id') #get here all the needed information from galaxys
-	analysis = Analysis.objects.raw('SELECT COUNT(DISTINCT user_id) as count, galaxy_id, id FROM ds9s_analysis group by galaxy_id') #how many analysis was done on galaxys
+	analysis = Analysis.objects.raw('SELECT COUNT(DISTINCT user_id) as count, galaxy_id, id FROM ds9s_identifications group by galaxy_id') #how many analysis was done on galaxys
 	
 	#here, we just create a dictionnary with for key the galaxy's id and the number of analysis for value
 	aly = {}
@@ -221,6 +221,7 @@ def getNextIndexQueue(objects, act):
 @login_required
 def viewGalaxy(request, name=None): #name is in default at none because we need a begging for the queue.
 	if name == None:
+		print "coucou"
 		parfolder, act = getNextParFolder(request.user.id) #we take the older folder
 		if parfolder == None:
 			messages.error(request,"You did all the available galaxy.")
@@ -236,9 +237,14 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 			gal, next, wavelenghts = queue(request, objects, parfolder.fieldId_par, parfolder.id, act=act)
 	else:
 		uid, parfolderId, parId = getGalaxyInfodByUniqName(name) #get the galaxy with the name
+		print uid
+		print parfolderId
+		print parId
 		if uid != None and parfolderId != None: #if we have something
 			objects = openQueueFile(parfolderId) #open the queue file
 			act = getIndexObjectById(objects, str(uid)) #get the index in the file for the uniq_id
+			print "-----"
+			print act
 			if act == None: #if we don't have a index
 				return HttpResponseRedirect("/ds9s/") #redirect the user on home page
 			else:
