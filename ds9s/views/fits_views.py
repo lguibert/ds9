@@ -221,7 +221,6 @@ def getNextIndexQueue(objects, act):
 @login_required
 def viewGalaxy(request, name=None): #name is in default at none because we need a begging for the queue.
 	if name == None:
-		print "coucou"
 		parfolder, act = getNextParFolder(request.user.id) #we take the older folder
 		if parfolder == None:
 			messages.error(request,"You did all the available galaxy.")
@@ -237,14 +236,9 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 			gal, next, wavelenghts = queue(request, objects, parfolder.fieldId_par, parfolder.id, act=act)
 	else:
 		uid, parfolderId, parId = getGalaxyInfodByUniqName(name) #get the galaxy with the name
-		print uid
-		print parfolderId
-		print parId
 		if uid != None and parfolderId != None: #if we have something
 			objects = openQueueFile(parfolderId) #open the queue file
-			act = getIndexObjectById(objects, str(uid)) #get the index in the file for the uniq_id
-			print "-----"
-			print act
+			act = getIndexObjectById(objects, uid) #get the index in the file for the uniq_id
 			if act == None: #if we don't have a index
 				return HttpResponseRedirect("/ds9s/") #redirect the user on home page
 			else:
@@ -318,27 +312,26 @@ def read1DSpectrum(pathToASCIISpectrum,minWavelength=None,maxWavelength=None):
         spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
     return spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders
 
+#this function create this 1D spectrum
 def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,title,redshift):
-    # Separately read in the G102 and G141 spectra
     wl,f,u,c,z = read1DSpectrum(pathToFile, minWavelength, maxWavelength)
     
-    wlmax = max(wl) #
-    wlmin = min(wl) #
-    #cmax = max(c)
-    cmin = min(c) #
-    fmax = max(f) #
-    #fmin = min(f)
+    wlmax = max(wl) 
+    wlmin = min(wl) 
+    cmin = min(c) 
+    fmax = max(f) 
     xplus = 100
     yplus = 0.00000000000000001
 
-    wlmin_f = wlmin-xplus
-    wlmax_f = wlmax+xplus
-    cmin_f = cmin-yplus
-    fmax_f = fmax+yplus
+    wlmin_f = wlmin-xplus #axe x min
+    wlmax_f = wlmax+xplus #axe x max
+    cmin_f = cmin-yplus #axe y min
+    fmax_f = fmax+yplus #axe y max
 
     array = [wlmin_f,wlmax_f]
 
-    request.session['array'+title] = array
+	#add in session the value of x min & x max to have them on other spectrum
+    request.session['array'+title] = array 
 
 
     mul = multi_line(xs=[wl,wl],
@@ -355,45 +348,62 @@ def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,t
 
     hold()
 
+    #here, we create the wavelenghts lines
     for wave in wavelenghts:
     	wave = float(wave)
     	line([wave, wave],y=[cmin-yplus,fmax+yplus],color=crossColor,line_width=2, line_dash="dotted")
 
+    #for each emission line, we create a line on the image. The value is made with the redshift
     for index, em in enumerate(emlineWavelengthsRest):    	
     	emlineWavelengths = em * (1.0 + float(redshift))
     	lin = line([emlineWavelengths,emlineWavelengths],[cmin-yplus,fmax+yplus],color=colors[index],line_width=2)
     	#text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
 
+    #begin here: the creation of html code
     resources = Resources("inline")
 
     plot_script, plot_div = components(mul, resources)
 
     html_script = mark_safe(encode_utf8(plot_script))
     html_div = mark_safe(encode_utf8(plot_div))
+    #end creation html code
 
+    #create new image (to avoid problem with chain creation)
     figure()
 
     return html_script, html_div
 
+#this function is called with Ajax to change the 2D spectrums' color 
 @login_required
 def coloring(request, val, redshift, color):
+	#get the galaxy
 	gal = get_object_or_404(Galaxy, uniq_name=request.session['unameGal'])
 
+	#check if the files exist
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
 
+	#make sure that the redshift's value is correct
 	redshift = secureRedshift(redshift)
 
+	#take the special wavelenghts
 	wavelenghts = request.session['waves'+str(gal.uniq_name)]
 
+	#create first 2D spectrum
 	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val, color)
+	#create the second 2D spectrum (from f140 or 160 files)
 	f160script, f160div = displayFImage(request, checked[3], gal, checked_short[3], val, color)
+	#create the first little 2D spectrum
 	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color)
+	#create the second little 2D spectrum
 	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift,color)
 
+	#add every data in an array
 	data = f110script, f110div, f160script, f160div, g1script, g1div, g2script, g2div
 
+	#return  the array
 	return HttpResponse(json.dumps(data))
 
+#this on is called when the user wants to change the redshift
 @login_required
 def wavelenghing(request, redshift,mode="false",color="Greys-9"):
 	gal = get_object_or_404(Galaxy, uniq_name=request.session['unameGal'])
@@ -404,8 +414,6 @@ def wavelenghing(request, redshift,mode="false",color="Greys-9"):
 
 	wavelenghts = request.session['waves'+str(gal.uniq_name)]
 
-	print redshift
-
 	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color)
 	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift,color)
 	g102script, g102div = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift)
@@ -414,6 +422,7 @@ def wavelenghing(request, redshift,mode="false",color="Greys-9"):
 	#return f110script, f110div, f160script, f160div
 	data = g1script, g1div, g2script, g2div, g102script, g102div, g141script, g141div
 
+	#if mode == true, the reference has to be updated 
 	if mode != "false":
 		src102, div102, src141, div141 = plotModels(request, float(redshift), mode=mode)
 		data = data + (src102, div102, src141, div141)
@@ -421,9 +430,9 @@ def wavelenghing(request, redshift,mode="false",color="Greys-9"):
 
 	return HttpResponse(json.dumps(data))
 
+#this on is called when the user wants to zoom in/out on the 2D spectrum
 @login_required
 def scaling(request, val, color):
-	#pdb.set_trace()
 	gal = get_object_or_404(Galaxy, uniq_name=request.session['unameGal'])
 
 	colors = getColorsNames()
@@ -439,9 +448,9 @@ def scaling(request, val, color):
 	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val, color)
 	f160script, f160div = displayFImage(request, checked[3], gal, checked_short[3], val, color)
 
-	#return f110script, f110div, f160script, f160div
 	data = f110script, f110div, f160script, f160div
 	return HttpResponse(json.dumps(data))
+
 
 @login_required
 def referencing(request, redshift, mode):
