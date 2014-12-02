@@ -403,7 +403,7 @@ def coloring(request, val, redshift, color):
 	#return  the array
 	return HttpResponse(json.dumps(data))
 
-#this on is called when the user wants to change the redshift
+#this one is called when the user wants to change the redshift
 @login_required
 def wavelenghing(request, redshift,mode="false",color="Greys-9"):
 	gal = get_object_or_404(Galaxy, uniq_name=request.session['unameGal'])
@@ -430,7 +430,7 @@ def wavelenghing(request, redshift,mode="false",color="Greys-9"):
 
 	return HttpResponse(json.dumps(data))
 
-#this on is called when the user wants to zoom in/out on the 2D spectrum
+#this one is called when the user wants to zoom in/out on the 2D spectrum
 @login_required
 def scaling(request, val, color):
 	gal = get_object_or_404(Galaxy, uniq_name=request.session['unameGal'])
@@ -451,14 +451,16 @@ def scaling(request, val, color):
 	data = f110script, f110div, f160script, f160div
 	return HttpResponse(json.dumps(data))
 
-
+#this one is called to display reference spectrum
 @login_required
 def referencing(request, redshift, mode):
 	src102, div102, src141, div141 = plotModels(request,float(redshift), mode=mode)
 
 	data = src102, div102, src141, div141
+
 	return HttpResponse(json.dumps(data))
 
+#this function makes all the usefull data for the full galaxy images
 def displayFImage(request, file, gal, short_name, val, color="Greys-9"):
 	val = int(val)
 	features = GalaxyFeatures.objects.filter(galaxy_id=gal.id).order_by('galaxyfields_id')
@@ -483,10 +485,12 @@ def displayFImage(request, file, gal, short_name, val, color="Greys-9"):
 	#iFocus = iData[xcen-val:xcen+val,ycen-val:ycen+val]
 	iFocus = iData[iFocusBoundaries[0]:iFocusBoundaries[1],iFocusBoundaries[2]:iFocusBoundaries[3]]
 
+	#here, we call the function to create the html files
 	script, div = createBokehImage(iFocus,iFocusBoundaries,400,400, short_name, xcircle=xcen, ycircle=ycen, color=color, val=val)
 
 	return script, div
 
+#same as the function above but for the 2D little spectrums
 def displayGImage(request, wavelenghts, file, short_name, redshift, color="Greys-9"):
 	inFits=pyfits.open(file)
 	iHdr=inFits[1].header
@@ -510,6 +514,7 @@ def displayGImage(request, wavelenghts, file, short_name, redshift, color="Greys
 
 	return script, div
 
+#Like the name says it, this function remap the pixel for all the images
 def remapPixels(data, minpex=None, maxpex=None):
 	datastat = imagestats.ImageStats(data,nclip=3)
 	if minpex == None:
@@ -555,7 +560,7 @@ def grismBoundaries(grismStampShape,grismStampHeader):
     return (l1,l2,y1,y2) # again, we will use these as the coordinate boundaries for the plots.
 
 
-
+#here, we create the image
 def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=True, redshift=0 ,xcircle=0, ycircle=0, color="Greys-9",val=100, wavelenghts=None):
 	data = remapPixels(data)
 
@@ -598,18 +603,20 @@ def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=
 	figure()
 
 	return html_script, html_div
-
+'''
 def calculatePositionText(value):
 	value = float(value)/5 + 0.5
 	if value > 1.0:
 		value = value - 1
 	return value
+'''
 
-
+#return a string with the path to the .lines file
 def createPathParDat(fieldId):
 	fieldId = str(fieldId)
 	return basePath +"Par"+fieldId+"_final/"+"Par"+fieldId+"lines.dat"
 
+#get the index form a list of object with the uniq_id of a galaxy
 def getIndexObjectById(objects, uniq_id):
 	try:
 		index = None
@@ -623,6 +630,7 @@ def getIndexObjectById(objects, uniq_id):
 	except:
 		return None
 
+#get the first object undone by the user in a specific list
 def firstObjectInFile(request, objects, fieldId, parId):
 	index = None
 
@@ -635,6 +643,7 @@ def firstObjectInFile(request, objects, fieldId, parId):
 
 	return index
 
+#get the lastest review of a specific user
 def getLastGalaxyReviewed(user_id):
 	try :
 		iden = Identifications.objects.filter(user_id=user_id).order_by('-date')[0]
@@ -642,6 +651,8 @@ def getLastGalaxyReviewed(user_id):
 		iden = None
 	return iden
 
+#this function will return all needed information for the actual galaxy and the next one
+#we will have also the special wavelenght
 def queue(request, objects, fieldId, parId, act=0):
 	#pdb.set_trace()
 	actual = objects[act]
@@ -651,34 +662,51 @@ def queue(request, objects, fieldId, parId, act=0):
 	wavelenghts = []
 	next = None
 
-	while act + i < maxValue:		
-		nextInFile = objects[act + i]
+	while act + i < maxValue: #while the actual index is lower than the max value	
+		nextInFile = objects[act + i] #take the value in the list with actual i value
 
+		#get the gal with the same uniq_id as the galaxy in the file
 		gal = Galaxy.objects.get(uniq_id=nextInFile[2],parfolder_id=parId)
+		#look if a review exist
 		check = getIdentificationUser(gal.id,request.user.id)
 
+		#if there is no review
 		if not check:
+			#if the next galaxy's uniq_id is equal to the actual's uniq_id
 			if nextInFile[2] == actual[2]:
+				#we keep the wavelenght
 				wavelenghts.append(nextInFile[3])
+				#and increate i of 1 to go on the next galaxy in file
 				i += 1
+			#if the id if different
 			else: 
+				#we keep this galaxy, and take all the needed infornation
 				next = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [nextInFile[2], nextInFile[0]])[0]			
+				#exit the loop
 				break
+		#if there is review
 		else:
+			#if the next galaxy's uniq_id is equal to the actual's uniq_id
 			if nextInFile[2] == actual[2]:
+				#we keep the wavelenght
 				wavelenghts.append(nextInFile[3])
+			#go on the next galaxy in file
 			i += 1 
 
+	#all needed information for the actual galaxy
 	actualEnd = Galaxy.objects.raw("SELECT g.id, g.uniq_id, g.parfolder_id FROM `ds9s_galaxy` g INNER JOIN ds9s_parfolder pf ON (g.parfolder_id = pf.id) WHERE g.uniq_id = %s AND pf.fieldId_par = %s", [actual[2], actual[0]])[0]
+	#set in session the special wavelenght so values will be disponible for the Ajax function
 	request.session['waves'+str(actualEnd.uniq_name)] = wavelenghts
 
+	#return needed data
 	return actualEnd, next, wavelenghts
 
 
-
+#open and return the colors
 def getColors():
 	return json.load(open('/opt/lampp/www/ds9/ds9s/assets/colors.json'))
 
+#return only the colors' names
 def getColorsNames():
 	colors = getColors()
 	names = []
@@ -694,6 +722,7 @@ def getColorsNames():
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
 
+#check if all the files exists for a specific galaxy
 def checkAllFiles(gal_id, par_name, par_id):
 	base = basePath + par_name 
 	g102 =  base + findIn + "aXeWFC3_G102_mef_ID"+str(gal_id)+".fits"
@@ -725,6 +754,7 @@ def checkAllFiles(gal_id, par_name, par_id):
 
 	return checked, checked_short
 
+#this function allow admin to see the form to upload a new ParXXX folder
 @login_required
 @permission_required("ds9s.add_parfolder", login_url="/ds9s/")
 def newParFile(request):
@@ -755,12 +785,14 @@ def newParFile(request):
 
 	return render(request, 'newParFits.html',locals())
 
+#just a "group" function
 def getParfoldersAndId():
 	parfolders = getParfoldersBaseDirectory()
 	parids = getFieldIdFromParfolder(parfolders)
 
 	return parfolders, parids
 
+#get all the ParXXX folder at the basePath who aren't already uploaded
 def getParfoldersBaseDirectory():
 	folders = listdir(basePath)
 	parfolders = []
@@ -779,6 +811,7 @@ def getParfoldersBaseDirectory():
 
 	return parfolders
 
+#split and return only the field of every parfolder
 def getFieldIdFromParfolder(parfolders):
 	fieldids = []
 
@@ -791,7 +824,7 @@ def getFieldIdFromParfolder(parfolders):
 
 	return fieldids
 
-
+#this function will upload the ParXXX folder
 def uploadParFile(request, name=None):
 	if name is None:
 		messages.error('Error in the folder\'s name')
@@ -829,7 +862,7 @@ def uploadParFile(request, name=None):
 		else:
 			messages.error(request, u"File already in database.")
 			return False	
-
+#identifie if we have a F140 or F160 file
 def getTypeSecondFiles(fieldId):
 	value = None
 	par = "Par"+fieldId+"_final"
@@ -844,6 +877,7 @@ def getTypeSecondFiles(fieldId):
 
 	return value
 
+#save ParXXX folder in database
 def saveParFile(fieldNum, name):
 	try:
 		par = ParFolder()
@@ -854,7 +888,7 @@ def saveParFile(fieldNum, name):
 	except:
 		return False
 
-
+#get the fieldId from the ParXXX's name
 def getUniqIdFromFile(name, fIn, exp):
 	ids = []
 	directory = listdir(basePath + name + fIn)
@@ -867,6 +901,7 @@ def getUniqIdFromFile(name, fIn, exp):
 			ids.append(id)
 	return ids	
 
+# ???
 def checkFilesGtype(ids1, ids2):
 	ids_final = []
 	#ids_wrong = []?
@@ -877,6 +912,7 @@ def checkFilesGtype(ids1, ids2):
 			#ids_wrong.append(i)
 	return ids_final#,ids_wrong
 
+#add fiel to database with all features
 def addFileDatabase(ids, par, type):
 	tab = getDataFromCat(par, type)
 	for id in ids:	
@@ -896,7 +932,7 @@ def addFileDatabase(ids, par, type):
 			feat.value = tab[x][index]
 			feat.save()
 		
-
+#read and return data for galaxy features
 def getDataFromCat(par_id, type):	
 	parfile = get_object_or_404(ParFolder,id=par_id)		
 	cat_file_f = basePath + parfile.name_par + grismFolder + "fin_F110.cat"
@@ -933,6 +969,7 @@ def getDataFromCat(par_id, type):
 
 	return tab
 
+# ???
 def getIndexPerId(id, ids):
 	ids_normal = []
 	for i in ids:
