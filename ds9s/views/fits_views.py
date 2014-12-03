@@ -1158,7 +1158,7 @@ def createReference(data,redshift, xmin, xmax):
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
 
-
+#add the user's identification to the database, return false if there is any problem
 def addIdentification(gal_id, user_id, galtype_id, redshift, contaminated):
 	try:
 		iden = Identifications()
@@ -1172,7 +1172,8 @@ def addIdentification(gal_id, user_id, galtype_id, redshift, contaminated):
 	except:
 		return False
 
-
+#add the user's analysis to the database, return false if there is any problem.
+#one analysis = one emission line per galaxy and per user
 def addAnalys(gal_id, user_id, emissionline_id, emissionlinefield_id, value):
 	try:
 		aly = Analysis()
@@ -1186,9 +1187,11 @@ def addAnalys(gal_id, user_id, emissionline_id, emissionlinefield_id, value):
 	except:
 		return False
 
+#return all the enission line field's names
 def getEmissionLineFields():
 	return EmissionLineFields.objects.all()
 
+#return the database id of a emission line field by name
 def getIdEmissionLineFieldByName(name):
 	fields = getEmissionLineFields()
 
@@ -1201,10 +1204,11 @@ def getIdEmissionLineFieldByName(name):
 
 	return id
 
-
+#return all the enission line's names
 def getEmissionLines():
 	return EmissionLine.objects.all()
 
+#return the database id of a emission line by name
 def getIdEmissionLineByName(name):
 	lines = getEmissionLines()
 
@@ -1217,9 +1221,11 @@ def getIdEmissionLineByName(name):
 
 	return id
 
+#return all galaxytypes
 def getGalaxyTypes():
 	return GalaxyTypes.objects.values("id","nameForId")
 
+#return the database id for a specific name
 def getIdOfType(typeObj):
 	types = getGalaxyTypes()
 
@@ -1231,6 +1237,7 @@ def getIdOfType(typeObj):
 
 	return objId
 
+#make sure if the redshift is correct, if not, remplace the value
 def secureRedshift(redshift):
 	if redshift < 0:
 		redshift = 0
@@ -1239,6 +1246,7 @@ def secureRedshift(redshift):
 
 	return redshift
 
+#get a specific review of a user 
 def getIdentificationUser(gal_id, user_id):
 	try:
 		iden = Identifications.objects.get(galaxy_id=gal_id, user_id=user_id)
@@ -1247,6 +1255,7 @@ def getIdentificationUser(gal_id, user_id):
 
 	return iden
 
+#change the redshift's value when the object is Star or Nothing to set it to null
 def setNoneRedshist(typeObjId, redshift):
 	if typeObjId in databaseIdsRedshiftZero:
 		redshift = None
@@ -1255,6 +1264,8 @@ def setNoneRedshist(typeObjId, redshift):
 
 	return redshift
 
+#change the value of contaminated
+#if the user didn't clic on the checkbox, the value will be None and it's a problem for the database
 def secureContaminated(contaminated):
 	if contaminated == None:
 		contaminated = 0
@@ -1302,14 +1313,11 @@ def saveUserReview(request, id, uniq_name, next_uniq_name):
 		messages.error(request, "You already identified this object.")
 		return HttpResponseRedirect("/ds9s/view/"+uniq_name+"/")
 
+#return a specfic review
 def getIdenById(iden_id):
-	#try:
-	iden = Identifications.objects.get(id=iden_id)
-	#except:
-	#	iden = None
+	return Identifications.objects.get(id=iden_id)
 
-	return iden
-
+#update a review
 def updateIden(iden, typeObjId, redshift, contaminated):
 	try:
 		iden.galaxytype_id = typeObjId
@@ -1320,6 +1328,7 @@ def updateIden(iden, typeObjId, redshift, contaminated):
 	except:
 		return False
 
+#called when the user asks for a review's update
 def updateUserReview(request, rev_id):
 	typeObj = request.POST.get("typeObject")
 	typeObjId = getIdOfType(typeObj)
