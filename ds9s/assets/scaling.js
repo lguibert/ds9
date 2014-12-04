@@ -61,7 +61,11 @@ $(document).ready(function(){
 				$("#scrf160140").html(f160script);
 		    }).complete(function(){
 		    	$(".disableCharge").prop("disabled",false);
-		    	$("*").css("cursor","initial");
+		    	$('*[style="cursor: progress;"]').each(function() {
+				   $(this).attr("style",'')
+				});
+
+		    	//$("*").css("cursor","initial");
 		    }).error(function(xhr, err){
 		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
 		    	alert("responseText: "+xhr.responseText);
@@ -156,7 +160,9 @@ $(document).ready(function(){
 				$("#scrG141Dat").html(srcDat141);
 		    }).complete(function(){
 		    	$(".disableCharge").prop("disabled",false);
-		    	$("*").css("cursor","initial");
+		    	$('*[style="cursor: progress;"]').each(function() {
+				   $(this).attr("style",'')
+				});
 		    }).error(function(xhr, err){
 		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
 		    	alert("responseText: "+xhr.responseText);
@@ -229,7 +235,9 @@ $(document).ready(function(){
 		    	alert("responseText: "+xhr.responseText);
 		    }).complete(function(){
 		    	$(".disableCharge").prop("disabled",false);
-		    	$("*").css("cursor","initial");
+		    	$('*[style="cursor: progress;"]').each(function() {
+				   $(this).attr("style",'')
+				});
 		    });
 	}
 
@@ -287,7 +295,9 @@ $(document).ready(function(){
 		    	alert("responseText: "+xhr.responseText);
 		    }).complete(function(){
 		    	$(".disableCharge").prop("disabled",false);
-		    	$("*").css("cursor","initial");
+		    	$('*[style="cursor: progress;"]').each(function() {
+				   $(this).attr("style",'')
+				});
 		    });
 	}
 

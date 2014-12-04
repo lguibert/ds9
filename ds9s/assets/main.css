@@ -20,7 +20,7 @@ tfoot tr th {
 }
 
 .btn{
-	cursor: pointer !important;
+	cursor: pointer;
 }
 
 .pagination{
@@ -124,7 +124,7 @@ label{
 
 .figure:hover{
 	-webkit-box-shadow: 0 3px 10px #666; -moz-box-shadow: 0 3px 10px #666;
-	cursor:pointer !important;
+	cursor:pointer;
 }
 
 .figure:focus{
@@ -148,7 +148,7 @@ label{
 }
 
 .pointer:hover{
-	cursor:pointer !important;
+	cursor:pointer;
 }
 
 .nunAnaly{
@@ -291,7 +291,7 @@ input[type="number"]{
 
 #removeSelec:hover{
 	text-decoration: underline;
-	cursor:pointer !important;
+	cursor:pointer;
 }
 
 #removeSelec:active{
@@ -358,15 +358,15 @@ input[type="number"]{
 
 #parfolderList li:hover{
 	text-decoration: underline;
-	cursor: pointer !important;
+	cursor: pointer;
 }
 
 #reviewChoises label, #reviewChoises input[type='radio'], #reviewChoises input[type='checkbox']{
-	cursor: pointer !important;
+	cursor: pointer;
 }
 
 .pointer{
-	cursor: pointer !important;
+	cursor: pointer;
 }
 
 .hrReview{
