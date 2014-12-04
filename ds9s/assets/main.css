@@ -6,6 +6,19 @@ tfoot tr th {
     padding: 8px !important;
 }
 
+#letsgo{
+	text-align: center;
+	font-size: 30px;
+	text-shadow: 2px 2px #000000;
+	margin: auto;
+	display: block;
+	text-decoration: none;
+}
+
+#letsgo:hover{
+	font-style: italic;
+}
+
 .btn{
 	cursor: pointer !important;
 }

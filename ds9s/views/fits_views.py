@@ -94,29 +94,9 @@ colors = ["indianred","steelblue","indigo","orange","orange","darkred","darkorch
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
 
-#This function is for displaying the home page. 
+#This function display the home page. 
 def viewHomeGalaxy(request):
-	galaxy_list = Galaxy.objects.values('uniq_id','id','uniq_name','parfolder').order_by('uniq_id') #get here all the needed information from galaxys
-	analysis = Analysis.objects.raw('SELECT COUNT(DISTINCT user_id) as count, galaxy_id, id FROM ds9s_identifications group by galaxy_id') #how many analysis was done on galaxys
-	
-	#here, we just create a dictionnary with for key the galaxy's id and the number of analysis for value
-	aly = {}
-	for g in galaxy_list:
-		aly[g['id']] = 0
-	for a in analysis:
-		aly[a.galaxy_id] = a.count
-
-	#Django stuff to create pages
-	paginator = Paginator(galaxy_list, 15)
-	page = request.GET.get('page')
-	try:
-		galaxys = paginator.page(page)
-	except PageNotAnInteger:
-		galaxys = paginator.page(1)
-	except EmptyPage:
-		galaxys = paginator.page(paginator.num_pages)
-
-	#send all the previous values to the homeGalaxy template
+	#redirect to the homeGalaxy template
 	return render(request, 'homeGalaxy.html',locals())
 
 

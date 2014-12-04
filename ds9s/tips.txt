@@ -326,3 +326,57 @@ def remapPixelsLog(data):
       data[data>1]=1
 
       return data
+
+#This function is for displaying the home page. 
+def viewHomeGalaxy(request):
+      galaxy_list = Galaxy.objects.values('uniq_id','id','uniq_name','parfolder').order_by('uniq_id') #get here all the needed information from galaxys
+      analysis = Analysis.objects.raw('SELECT COUNT(DISTINCT user_id) as count, galaxy_id, id FROM ds9s_identifications group by galaxy_id') #how many analysis was done on galaxys
+      
+      #here, we just create a dictionnary with for key the galaxy's id and the number of analysis for value
+      aly = {}
+      for g in galaxy_list:
+            aly[g['id']] = 0
+      for a in analysis:
+            aly[a.galaxy_id] = a.count
+
+      #Django stuff to create pages
+      paginator = Paginator(galaxy_list, 15)
+      page = request.GET.get('page')
+      try:
+            galaxys = paginator.page(page)
+      except PageNotAnInteger:
+            galaxys = paginator.page(1)
+      except EmptyPage:
+            galaxys = paginator.page(paginator.num_pages)
+
+      #send all the previous values to the homeGalaxy template
+      return render(request, 'homeGalaxy.html',locals())
+
+
+      template :
+{% load ds9s_extras %}
+      {% if galaxys %}
+            {% for gal in galaxys%}
+                  <div class="col-md-4">
+                        <h1 class="first-uppercase">Galaxy n°{{gal.uniq_id}}</h1>
+                        <h2>Field n°{{gal.parfolder}}</h2>
+                        {% if user.is_authenticated%}
+                              <a class="btn btn-default" href="/ds9s/view/{{gal.uniq_name}}/">See more</a>
+                        {% endif %} 
+                        <div class='nunAnaly'>{{aly|keyvalue:gal.id}} analysis yet</div>        
+                  <hr>
+                  </div>
+            {%endfor%}
+
+            <div class="pagination clear">
+                  {% if galaxys.has_previous %}
+                      <a class="btn btn-default" href="?page={{ galaxys.previous_page_number }}">Previous</a> —
+                  {% endif %}
+                  Page {{ galaxys.number }} on {{ galaxys.paginator.num_pages }} 
+                  {% if galaxys.has_next %}
+                      — <a class="btn btn-default" href="?page={{ galaxys.next_page_number }}">Next</a>
+                  {% endif %}
+            </div>
+      {% else %}
+            <h1>No data yet. <a href="/ds9s/upload/">Add some !</a></h1>
+      {% endif %}

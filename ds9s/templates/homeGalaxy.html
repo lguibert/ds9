@@ -1,29 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-{% load ds9s_extras %}
-	{% if galaxys %}
-		{% for gal in galaxys%}
-			<div class="col-md-4">
-				<h1 class="first-uppercase">Galaxy n°{{gal.uniq_id}}</h1>
-				<h2>Field n°{{gal.parfolder}}</h2>
-				{% if user.is_authenticated%}
-					<a class="btn btn-default" href="/ds9s/view/{{gal.uniq_name}}/">See more</a>
-				{% endif %}	
-				<div class='nunAnaly'>{{aly|keyvalue:gal.id}} analysis yet</div>		
-			<hr>
-			</div>
-		{%endfor%}
 
-		<div class="pagination clear">
-			{% if galaxys.has_previous %}
-			    <a class="btn btn-default" href="?page={{ galaxys.previous_page_number }}">Previous</a> —
-			{% endif %}
-			Page {{ galaxys.number }} on {{ galaxys.paginator.num_pages }} 
-			{% if galaxys.has_next %}
-			    — <a class="btn btn-default" href="?page={{ galaxys.next_page_number }}">Next</a>
-			{% endif %}
-		</div>
-	{% else %}
-		<h1>No data yet. <a href="/ds9s/upload/">Add some !</a></h1>
-	{% endif %}
+<h1>Welcome !</h1>
+<a id='letsgo' href="/ds9s/view/">LET'S GO !</a>
+
+
 {% endblock %}
