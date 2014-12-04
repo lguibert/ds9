@@ -380,3 +380,37 @@ def viewHomeGalaxy(request):
       {% else %}
             <h1>No data yet. <a href="/ds9s/upload/">Add some !</a></h1>
       {% endif %}
+
+
+    <script type="text/javascript">
+      $(document).ready(function(){
+        alert("session"+$('section').height());
+        alert('main'+$('#main').height());
+
+        var bumpIt = function() {  
+          if($('section').height() < $('#main').height()){
+            var footer = $('footer').outerHeight();
+              $('#main').css('padding-bottom', footer);
+
+              $('footer').css("margin-top",-footer)
+
+              height = ($('html').height() - $('.jumbotron').outerHeight()) - footer;
+
+
+              $('#main').css('height', height);
+          }
+          else{
+            alert("prout");
+          }
+        }
+
+
+         bumpIt();
+
+
+          $(window).resize(function() {
+            bumpIt();
+          });
+      });
+
+    </script>

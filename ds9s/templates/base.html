@@ -9,6 +9,7 @@
     <title>{% block title %}DS9 Web Application{% endblock %}</title>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
     
 
    	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
@@ -107,17 +108,23 @@
           {% block content %}{% endblock %}
         </section>
       </div>
+      
       <hr>
 
       <footer>
-        <h4>DS9 Web Application</h4>
+        
+                <h4>DS9 Web Application</h4>
         <ul class="list-inline list-unstyled">
           <li><a class="btn btn-primary btn-lg" href="/ds9s/information/">Information</a></li>
           <li><a class="btn btn-primary btn-lg" href="/ds9s/started/">Getting started</a></li>
         </ul>
+
+        
       </footer>
+     
       
     </div>
+     
 
   {% block js %}
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
