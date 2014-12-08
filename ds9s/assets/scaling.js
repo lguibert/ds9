@@ -1,4 +1,12 @@
 $(document).ready(function(){
+	function deleteStyle(){
+		$('*[style*="cursor: progress;"]').each(function() {
+			var style = $(this).attr("style");
+			style = style.replace("cursor: progress;", "");
+			$(this).attr("style",style);
+		});		
+	}
+
 	$(".unsubmitable").submit(function(e){
 		return false;
 	});
@@ -61,9 +69,7 @@ $(document).ready(function(){
 				$("#scrf160140").html(f160script);
 		    }).complete(function(){
 		    	$(".disableCharge").prop("disabled",false);
-		    	$('*[style="cursor: progress;"]').each(function() {
-				   $(this).attr("style",'')
-				});
+		    	deleteStyle();
 
 		    	//$("*").css("cursor","initial");
 		    }).error(function(xhr, err){
@@ -160,9 +166,7 @@ $(document).ready(function(){
 				$("#scrG141Dat").html(srcDat141);
 		    }).complete(function(){
 		    	$(".disableCharge").prop("disabled",false);
-		    	$('*[style="cursor: progress;"]').each(function() {
-				   $(this).attr("style",'')
-				});
+		    	deleteStyle();
 		    }).error(function(xhr, err){
 		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);
 		    	alert("responseText: "+xhr.responseText);
@@ -235,9 +239,7 @@ $(document).ready(function(){
 		    	alert("responseText: "+xhr.responseText);
 		    }).complete(function(){
 		    	$(".disableCharge").prop("disabled",false);
-		    	$('*[style="cursor: progress;"]').each(function() {
-				   $(this).attr("style",'')
-				});
+		    	deleteStyle();
 		    });
 	}
 
@@ -295,9 +297,7 @@ $(document).ready(function(){
 		    	alert("responseText: "+xhr.responseText);
 		    }).complete(function(){
 		    	$(".disableCharge").prop("disabled",false);
-		    	$('*[style="cursor: progress;"]').each(function() {
-				   $(this).attr("style",'')
-				});
+		    	deleteStyle();
 		    });
 	}
 
