@@ -10,7 +10,11 @@
 		        $(this).html( '<input type="text" placeholder="'+title+'" />' );
 		    });
 
-        	var table = $("#allReviewsTab").DataTable();
+        	var table = $("#allReviewsTab").DataTable({
+	          	"columnDefs": [
+	          		{ "orderable": false, "targets": 1 }
+	          	]
+          	});
 
 	        table.columns().eq( 0 ).each( function ( colIdx ) {
 		        $( 'input', table.column( colIdx ).footer() ).on( 'keyup change', function () {
@@ -43,36 +47,25 @@
 			<thead>
 				<tr>
 					<th>Unique id</th>
-					<th>Field id</th>
-					<th>Contaminated</th>
-					<th>Galaxy type</th>
-					<th>Redshift</th>
-					<th>Last update</th>
-					<th>User</th>
+					<th>How many</th>
+					<th>Go</th>
 				</tr>
 			</thead>
 
 			<tfoot>
 	            <tr>
 	                <th>Unique id</th>
-					<th>Field id</th>
-					<th>Contaminated</th>
-					<th>Galaxy type</th>
-					<th>Redshift</th>
-					<th>Last update</th>
-					<th>User</th>
+	                <th>How many</th>
+	                <th class="displayChildNone"></th>
 	            </tr>
         	</tfoot>
+
 			<tbody>
 				{% for iden in idens %}
 					<tr class="firstLine">
 						<td>{{iden.galaxy.uniq_id}}</td>
-						<td>{{iden.galaxy.parfolder.fieldId_par}}</td>
-						<td>{{iden.contaminated}}</td>
-						<td>{{iden.galaxytype}}</td> 
-						<td>{{iden.redshift}}</td>	
-						<td>{{iden.last_update}}</td>						
-						<td>{{iden.user.first_name}} {{iden.user.last_name}}</td>
+						<td>{{iden.reviews}}</td>
+						<td><a class="btn btn-default" href="/ds9s/reviews/{{iden.galaxy.uniq_name}}/">Go</a></td>
 					</tr>
 				{% endfor %}
 			</tbody>

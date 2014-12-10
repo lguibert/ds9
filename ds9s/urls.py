@@ -28,4 +28,5 @@ urlpatterns = patterns('ds9s.views',
 
 	url(r'^/account/reviews/?$','getReviewUser'),
 	url(r'^/reviews/?$','viewAllReviews'),
+	url(r'^/reviews/(?P<uniq_name>[0-9]+_[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})/?$','viewReviewAnalysis'),
 )
