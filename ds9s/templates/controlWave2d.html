@@ -13,11 +13,11 @@
 		<select class="form-control colors" name="colors" >
 			{% for d in colors.colors %}
 				{% for val in d.values%}
-					<option value="{{d.name}}-{{val}}" {% if d.name == "Greys" and val == 9 %}selected{%endif%}>{{d.name}} - {{val}}</option>	
+					<option value="{{d.name}}{{val}}" {% if d.name == "Greys" and val == 9 %}selected{%endif%}>{{d.name}} - {{val}}</option>	
 				{% endfor %}
 			{% endfor %}
 		</select>
-		<input type="button" class="defaultWaveColor btn btn-default disableCharge" value="Default value"/>
+		<input type="button" class="defaultWaveColor defaultWave btn btn-default disableCharge" value="Default value"/>
 		<a type="1" class="legendLines btn btn-default">Hide legend</a>
 
 		<div id="divLegends" class="legendsLines">
