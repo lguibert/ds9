@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 from ds9s.models import Galaxy, ParFolder, Analysis, EmissionLineFields, EmissionLine, GalaxyFeatures, GalaxyTypes, Identifications
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Count
 
 from django.utils.safestring import mark_safe
@@ -16,7 +16,7 @@ from bokeh.utils import encode_utf8
 import json
 
 
-TOOLS="pan,wheel_zoom,box_zoom,reset"
+TOOLS="pan,wheel_zoom,box_zoom,reset, hover"
 
 
 @login_required
@@ -26,6 +26,8 @@ def getReviewUser(request):
 	return render(request, 'analysis.html',locals()) 
 
 @login_required
+@permission_required("ds9s.view_allIdentifications")
+@permission_required("ds9s.view_allAnalysis")
 def viewAllReviews(request):
 	idens = Identifications.objects.raw("SELECT COUNT(`galaxy_id`) as reviews, i.* FROM ds9s_identifications  i group by `galaxy_id`")
 
@@ -33,6 +35,8 @@ def viewAllReviews(request):
 	return render(request, 'reviews.html',locals())
 
 @login_required
+@permission_required("ds9s.view_allIdentifications")
+@permission_required("ds9s.view_allAnalysis")
 def viewReviewAnalysis(request, uniq_name):
 	gal = get_object_or_404(Galaxy, uniq_name=uniq_name)
 	idens = Identifications.objects.filter(galaxy_id=gal.id)
@@ -40,21 +44,25 @@ def viewReviewAnalysis(request, uniq_name):
 	redshifts = []
 
 	for iden in idens:
-		try:
-			redshift = float(iden.redshift)
-		except:
-			redshift = iden.redshift
-		redshifts.append(redshift)
+		redshift = iden.redshift
 
-	redshifts = json.dumps(redshifts)
+		if redshift == None:
+			redshift = 0.
+
+		redshifts.append(float(redshift))
+
+	html, div = createHistogram([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1.24,1,1.32,1,2,3])	
 
 	return render(request, 'reviewAnalysis.html',locals())
 
 
 def createHistogram(data):
-	hist, edges = np.histogram(data)
+	hist, edges = np.histogram(data,bins=3000)
 
-	p1 = quad(
+	print hist
+	print edges
+
+	plot = quad(
 		top=hist,
 		bottom=0,
 		left=edges[:-1],
@@ -62,11 +70,13 @@ def createHistogram(data):
 	    fill_color="#036564",
 	    line_color="#033649",
 	    tools=TOOLS,
+	    x_range=[-0.5,3.5],
+	    plot_width=1100,
     )
 
 	resources = Resources("inline")
 
-	plot_script, plot_div = components(p1, resources)
+	plot_script, plot_div = components(plot, resources)
 
 	html_script = mark_safe(encode_utf8(plot_script))
 	html_div = mark_safe(encode_utf8(plot_div))

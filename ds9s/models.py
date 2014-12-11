@@ -71,6 +71,9 @@ class Analysis(models.Model):
 	#approximately one billion with a resolution of 10 decimal
 	value = models.DecimalField(max_digits=19, decimal_places=10)
 
+	class Meta:
+		permissions = (("view_allAnalysis","Can see all analysis"),)
+
 	def __unicode__(self): 	
 		return "Done by {0} on galaxy number {1}",format(self.user.username, self.galaxy.uniq_id)
 
@@ -81,6 +84,9 @@ class Identifications(models.Model):
 	redshift = models.DecimalField(max_digits=3, decimal_places=2,null=True)
 	contaminated = models.BooleanField(default=False)
 	last_update = models.DateTimeField(auto_now_add=False, auto_now=True)
+
+	class Meta:
+		permissions = (("view_allIdentifications","Can see all identifications"),)
 
 	def __unicode__(self): 	
 		return "{0} is a {1} for {2}",format(self.galaxy.uniq_id, self.galaxytype.name, self.user.username)
