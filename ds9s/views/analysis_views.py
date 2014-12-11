@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 
 import numpy as np
 import scipy.special
-from bokeh.plotting import figure, quad
+from bokeh.plotting import figure, quad, ColumnDataSource
 from bokeh.embed import components
 from bokeh.resources import Resources
 from bokeh.utils import encode_utf8
@@ -59,20 +59,21 @@ def viewReviewAnalysis(request, uniq_name):
 def createHistogram(data):
 	hist, edges = np.histogram(data,bins=3000)
 
-	print hist
-	print edges
-
 	plot = quad(
 		top=hist,
 		bottom=0,
 		left=edges[:-1],
 		right=edges[1:],
-	    fill_color="#036564",
-	    line_color="#033649",
-	    tools=TOOLS,
-	    x_range=[-0.5,3.5],
-	    plot_width=1100,
-    )
+		fill_color="#036564",
+		line_color="#033649",
+		tools=TOOLS,
+		x_range=[-0.5,3.5],
+		plot_width=1100, 
+		title="",
+	)
+
+	#hover = plot.select(dict(type=HoverTool))
+	#hover.tooltips = [('index','$index')]
 
 	resources = Resources("inline")
 

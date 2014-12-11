@@ -295,7 +295,7 @@ def read1DSpectrum(pathToASCIISpectrum,minWavelength=None,maxWavelength=None):
 #this function create this 1D spectrum
 def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,title,redshift):
     wl,f,u,c,z = read1DSpectrum(pathToFile, minWavelength, maxWavelength)
-    
+
     wlmax = max(wl) 
     wlmin = min(wl) 
     cmin = min(c) 
@@ -310,20 +310,23 @@ def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,t
 
     array = [wlmin_f,wlmax_f]
 
-	#add in session the value of x min & x max to have them on other spectrum
+	#add in session the value of x min & x max to have them for other spectrum
     request.session['array'+title] = array 
 
-
-    mul = multi_line(xs=[wl,wl],
-    	ys=[f,c],
-    	color=["black","red"],
+    mul = figure(
     	x_range=[wlmin_f,wlmax_f],
     	y_range=[cmin_f,fmax_f],
-    	line_width=2,
     	tools=TOOLS,
     	plot_width=400,
     	plot_height=400,
     	title=title,
+    )
+
+    mul.multi_line(
+    	xs=[wl,wl],
+    	ys=[f,c],
+    	color=["black","red"],    	
+    	line_width=2,    	
     )
 
     hold()
@@ -331,12 +334,12 @@ def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,t
     #here, we create the wavelenghts lines
     for wave in wavelenghts:
     	wave = float(wave)
-    	line([wave, wave],y=[cmin-yplus,fmax+yplus],color=crossColor,line_width=2, line_dash="dotted")
+    	mul.line([wave, wave],y=[cmin-yplus,fmax+yplus],color=crossColor,line_width=2, line_dash="dotted")
 
     #for each emission line, we create a line on the image. The value is made with the redshift
     for index, em in enumerate(emlineWavelengthsRest):    	
     	emlineWavelengths = em * (1.0 + float(redshift))
-    	lin = line([emlineWavelengths,emlineWavelengths],[cmin-yplus,fmax+yplus],color=colors[index],line_width=2)
+    	mul.line([emlineWavelengths,emlineWavelengths],[cmin-yplus,fmax+yplus],color=colors[index],line_width=2)
     	#text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
 
     #begin here: the creation of html code
@@ -349,7 +352,6 @@ def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,t
     #end creation html code
 
     #create new image (to avoid problem with chain creation)
-    figure()
 
     return html_script, html_div
 
@@ -385,7 +387,7 @@ def coloring(request, val, redshift, color):
 
 #this one is called when the user wants to change the redshift
 @login_required
-def wavelenghing(request, redshift,mode="false",color="Greys-9"):
+def wavelenghing(request, redshift,mode="false",color="Greys9"):
 	gal = get_object_or_404(Galaxy, uniq_name=request.session['unameGal'])
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
@@ -441,7 +443,7 @@ def referencing(request, redshift, mode):
 	return HttpResponse(json.dumps(data))
 
 #this function makes all the usefull data for the full galaxy images
-def displayFImage(request, file, gal, short_name, val, color="Greys-9"):
+def displayFImage(request, file, gal, short_name, val, color="Greys9"):
 	val = int(val)
 	features = GalaxyFeatures.objects.filter(galaxy_id=gal.id).order_by('galaxyfields_id')
 	raCenter = float(features[0].value)
@@ -471,7 +473,7 @@ def displayFImage(request, file, gal, short_name, val, color="Greys-9"):
 	return script, div
 
 #same as the function above but for the 2D little spectrums
-def displayGImage(request, wavelenghts, file, short_name, redshift, color="Greys-9"):
+def displayGImage(request, wavelenghts, file, short_name, redshift, color="Greys9"):
 	inFits=pyfits.open(file)
 	iHdr=inFits[1].header
 	iData=inFits[1].data
@@ -541,36 +543,39 @@ def grismBoundaries(grismStampShape,grismStampHeader):
 
 
 #here, we create the image
-def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=True, redshift=0 ,xcircle=0, ycircle=0, color="Greys-9",val=100, wavelenghts=None):
+def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=True, redshift=0 ,xcircle=0, ycircle=0, color="Greys9",val=100, wavelenghts=None):
 	data = remapPixels(data)
 
-	img = image(image=[data], 
-		x_range=[dataBoundaries[0], dataBoundaries[1]], # range of x-values in the Display
-		y_range=[dataBoundaries[2], dataBoundaries[3]], # range of y-values in the Display
+	img = figure(
+		title=title, 
+		plot_width=plot_width, 
+		plot_height=plot_height, 
+		tools=TOOLS, 
+		x_range=[dataBoundaries[0], dataBoundaries[1]],
+		y_range=[dataBoundaries[2], dataBoundaries[3]]
+	)
+
+	img.image(image=[data],
 		x=dataBoundaries[0], # x-coordinate of Origin of display 
 		y=dataBoundaries[2], # y-coordinate of Origin of display
 		dw=dataBoundaries[1]-dataBoundaries[0], # number of image pixels in x-range of display
 		dh=dataBoundaries[3]-dataBoundaries[2], # number of image pixels in y-range of display
-		tools=TOOLS,
-		palette=[color],
-		title=title,
-		plot_width=plot_width, # size of the diplay in Screen Pixels
-		plot_height=plot_height, # size of the display in Screen pixels
+		palette=color,
 	)
 
 	hold()
 	if type:
-		annulus([ycircle],xcircle,9.9,10,fill_color="#df1c1c", line_color="#df1c1c")
+		img.annulus([ycircle],xcircle,9.9,10,fill_color="#df1c1c", line_color="#df1c1c")
 	else:
 		y = [-3.2,3]
 		for wave in wavelenghts:
 			wave = float(wave)
-			line([wave, wave],y=y,color=crossColor,line_width=2, line_dash="dotted")
+			img.line([wave, wave],y=y,color=crossColor,line_width=2, line_dash="dotted")
 		
 		#creation emition lines
 		for index, em in enumerate(emlineWavelengthsRest):
 			emlineWavelengths = em * (1.0 + float(redshift))
-			lin = line([emlineWavelengths,emlineWavelengths],y,color=colors[index],line_width=2)
+			img.line([emlineWavelengths,emlineWavelengths],y,color=colors[index],line_width=2)
 			#text([emlineWavelengths+20],calculatePositionText(index),emlineNames[index],0,text_color=colors[index])	
 			
 	resources = Resources("inline")
@@ -579,8 +584,6 @@ def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=
 
 	html_script = mark_safe(encode_utf8(plot_script))
 	html_div = mark_safe(encode_utf8(plot_div))
-
-	figure()
 
 	return html_script, html_div
 '''
@@ -1104,21 +1107,25 @@ def createReference(data,redshift, xmin, xmax):
 	#maxd = np.amax(data)
 	#mind = min(np.amin(data,axis=0)) #big problem here
 
+	mul = figure(
+		plot_width=400,
+		plot_height=400,
+		x_range=[xmin,xmax],
+		tools=TOOLS, 
+	)
+
 	for i in range(data.shape[1]-1):
-		mul = line(x=data[0:,0], 
-			y=data[0:,i+1], 
-			tools=TOOLS, 
+		mul.line(
+			x=data[0:,0], 
+			y=data[0:,i+1], 			
 			color=pcolors[i%3],
-			plot_width=400,
-			plot_height=400,
-			x_range=[xmin,xmax]
 		)
 
 	hold()
 
 	for index, em in enumerate(emlineWavelengthsRest):
 		emlineWavelengths = em * (1.0 + float(redshift))
-		line([emlineWavelengths,emlineWavelengths],[0,1],color=colors[index],line_width=2)
+		mul.line([emlineWavelengths,emlineWavelengths],[0,1],color=colors[index],line_width=2)
 		#text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
 
 	resources = Resources("inline")
@@ -1127,8 +1134,6 @@ def createReference(data,redshift, xmin, xmax):
 
 	html_script = mark_safe(encode_utf8(plot_script))
 	html_div = mark_safe(encode_utf8(plot_div))
-
-	figure()
 
 	return html_script, html_div
 

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block flyJs %}
-	    <script type="text/javascript" src='http://cdn.pydata.org/bokeh-0.6.1.min.js'></script>
+	    <script type="text/javascript" src='http://cdn.pydata.org/bokeh-0.7.0.min.js'></script>
 	    <script type="text/javascript">
 	    $(document).ready(function(){
 		    $("#userReview").submit(function(e){
@@ -16,7 +16,7 @@
 
 
 {% block flyCss %}
-	<link rel="stylesheet" type="text/css" href="http://cdn.pydata.org/bokeh-0.6.1.min.css">
+	<link rel="stylesheet" type="text/css" href="http://cdn.pydata.org/bokeh-0.7.0.min.css">
 	<style>
 		.jumbotron{
 			padding-bottom: 1px;
@@ -55,7 +55,7 @@ class = 'container-fuild'
 						<select class="form-control colors" name="colors">
 							{% for d in colors.colors %}
 								{% for val in d.values%}
-									<option value="{{d.name}}-{{val}}" {% if d.name == "Greys" and val == 9 %}selected{%endif%}>{{d.name}} - {{val}}</option>	
+									<option value="{{d.name}}{{val}}" {% if d.name == "Greys" and val == 9 %}selected{%endif%}>{{d.name}} - {{val}}</option>	
 								{% endfor %}
 							{% endfor %}
 						</select>
