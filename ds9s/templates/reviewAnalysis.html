@@ -1,20 +1,25 @@
 {% extends "base.html" %}
 
 {% block flyJs %}
-	<script type="text/javascript" src='http://cdn.pydata.org/bokeh-0.6.1.min.js'></script>
+	<script type="text/javascript" src='http://cdn.pydata.org/bokeh-0.7.0.min.js'></script>
 {% endblock %}
 
 {% block flyCss %}
-	<link rel="stylesheet" type="text/css" href="http://cdn.pydata.org/bokeh-0.6.1.min.css">
+	<link rel="stylesheet" type="text/css" href="http://cdn.pydata.org/bokeh-0.7.0.min.css">
+	{%load static %}
+	<link rel="stylesheet" href="{%static 'flyJumbo.css'%}"/>
+{% endblock %}
+
+{% block head %}
+	<h1 id="headGalaxy" title="Field id: {{gal.parfolder.fieldId_par}}">Galaxy n°<span id="uidGal">{{gal.uniq_id}}</span></h1>
 {% endblock %}
 
 {% block content %}
-	<h1> Galaxy n°{{gal.uniq_id}}</h1>
 	{%for iden in idens%}
-	<h3> {{iden.redshift}}</h3>
+	<h3 style="display:inline-block;"> {{iden.redshift}}</h3>
 	{%endfor%}
 
-	<div>{{div}}</div>
+	<div style="height:632px;">{{div}}</div>
 {% endblock %}
 
 {% block js %}

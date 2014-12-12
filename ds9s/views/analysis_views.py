@@ -31,7 +31,6 @@ def getReviewUser(request):
 def viewAllReviews(request):
 	idens = Identifications.objects.raw("SELECT COUNT(`galaxy_id`) as reviews, i.* FROM ds9s_identifications  i group by `galaxy_id`")
 
-	#SELECT AVG(`redshift`) as avgRedshit, COUNT(`galaxy_id`) as numReview, `galaxy_id` FROM ds9s_identifications  group by `galaxy_id` order by `galaxy_id`
 	return render(request, 'reviews.html',locals())
 
 @login_required
@@ -51,7 +50,7 @@ def viewReviewAnalysis(request, uniq_name):
 
 		redshifts.append(float(redshift))
 
-	html, div = createHistogram([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1.24,1,1.32,1,2,3])	
+	html, div = createHistogram(redshifts)	
 
 	return render(request, 'reviewAnalysis.html',locals())
 
@@ -59,17 +58,21 @@ def viewReviewAnalysis(request, uniq_name):
 def createHistogram(data):
 	hist, edges = np.histogram(data,bins=3000)
 
-	plot = quad(
+	plot = figure(
+		tools=TOOLS,
+		x_range=[min(edges)-0.05,max(edges)+0.05],
+		plot_width=1100, 
+		title="",
+	)
+
+	plot.quad(
 		top=hist,
 		bottom=0,
 		left=edges[:-1],
 		right=edges[1:],
 		fill_color="#036564",
 		line_color="#033649",
-		tools=TOOLS,
-		x_range=[-0.5,3.5],
-		plot_width=1100, 
-		title="",
+		
 	)
 
 	#hover = plot.select(dict(type=HoverTool))

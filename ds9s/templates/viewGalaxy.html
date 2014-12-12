@@ -17,18 +17,8 @@
 
 {% block flyCss %}
 	<link rel="stylesheet" type="text/css" href="http://cdn.pydata.org/bokeh-0.7.0.min.css">
-	<style>
-		.jumbotron{
-			padding-bottom: 1px;
-			text-align: center;
-		}
-		#headGalaxy{
-			margin: 10px;
-		}
-		#headGalaxy:hover{
-			text-decoration: underline;		
-		}
-	</style>
+	{%load static %}
+	<link rel="stylesheet" href="{%static 'flyJumbo.css'%}"/>
 {% endblock %}
 
 

@@ -12,7 +12,7 @@
 
         	var table = $("#allReviewsTab").DataTable({
 	          	"columnDefs": [
-	          		{ "orderable": false, "targets": 1 }
+	          		{ "orderable": false, "targets": 3 }
 	          	]
           	});
 
@@ -36,17 +36,21 @@
     		width:1400px;
     	}
     </style>
+    {%load static %}
+	<link rel="stylesheet" href="{%static 'flyJumbo.css'%}"/>
+{% endblock %}
+
+{% block head %}
+	<h1 id="headGalaxy">All reviews</h1>
 {% endblock %}
 
 
-
 {% block content %}
-	<h1>Reviews Page</h1>
-
 	<table id='allReviewsTab' class="table table-hover">
 			<thead>
 				<tr>
 					<th>Unique id</th>
+					<th>Field id</th>
 					<th>How many</th>
 					<th>Go</th>
 				</tr>
@@ -55,7 +59,8 @@
 			<tfoot>
 	            <tr>
 	                <th>Unique id</th>
-	                <th>How many</th>
+	                <th>Field id</th>
+	                <th>How many reviews</th>
 	                <th class="displayChildNone"></th>
 	            </tr>
         	</tfoot>
@@ -64,6 +69,7 @@
 				{% for iden in idens %}
 					<tr class="firstLine">
 						<td>{{iden.galaxy.uniq_id}}</td>
+						<td>{{iden.galaxy.parfolder.fieldId_par}}</td>
 						<td>{{iden.reviews}}</td>
 						<td><a class="btn btn-default" href="/ds9s/reviews/{{iden.galaxy.uniq_name}}/">Go</a></td>
 					</tr>

@@ -1,9 +1,21 @@
 {% extends "base.html" %}
 {% load ds9s_extras %}
+
+
 {% block flyJs %}
 	{%load static %}
 	<script type="text/javascript" src='{% static "parfolder.js" %}'></script>
 {% endblock %}
+
+{% block flyCss %}
+    {%load static %}
+	<link rel="stylesheet" href="{%static 'flyJumbo.css'%}"/>
+{% endblock %}
+
+{% block head %}
+	<h1 id="headGalaxy">Add new ParXXX folder</h1>
+{% endblock %}
+
 
 {% block content %}
 	{% if parfolders %}

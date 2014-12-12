@@ -1,0 +1,12 @@
+.jumbotron{
+	padding-bottom: 1px;
+	text-align: center;
+}
+		
+#headGalaxy{
+	margin: 10px;
+}
+
+#headGalaxy:hover{
+	text-decoration: underline;		
+}
