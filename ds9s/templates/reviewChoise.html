@@ -1,5 +1,5 @@
 <div class="clear container-fluid" id="reviewChoises">
-	<div class="col-xs-6 col-md-6">
+	<div class="col-xs-12 col-md-12">
 		<form id="userReview" method="post" 
 		{% if not next %}
 			action="/ds9s/saveReview/{{gal.id}}/{{gal.uniq_name}}/None/"			
@@ -10,6 +10,7 @@
 		{% endif %}
 		>
 		{% csrf_token %}
+		<div id="choises" class="col-xs-6 col-md-6">
 			<div class="radio">
 				<label for="objectStar">
 					<input type="radio" {%if check.galaxytype.nameForId == "star"%}checked="checked"{%endif%}required name="typeObject" id="objectStar" value="star"/>
@@ -35,9 +36,27 @@
 				</label>
 			</div>
 			<div class="radio">
+				<label for="objectOneLine">
+					<input type="radio" {%if check.galaxytype.nameForId == "oneLine"%}checked="checked"{%endif%}required name="typeObject" id="objectOneLine" value="oneLine"/>
+					This object has only <strong>one emission line</strong>
+				</label>
+			</div>
+			<div class="radio">
+				<label for="objectNotReal">
+					<input type="radio" {%if check.galaxytype.nameForId == "notReal"%}checked="checked"{%endif%}required name="typeObject" id="objectNotReal" value="notReal"/>
+					This object is <strong>not real</strong>
+				</label>
+			</div>
+			<div class="radio">
+				<label for="objectPossibleLine">
+					<input type="radio" {%if check.galaxytype.nameForId == "possibleLine"%}checked="checked"{%endif%}required name="typeObject" id="objectPossibleLine" value="possibleLine"/>
+					This object has <strong>possible emission line</strong>
+				</label>
+			</div>
+			<div class="radio">
 				<label for="objectGalaxyNothing">
 					<input type="radio" {%if check.galaxytype.nameForId == "nothing"%}checked="checked"{%endif%}required name="typeObject" value="nothing" id="objectGalaxyNothing"/>
-					This object is <strong>nothing</strong>.
+					This object is <strong>nothing</strong>
 				</label>
 			</div>
 			<div class="checkbox">
@@ -46,9 +65,13 @@
 					This object's spectrum suffers from contamination from nearby stars/galaxies
 				</label>
 			</div>
+		</div>
 
+		<div id="checkRef" class="col-xs-6 col-md-6">
+			<div id="divCheckRef"></div>
+		</div>
 
-			<input type="submit" id="validate-review" class="btn btn-default" 
+			<input type="submit" id="validateReview" class="btn btn-default" 
 
 			{% if check %}
 				value="Update"
@@ -56,9 +79,7 @@
 				value="Validate & go next"
 			{% endif %}	
 			/>
+			
 		</form>
-	</div>
-	<div id="checkRef" class="col-xs-6 col-md-6">
-		<div id="divCheckRef"></div>
-	</div>
+	</div>	
 </div>

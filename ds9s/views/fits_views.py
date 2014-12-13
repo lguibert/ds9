@@ -83,8 +83,8 @@ TOOLS="pan,wheel_zoom,box_zoom,reset" #all the tools for the bokeh images
 
 emlineWavelengthsRest = np.array([3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.])
 emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"]
-#            [O II]      [Ne III] Hbeta       [O III]        [O III]      Halpha     [S II]     [S III]               [S III]       He I
-colors = ["indianred","steelblue","indigo","orange","orange","darkred","darkorchid","palevioletred","palevioletred","yellowgreen"]
+#            [O II]     [Ne III]   Hbeta    [O III]  [O III]   Halpha     [S II]     [S III]               [S III]       He I
+colors = ["indianred","steelblue","indigo","orange","orange","firebrick","darkorchid","palevioletred","palevioletred","yellowgreen"]
 #----------------------------------------------------------------------------------
 
 
@@ -103,6 +103,7 @@ def viewHomeGalaxy(request):
 @login_required
 def test(request):
 	return render(request, 'test.html',locals())
+
 
 #A simple function to find the galaxy with a unique name. If the name isn't defined any galaxy, the return is none.
 def getGalaxyByUniqName(name):
@@ -354,6 +355,27 @@ def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,t
     #create new image (to avoid problem with chain creation)
 
     return html_script, html_div
+
+#this function will be called when the user will choose the "one line" choise
+@login_required
+def oneLining(request):
+	lines = EmissionLine.objects.all()
+
+	data = []
+
+	for line in lines:
+		name = line.name
+		checked = None
+
+		if name == "Halpha":
+			checked = 'checked="checked"'
+		
+		data.append(mark_safe(
+		'<div class="radio oneLineChoises"> <label for="%s"> <input type="radio" %s required name="oneLineSelect" id="%s" value="%s"/> <strong>%s</strong> </label> </div>' % (name, checked, name, name, name)
+		))
+
+
+	return HttpResponse(json.dumps(data))
 
 #this function is called with Ajax to change the 2D spectrums' color 
 @login_required
@@ -1159,7 +1181,7 @@ def addIdentification(gal_id, user_id, galtype_id, redshift, contaminated):
 
 #add the user's analysis to the database, return false if there is any problem.
 #one analysis = one emission line per galaxy and per user
-def addAnalys(gal_id, user_id, emissionline_id, emissionlinefield_id, value):
+def addAnalys(gal_id, user_id, emissionline_id, value, emissionlinefield_id=1):
 	try:
 		aly = Analysis()
 		aly.galaxy_id = gal_id
@@ -1262,6 +1284,7 @@ def secureContaminated(contaminated):
 def saveUserReview(request, id, uniq_name, next_uniq_name):
 	user_id = request.user.id
 	check = getIdentificationUser(id, user_id)
+	#oneLine = request.POST.get("oneLineSelect")
 
 	if not check:
 		typeObj = request.POST.get("typeObject")
@@ -1272,10 +1295,9 @@ def saveUserReview(request, id, uniq_name, next_uniq_name):
 
 			contaminated = secureContaminated(request.POST.get("contaminated"))
 
-			'''linecheck = []
-			for index, em in enumerate(emlineWavelengthsRest):
-				value = em * (1.0 + float(redshift))
-				linecheck.append(addAnalys(id, user_id, index,value))'''
+			#if oneLine:
+			#	idLineOne = EmissionLine.objects.get(name=oneLine).id
+			#	addAnalys(id, user_id, idLineOne,0)
 
 
 			identification = addIdentification(id, user_id, typeObjId, redshift, contaminated)

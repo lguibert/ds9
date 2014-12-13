@@ -7,9 +7,9 @@
 	{% endif %}  
 	<p>
 		{% if formType %}
-			<form method="post" id='formUpdateUser' action="/ds9s/update/{{pk}}/">
+			<form id="formUser" method="post" id='formUpdateUser' action="/ds9s/update/{{pk}}/">
 		{% else %}
-	    	<form method="post" action="/ds9s/newUser/">
+	    	<form id="formUser" method="post" action="/ds9s/newUser/">
 	    {% endif %}
 	    
 	       {% csrf_token %}

@@ -41,9 +41,14 @@ tfoot tr th {
 	margin-top: 10px;
 }
 
-label{
+.miniLabel{
+	max-width: 25px;
+}
+
+#formUser label{
 	min-width: 175px;
 }
+
 
 .none, #formUpdateUser #id_password, #formUpdateUser #id_passwordCheck, #formUpdateUser label[for='id_password'], #formUpdateUser label[for='id_passwordCheck']{
 	display: none;
@@ -269,6 +274,10 @@ input[type="number"]{
 	background-color:yellowgreen;
 }
 
+.red{
+	background-color: red;
+}
+
 .divCross{
 	width: initial!important;
 }
@@ -298,8 +307,9 @@ input[type="number"]{
 	font-style: italic;
 }
 
-#validate-review{
+#validateReview{
 	margin-top: 10px;
+	clear: both;
 }
 
 .titleMoreInfo{
@@ -373,4 +383,16 @@ input[type="number"]{
     border: 0;
     border-bottom: 1px dashed #ccc;
     background: #999;
+}
+
+.oneLineChoises{
+	display: inline-block;
+}
+
+#checkRef, #choises{
+	float:left;
+}
+
+#checkRef{
+	min-height: 245px;
 }

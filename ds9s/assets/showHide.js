@@ -20,11 +20,11 @@ $(document).ready(function(){
         if ($(this).attr('type') == 0){
         	showSelector('#dataCatContainer', "slow");
         	$(this).attr('type','1');
-        	$(this).html('See less');
+        	$(this).html('See less information about this galaxy');
         }else{
           hideSelector('#dataCatContainer', "slow");
           $(this).attr('type','0');
-          $(this).html('See more');
+          $(this).html('See more information about this galaxy');
         }
     })    
 

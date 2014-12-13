@@ -31,7 +31,7 @@ class = 'container-fuild'
 {% endblock %}
 
 {% block content %}	
-	<a class='btn btn-default' type='0' id='displayCatData'>See more</a>
+	<a class='btn btn-default' type='0' id='displayCatData'>See more information about this galaxy</a>
 	{% include 'seeMoreInfo.html' %}
 
 	<div id="rootFiles" class="container-fluid">
@@ -40,8 +40,10 @@ class = 'container-fuild'
 				<div id="scaled">
 					<form class="unsubmitable">
 						{% csrf_token %}
-						<label for="scaling">Scaling: </label>
+						<label for="scaling">Zoom =</label>
 						<input type="number" min="1" value="150" class="disableCharge" name="valScaling" id="valScaling" max="300"/>
+						<input type="range" class="disableCharge" id="scaling" name="scaling" min="1" step="1" max="300" value="150"/>
+
 						<select class="form-control colors" name="colors">
 							{% for d in colors.colors %}
 								{% for val in d.values%}
@@ -50,7 +52,7 @@ class = 'container-fuild'
 							{% endfor %}
 						</select>
 						<input type="button" id="default" class="btn btn-default disableCharge" value="Default values"/>
-						<input type="range" class="disableCharge" id="scaling" name="scaling" min="1" step="1" max="300" value="150"/>
+						
 					</form>
 				</div>
 				<div contenteditable="false" class="">
@@ -62,14 +64,6 @@ class = 'container-fuild'
 						{{f160140div}}
 					</div>
 				</div>
-				<!--<div contenteditable="false" class="auto">
-					<div id='dataF110' class="">
-						<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
-					</div>
-					<div id='dataF160140' class="">
-						<p>Cursor position => X:<span class="x"></span> - Y:<span class="y"></span></p>
-					</div>
-				</div>-->
 			</div>
 
 			<div id="lines" class="col-xs-6 col-md-6">
