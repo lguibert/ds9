@@ -81,6 +81,7 @@ $(document).ready(function(){
 			$("input[name='choiseRef']:checked").prop("checked",false);
 			$("#divRef102").html("");
 			$("#divRef141").html("");
+			$('#removeSelec .removeImage').hide();
 		}
 	});
 

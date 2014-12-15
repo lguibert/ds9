@@ -30,6 +30,7 @@
 class = 'container-fuild'	
 {% endblock %}
 
+{% load staticfiles %}
 {% block content %}	
 	<a class='btn btn-default' type='0' id='displayCatData'>See more information about this galaxy</a>
 	{% include 'seeMoreInfo.html' %}
@@ -38,12 +39,13 @@ class = 'container-fuild'
 		<div class="row">
 			<div id="fFiles" class="col-xs-6 col-md-6">
 				<div id="scaled">
-					<form class="unsubmitable">
+					<form class="unsubmitable inline-form formControl">
 						{% csrf_token %}
-						<label for="scaling">Zoom =</label>
-						<input type="number" min="1" value="150" class="disableCharge" name="valScaling" id="valScaling" max="300"/>
-						<input type="range" class="disableCharge" id="scaling" name="scaling" min="1" step="1" max="300" value="150"/>
-
+						<div class="controllers">
+							<label for="scaling">Zoom =</label>
+							<input type="number" min="1" value="150" class="disableCharge" name="valScaling" id="valScaling" max="300"/>
+							<input type="range" class="disableCharge" id="scaling" name="scaling" min="1" step="1" max="300" value="150"/>
+						</div>
 						<select class="form-control colors" name="colors">
 							{% for d in colors.colors %}
 								{% for val in d.values%}
@@ -86,7 +88,7 @@ class = 'container-fuild'
 				</div>
 				<div id="refSpectra" class="col-md-offset-6 col-xs-6 col-md-6">
 					<ul id="ulRefSpec">
-						<li><label id="removeSelec" title="Click here to remove selection" class="pointer">Reference: </label></li>
+						<li><label id="removeSelec" title="Click here to remove selection" class="pointer"><span class="removeImage"><img src="{% static 'images/close.png'%}" alt="Close"/></span>Reference: </label></li>
 						<li><input class="disableCharge pointer" type="radio" id="starRef" name="choiseRef" value="star"/><label for="starRef" class="pointer">Star</label></li>
 						<li><input class="disableCharge pointer" type="radio" id="quadarRef" name="choiseRef" value="quasar"/><label for="quadarRef" class="pointer">Quasar</label></li>
 						<li><input class="disableCharge pointer" type="radio" id="galaxyRef" name="choiseRef" value="galaxy"/><label for="galaxyRef" class="pointer">Galaxy</label></li>

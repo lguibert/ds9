@@ -212,7 +212,7 @@ td[class='bk-plot-above bk-sidebar bk-toolbar-active'] a[class='bk-logo bk-logo-
 	margin-left: 20px;
 }
 
-input[type="range"], #divLegends{
+#divLegends{
 	margin-top: 10px;
 }
 
@@ -230,6 +230,7 @@ input[type="number"]{
 
 #ulRefSpec li{
 	list-style: none;
+	width: 175px;
 }
 
 #ulRefSpec label{
@@ -387,6 +388,7 @@ input[type="number"]{
 
 .oneLineChoises{
 	display: inline-block;
+	width: 175px;
 }
 
 #checkRef, #choises{
@@ -395,4 +397,52 @@ input[type="number"]{
 
 #checkRef{
 	min-height: 245px;
+}
+
+.controllers{
+	margin-bottom: 20px;
+}
+
+.controllers input[type="range"]{
+	display: inline-block;
+	width: 700px;
+	margin-left: 30px
+}
+
+.formControl{
+	margin-bottom: 20px;
+}
+
+input[type="range"] {
+    position: relative;   
+}
+
+input[type="range"]:after, input[type="range"]:before {
+    position: absolute;
+    top: 1em;
+    color: #aaa;
+}
+
+input[type="range"]:before {
+    left:0em;
+    content: attr(min);
+}
+
+input[type="range"]:after {
+    right: 0em;
+    content: attr(max);
+}
+
+.removeImage{
+	margin-right:3px;
+	display: none;
+}
+
+.removeImage img{
+	margin-bottom:3px;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {  
+   opacity: 1;
 }

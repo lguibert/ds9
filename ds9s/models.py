@@ -32,7 +32,7 @@ class GalaxyFields(models.Model):
 class GalaxyFeatures(models.Model):
 	galaxy = models.ForeignKey('Galaxy')
 	galaxyfields = models.ForeignKey('GalaxyFields')
-	value = models.DecimalField(max_digits=19, decimal_places=10, default=None) 
+	value = models.DecimalField(max_digits=19, decimal_places=6, default=None) 
 
 
 class EmissionLine(models.Model):
@@ -69,7 +69,7 @@ class Analysis(models.Model):
 	emissionline = models.ForeignKey('EmissionLine')
 	emissionlinefield = models.ForeignKey('EmissionLineFields')
 	#approximately one billion with a resolution of 10 decimal
-	value = models.DecimalField(max_digits=19, decimal_places=10)
+	value = models.DecimalField(max_digits=19, decimal_places=6)
 
 	class Meta:
 		permissions = (("view_allAnalysis","Can see all analysis"),)

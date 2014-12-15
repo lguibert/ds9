@@ -205,7 +205,8 @@ $(document).ready(function(){
 // --------------------------------------------------------------------------------------------------
 
 	$("input[name='choiseRef']").unbind().click(function(){
-		referencing($(".wavelengh").val(),$(this).val());			
+		referencing($(".wavelengh").val(),$(this).val());
+		$('#removeSelec .removeImage').show();			
 	});
 
 	function referencing(redshift, mode){
