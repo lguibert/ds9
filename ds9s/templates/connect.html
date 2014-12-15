@@ -2,11 +2,10 @@
 
 {% block content %}
 	{% if next %}
-		<form class="form" method="post" action="/ds9s/login/?next={{next}}">
+		<form class="form labelSize" method="post" action="/ds9s/login/?next={{next}}">
 	{%else%}
-		<form class="form" method="post" action="/ds9s/login/">
+		<form class="form labelSize" method="post" action="/ds9s/login/">
 	{% endif %}
-		<form class="form" method="post" action="/ds9s/login/">
 		 	   {% csrf_token %}
 		 	   {{ form.as_p }}
 		    <button type="submit" class="btn btn-default">Log in</button>

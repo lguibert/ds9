@@ -35,7 +35,9 @@
               <a class="navbar-brand" href="/ds9s/account/reviews/">My previous reviews</a>
             {% endif %}
             <a class="navbar-brand navbar-right" href="/ds9s/test/">Test page</a>
+            {% if perms.ds9s.view_allIdentifications and perms.ds9s.view_allAnalysis %}
             <a class="navbar-brand navbar-right" href="/ds9s/reviews/">All reviews</a>   
+            {% endif %}
             {% if perms.can_add_parfolder %}   
             <a class="navbar-brand navbar-right" href="/ds9s/upload/">Add new ParXXX</a>
             {% endif %}

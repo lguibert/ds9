@@ -85,24 +85,6 @@ $(document).ready(function(){
 		}
 	});
 
-
-
-	/*$(".firstLine").click(function(){
-		if ($(this).attr('type') == 0){
-			$(this).attr('type','1');
-			$("#firstTable").removeClass("table-hover")
-			$(".secondTable").addClass("table-hover")
-        	$("+ .secondLine", this).show(500);
-        }else{
-        	$(this).attr('type','0');
-
-        	$("#firstTable").addClass("table-hover")
-			$(".secondTable").removeClass("table-hover")
-
-        	$("+ .secondLine", this).hide(200);        	
-        }
-	});*/
-
 	$(".speWaveTitle").unbind().click(function(){
 		if ($(this).attr('type') == 0){
 			$(this).attr('type','1');
