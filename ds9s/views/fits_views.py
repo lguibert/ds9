@@ -251,19 +251,25 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 		messages.info(request,'No analysis yet.')'''
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par) #if all files exists
-		
+	
+	#pdb.set_trace()
+
 	#directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
 
-	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], scalingDefault)	#create the f110's image			
-	
-	f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], scalingDefault) #create the f160 or f140's image
+	if len(checked) > 3 : 
+		f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], scalingDefault)	#create the f110's image			
+		
+		f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], scalingDefault) #create the f160 or f140's image
 
-	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift) #create the g102 2D's image
-	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift)#create the g141 2D's image
+		g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift) #create the g102 2D's image
+		g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift)#create the g141 2D's image
 
-	g102DatScript, g102DatDiv = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift) #create the g102 1D's image
-	g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshift) #create the g141 1D's image
-	
+		g102DatScript, g102DatDiv = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift) #create the g102 1D's image
+		g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshift) #create the g141 1D's image
+	else:
+		g2script, g2div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift)#create the g141 2D's image
+		f160140script, f160140div = displayFImage(request, checked[1], gal,checked_short[1], scalingDefault) #create the f160 or f140's image
+		g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[2],minG141,maxG141,"G141dat",redshift) #create the g141 1D's image
 
 	return render(request, 'viewGalaxy.html',locals())
 
@@ -392,15 +398,21 @@ def coloring(request, val, redshift, color):
 	#take the special wavelenghts
 	wavelenghts = request.session['waves'+str(gal.uniq_name)]
 
-	#create first 2D spectrum
-	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val, color)
-	#create the second 2D spectrum (from f140 or 160 files)
-	f160script, f160div = displayFImage(request, checked[3], gal, checked_short[3], val, color)
-	#create the first little 2D spectrum
-	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color)
-	#create the second little 2D spectrum
-	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift,color)
-
+	if len(checked) > 3 :
+		#create first 2D spectrum
+		f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val, color)
+		#create the second 2D spectrum (from f140 or 160 files)
+		f160script, f160div = displayFImage(request, checked[3], gal, checked_short[3], val, color)
+		#create the first little 2D spectrum
+		g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color)
+		#create the second little 2D spectrum
+		g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift,color)
+	else:
+		f110script, f110div = None, None
+		f160script, f160div = displayFImage(request, checked[1], gal, checked_short[1], val, color)
+		g1script, g1div = None, None
+		g2script, g2div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color)
+	
 	#add every data in an array
 	data = f110script, f110div, f160script, f160div, g1script, g1div, g2script, g2div
 
@@ -418,11 +430,16 @@ def wavelenghing(request, redshift,mode="false",color="Greys9"):
 
 	wavelenghts = request.session['waves'+str(gal.uniq_name)]
 
-	g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color)
-	g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift,color)
-	g102script, g102div = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift)
-	g141script, g141div = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshift)
-
+	if len(checked) > 3:
+		g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color)
+		g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift,color)
+		g102script, g102div = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift)
+		g141script, g141div = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshift)
+	else:
+		g1script, g1div = None, None
+		g2script, g2div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color)
+		g102script, g102div =  None, None
+		g141script, g141div = plot1DSpectrum(request,wavelenghts,checked[2],minG141,maxG141,"G141dat",redshift)
 	#return f110script, f110div, f160script, f160div
 	data = g1script, g1div, g2script, g2div, g102script, g102div, g141script, g141div
 
@@ -443,14 +460,19 @@ def scaling(request, val, color):
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
 
+	#pdb.set_trace()
+
 	if int(val) < 1:
 		val = 1
 	if int(val) > 300:
 		val = 300
 
-
-	f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val, color)
-	f160script, f160div = displayFImage(request, checked[3], gal, checked_short[3], val, color)
+	if len(checked) > 3:
+		f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], val, color)
+		f160script, f160div = displayFImage(request, checked[3], gal, checked_short[3], val, color)
+	else:
+		f110script, f110div = None, None
+		f160script, f160div = displayFImage(request, checked[1], gal, checked_short[1], val, color)
 
 	data = f110script, f110div, f160script, f160div
 	return HttpResponse(json.dumps(data))
@@ -849,7 +871,13 @@ def uploadParFile(request, name=None):
 				ids1 = getUniqIdFromFile(name, findIn, expression)
 				ids2 = getUniqIdFromFile(name,findIn2,expression2)
 
+				print "ID1: ",ids1
+
+				print "IDS2: ",ids2
+
 				ids_final = checkFilesGtype(ids1,ids2)
+
+				print "FINAL: ",ids_final
 
 				try:
 					addFileDatabase(ids_final, par.id, getTypeSecondFiles(par.fieldId_par))
@@ -867,6 +895,7 @@ def uploadParFile(request, name=None):
 		else:
 			messages.error(request, u"File already in database.")
 			return False	
+
 #identifie if we have a F140 or F160 file
 def getTypeSecondFiles(fieldId):
 	value = None
@@ -874,6 +903,8 @@ def getTypeSecondFiles(fieldId):
 
 	toCheck = basePath + par +grismFolder + f140w
 	toCheck2 = basePath + par +grismFolder + f160w
+
+	#pdb.set_trace()
 
 	if exists(toCheck):
 		value = True
@@ -906,18 +937,20 @@ def getUniqIdFromFile(name, fIn, exp):
 			ids.append(id)
 	return ids	
 
-# ???
+# make sure if there is not double 
 def checkFilesGtype(ids1, ids2):
 	ids_final = []
-	#ids_wrong = []?
-	for i in ids1:
-		if i in ids2:
-			ids_final.append(i)
-		#else:
-			#ids_wrong.append(i)
-	return ids_final#,ids_wrong
 
-#add fiel to database with all features
+	if not ids1:
+		ids_final = ids2
+	else:
+		for i in ids1:
+			if i in ids2:
+				ids_final.append(i)
+
+	return ids_final
+
+#add file to database with all features
 def addFileDatabase(ids, par, type):
 	tab = getDataFromCat(par, type)
 	for id in ids:	
@@ -939,8 +972,9 @@ def addFileDatabase(ids, par, type):
 		
 #read and return data for galaxy features
 def getDataFromCat(par_id, type):	
-	parfile = get_object_or_404(ParFolder,id=par_id)		
-	cat_file_f = basePath + parfile.name_par + grismFolder + "fin_F110.cat"
+	parfile = get_object_or_404(ParFolder,id=par_id)	
+	cat_file = defineNumberCatFile(type)	
+	cat_file_f = basePath + parfile.name_par + grismFolder + cat_file
 
 	catdat=np.genfromtxt(cat_file_f,dtype=np.str)
 
