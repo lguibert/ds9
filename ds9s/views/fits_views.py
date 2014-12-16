@@ -237,11 +237,11 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 	else:
 		redshift = redshiftDefault #same thing
 
-	colors = getColors() #we take all the colors for the images
-
 	request.session['unameGal'] = gal.uniq_name #set in session the value of the galaxy's unique name
 
 	#previous = getPrevGalaxy(uid)
+
+	colors = getColors() #get all colors to display them in the combobox
 
 	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id) # we take the galaxy's features (values from the .cat files)
 
@@ -256,19 +256,23 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 
 	#directory = settings.MEDIA_ROOT + "/fits_png/" + gal.parfolder.name_par + "/"
 
-	if len(checked) > 3 : 
-		f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], scalingDefault)	#create the f110's image			
-		
-		f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], scalingDefault) #create the f160 or f140's image
+	if 'colorName' in request.session and 'colorVal' in request.session:
+		color = request.session['colorName'] + request.session['colorVal']
+	else:
+		color = "Greys9"
 
-		g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift) #create the g102 2D's image
-		g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift)#create the g141 2D's image
+	if len(checked) > 3 : 
+		f110script, f110div = displayFImage(request, checked[2], gal, checked_short[2], scalingDefault, color=color)	#create the f110's image			
+		f160140script, f160140div = displayFImage(request, checked[3], gal,checked_short[3], scalingDefault,color=color) #create the f160 or f140's image
+
+		g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color=color) #create the g102 2D's image
+		g2script, g2div = displayGImage(request,wavelenghts, checked[1],checked_short[1],redshift,color=color)#create the g141 2D's image
 
 		g102DatScript, g102DatDiv = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift) #create the g102 1D's image
 		g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshift) #create the g141 1D's image
 	else:
-		g2script, g2div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift)#create the g141 2D's image
-		f160140script, f160140div = displayFImage(request, checked[1], gal,checked_short[1], scalingDefault) #create the f160 or f140's image
+		g2script, g2div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color=color)#create the g141 2D's image
+		f160140script, f160140div = displayFImage(request, checked[1], gal,checked_short[1], scalingDefault,color=color) #create the f160 or f140's image
 		g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[2],minG141,maxG141,"G141dat",redshift) #create the g141 1D's image
 
 	return render(request, 'viewGalaxy.html',locals())
@@ -383,6 +387,10 @@ def oneLining(request):
 
 	return HttpResponse(json.dumps(data))
 
+
+def makeColorValue(color):
+	return re.sub('-','',color)
+
 #this function is called with Ajax to change the 2D spectrums' color 
 @login_required
 def coloring(request, val, redshift, color):
@@ -397,6 +405,13 @@ def coloring(request, val, redshift, color):
 
 	#take the special wavelenghts
 	wavelenghts = request.session['waves'+str(gal.uniq_name)]
+
+	color_splited = split(color,'-')
+
+	request.session['colorName'] = color_splited[0]
+	request.session['colorVal'] = color_splited[1]
+
+	color = makeColorValue(color)
 
 	if len(checked) > 3 :
 		#create first 2D spectrum
@@ -416,6 +431,8 @@ def coloring(request, val, redshift, color):
 	#add every data in an array
 	data = f110script, f110div, f160script, f160div, g1script, g1div, g2script, g2div
 
+
+
 	#return  the array
 	return HttpResponse(json.dumps(data))
 
@@ -429,6 +446,8 @@ def wavelenghing(request, redshift,mode="false",color="Greys9"):
 	redshift = secureRedshift(float(redshift))
 
 	wavelenghts = request.session['waves'+str(gal.uniq_name)]
+
+	color = makeColorValue(color)
 
 	if len(checked) > 3:
 		g1script, g1div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color)
@@ -456,7 +475,7 @@ def wavelenghing(request, redshift,mode="false",color="Greys9"):
 def scaling(request, val, color):
 	gal = get_object_or_404(Galaxy, uniq_name=request.session['unameGal'])
 
-	colors = getColorsNames()
+	color = makeColorValue(color)
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par)
 

@@ -21,9 +21,20 @@
 			name="wavelengh" min="0" step="0.01" max="3"/>
 		</div>
 		<select class="form-control colors" name="colors" >
+			{% load ds9s_extras %}
 			{% for d in colors.colors %}
 				{% for val in d.values%}
-					<option value="{{d.name}}{{val}}" {% if d.name == "Greys" and val == 9 %}selected{%endif%}>{{d.name}} - {{val}}</option>
+					<option value="{{d.name}}-{{val}}" 
+
+					{% if request.session.colorName and request.session.colorVal %}
+						{% if d.name == request.session.colorName and val == request.session.colorVal|toInt %}selected{%endif%}
+					{%else%}
+						{% if d.name == "Greys" and val == 9 %}selected{%endif%}
+					{%endif%}
+
+
+
+					>{{d.name}} - {{val}}</option>
 				{% endfor %}
 			{% endfor %}
 		</select>
