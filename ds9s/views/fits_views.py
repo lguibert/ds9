@@ -84,7 +84,7 @@ TOOLS="pan,wheel_zoom,box_zoom,reset" #all the tools for the bokeh images
 emlineWavelengthsRest = np.array([3727., 3869., 4861., 4959., 5007., 6563., 6727., 9069., 9532., 10830.])
 emlineNames = ["[O II]","[Ne III]","Hbeta","[O III]","[O III]","Halpha","[S II]","[S III]","[S III]","He I"]
 #            [O II]     [Ne III]   Hbeta    [O III]  [O III]   Halpha     [S II]     [S III]               [S III]       He I
-colors = ["indianred","steelblue","indigo","orange","orange","firebrick","darkorchid","palevioletred","palevioletred","yellowgreen"]
+colors = ["lightsalmon","steelblue","indigo","orange","orange","red","darkorchid","palevioletred","palevioletred","yellowgreen"]
 #----------------------------------------------------------------------------------
 
 
@@ -332,7 +332,7 @@ def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,t
     mul.multi_line(
     	xs=[wl,wl],
     	ys=[f,c],
-    	color=["black","red"],    	
+    	color=["black","green"],    	
     	line_width=2,    	
     )
 
