@@ -270,10 +270,16 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 
 		g102DatScript, g102DatDiv = plot1DSpectrum(request,wavelenghts,checked[4],minG102,maxG102,"G102dat",redshift) #create the g102 1D's image
 		g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[5],minG141,maxG141,"G141dat",redshift) #create the g141 1D's image
+		tab_test = f110script, f110div, f160140script, f160140div, g1script, g1div, g2script, g2div, g102DatScript, g102DatDiv, g141DatScript, g141DatDiv
 	else:
 		g2script, g2div = displayGImage(request,wavelenghts, checked[0],checked_short[0],redshift,color=color)#create the g141 2D's image
 		f160140script, f160140div = displayFImage(request, checked[1], gal,checked_short[1], scalingDefault,color=color) #create the f160 or f140's image
 		g141DatScript, g141DatDiv = plot1DSpectrum(request,wavelenghts,checked[2],minG141,maxG141,"G141dat",redshift) #create the g141 1D's image
+		tab_test = g2script, g2div, f160140script, f160140div, g141DatScript, g141DatDiv
+	
+
+	if None in tab_test:
+		messages.error(request, 'Error for this galaxy. Please go an other one.')
 
 	return render(request, 'viewGalaxy.html',locals())
 
@@ -284,87 +290,92 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 #------------------------------------------------------------------------------------------------------
 
 def read1DSpectrum(pathToASCIISpectrum,minWavelength=None,maxWavelength=None):
-    # The ASCII-format 1D spectrum files are found in the Spectrum/ subdirectory of the data
-    # If a minimum or maximum wavelength are specified, the spectra will be trimmed
-    spectrumData = np.genfromtxt(pathToASCIISpectrum,dtype=np.float64) # Read in the data from file
-    spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumData[0:,0],spectrumData[0:,1],spectrumData[0:,2],spectrumData[0:,3],spectrumData[0:,4]
-    # Filter out NaNs which will cause the plotting functions to fail
-    filter1 = np.logical_or(np.isnan(spectrumWavelengths),np.isnan(spectrumFluxes)) # an element evaluates to true if either is NaN
-    filter2 = np.logical_or(np.isnan(spectrumUncertainties),np.isnan(spectrumContamination)) # an element evaluates to true if either is NaN
-    filter3 = np.logical_not(np.logical_or(filter1,filter2))
-    # apply the filter
-    spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
-    # If minimum or maximum wavelengths are specified, trim spectra accordingly
-    if minWavelength:
-        filter3 = spectrumWavelengths >= minWavelength
-        spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
-    if maxWavelength:
-        filter3 = spectrumWavelengths <= maxWavelength
-        spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
-    return spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders
+	# The ASCII-format 1D spectrum files are found in the Spectrum/ subdirectory of the data
+	# If a minimum or maximum wavelength are specified, the spectra will be trimmed
+	spectrumData = np.genfromtxt(pathToASCIISpectrum,dtype=np.float64) # Read in the data from file
+	spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumData[0:,0],spectrumData[0:,1],spectrumData[0:,2],spectrumData[0:,3],spectrumData[0:,4]
+	# Filter out NaNs which will cause the plotting functions to fail
+	filter1 = np.logical_or(np.isnan(spectrumWavelengths),np.isnan(spectrumFluxes)) # an element evaluates to true if either is NaN
+	filter2 = np.logical_or(np.isnan(spectrumUncertainties),np.isnan(spectrumContamination)) # an element evaluates to true if either is NaN
+	filter3 = np.logical_not(np.logical_or(filter1,filter2))
+	# apply the filter
+	spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
+	# If minimum or maximum wavelengths are specified, trim spectra accordingly
+	if minWavelength:
+		filter3 = spectrumWavelengths >= minWavelength
+		spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
+	if maxWavelength:
+		filter3 = spectrumWavelengths <= maxWavelength
+		spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders = spectrumWavelengths[filter3], spectrumFluxes[filter3], spectrumUncertainties[filter3], spectrumContamination[filter3], spectrumZeroOrders[filter3]
+	return spectrumWavelengths, spectrumFluxes, spectrumUncertainties, spectrumContamination, spectrumZeroOrders
 
 #this function create this 1D spectrum
 def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,title,redshift):
-    wl,f,u,c,z = read1DSpectrum(pathToFile, minWavelength, maxWavelength)
+	wl,f,u,c,z = read1DSpectrum(pathToFile, minWavelength, maxWavelength)
 
-    wlmax = max(wl) 
-    wlmin = min(wl) 
-    cmin = min(c) 
-    fmax = max(f) 
-    xplus = 100
-    yplus = 0.00000000000000001
+	print wl
 
-    wlmin_f = wlmin-xplus #axe x min
-    wlmax_f = wlmax+xplus #axe x max
-    cmin_f = cmin-yplus #axe y min
-    fmax_f = fmax+yplus #axe y max
+	if wl.size > 0 and f.size > 0 and u.size > 0 and c.size > 0 and z.size > 0:
+		wlmax = max(wl) 
+		wlmin = min(wl) 
+		cmin = min(c) 
+		fmax = max(f) 
+		xplus = 100
+		yplus = 0.00000000000000001
 
-    array = [wlmin_f,wlmax_f]
+		wlmin_f = wlmin-xplus #axe x min
+		wlmax_f = wlmax+xplus #axe x max
+		cmin_f = cmin-yplus #axe y min
+		fmax_f = fmax+yplus #axe y max
 
-	#add in session the value of x min & x max to have them for other spectrum
-    request.session['array'+title] = array 
+		array = [wlmin_f,wlmax_f]
 
-    mul = figure(
-    	x_range=[wlmin_f,wlmax_f],
-    	y_range=[cmin_f,fmax_f],
-    	tools=TOOLS,
-    	plot_width=400,
-    	plot_height=400,
-    	title=title,
-    )
+		#add in session the value of x min & x max to have them for other spectrum
+		request.session['array'+title] = array 
 
-    mul.multi_line(
-    	xs=[wl,wl],
-    	ys=[f,c],
-    	color=["black","green"],    	
-    	line_width=2,    	
-    )
+		mul = figure(
+			x_range=[wlmin_f,wlmax_f],
+			y_range=[cmin_f,fmax_f],
+			tools=TOOLS,
+			plot_width=400,
+			plot_height=400,
+			title=title,
+		)
 
-    hold()
+		mul.multi_line(
+			xs=[wl,wl],
+			ys=[f,c],
+			color=["black","green"],    	
+			line_width=2,    	
+		)
 
-    #here, we create the wavelenghts lines
-    for wave in wavelenghts:
-    	wave = float(wave)
-    	mul.line([wave, wave],y=[cmin-yplus,fmax+yplus],color=crossColor,line_width=2, line_dash="dotted")
+		hold()
 
-    #for each emission line, we create a line on the image. The value is made with the redshift
-    for index, em in enumerate(emlineWavelengthsRest):    	
-    	emlineWavelengths = em * (1.0 + float(redshift))
-    	mul.line([emlineWavelengths,emlineWavelengths],[cmin-yplus,fmax+yplus],color=colors[index],line_width=2)
-    	#text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
+		#here, we create the wavelenghts lines
+		for wave in wavelenghts:
+			wave = float(wave)
+			mul.line([wave, wave],y=[cmin-yplus,fmax+yplus],color=crossColor,line_width=2, line_dash="dotted")
 
-    #begin here: the creation of html code
-    resources = Resources("inline")
+		#for each emission line, we create a line on the image. The value is made with the redshift
+		for index, em in enumerate(emlineWavelengthsRest):    	
+			emlineWavelengths = em * (1.0 + float(redshift))
+			mul.line([emlineWavelengths,emlineWavelengths],[cmin-yplus,fmax+yplus],color=colors[index],line_width=2)
+			#text([emlineWavelengths+20],(fmax+(index*(2*yplus)))/2,emlineNames[index],0,text_color=colors[index])	
 
-    plot_script, plot_div = components(mul, resources)
+		#begin here: the creation of html code
+		resources = Resources("inline")
 
-    html_script = mark_safe(encode_utf8(plot_script))
-    html_div = mark_safe(encode_utf8(plot_div))
-    #end creation html code
+		plot_script, plot_div = components(mul, resources)
 
-    #create new image (to avoid problem with chain creation)
+		html_script = mark_safe(encode_utf8(plot_script))
+		html_div = mark_safe(encode_utf8(plot_div))
+		#end creation html code
 
-    return html_script, html_div
+		#create new image (to avoid problem with chain creation)
+
+		return html_script, html_div
+	else:
+		return None, None
 
 #this function will be called when the user will choose the "one line" choise
 @login_required
@@ -519,7 +530,7 @@ def displayFImage(request, file, gal, short_name, val, color="Greys9"):
 
 	# Get parameters for converting Pixel Coordinates to Celestial Coordinates: Right ascension (RA) and Declination (Dec)
 	x0,y0,ra0,dec0,drdx,drdy,dddx,dddy,fieldRotation=iHdr["CRPIX1"],iHdr["CRPIX2"],iHdr["CRVAL1"],iHdr["CRVAL2"],iHdr["CD1_1"],iHdr["CD1_2"],iHdr["CD2_1"],iHdr["CD2_2"],iHdr["ORIENTAT"]
-	    
+		
 	fieldRotation=-1.*fieldRotation 
 	pixScaleR,pixScaleD=(drdy**2+drdx**2)**0.5 * 3600., (dddy**2+dddx**2)**0.5 * 3600. 
 	xcen = (raCenter-ra0)*cos(dec0*pi/180.)*3600./pixScaleR*-1.*cos(pi*fieldRotation/180.)+(decCenter-dec0)*3600./pixScaleD*-1.*sin(pi*fieldRotation/180.)+x0 # OK, this transformation seems to get closest
@@ -553,29 +564,32 @@ def displayGImage(request, wavelenghts, file, short_name, redshift, color="Greys
 
 	dataBoundaries = grismBoundaries([iData.shape[0],iData.shape[1]],iHdr)
 
-
-
 	script, div = createBokehImage(iData, dataBoundaries,800,280,short_name, type=False,redshift=redshift,wavelenghts=wavelenghts, color=color)
 
 	return script, div
 
 #Like the name says it, this function remap the pixel for all the images
 def remapPixels(data, minpex=None, maxpex=None):
-	datastat = imagestats.ImageStats(data,nclip=3)
-	if minpex == None:
-		minpex = datastat.mean
-	if maxpex == None:
-		maxpex = datastat.mean + 10 * datastat.stddev
+	try:
+		datastat = imagestats.ImageStats(data,nclip=3)
+		if minpex == None:
+			minpex = datastat.mean
+		if maxpex == None:
+			maxpex = datastat.mean + 10 * datastat.stddev
 
-	m = 1 / (maxpex - minpex)
-	b = minpex * -1 / (maxpex - minpex)
+		minus = maxpex - minpex
 
-	data = data * m + b
+		m = 1 / (minus)
+		b = minpex * -1 / (minus)
 
-	data[data<0]=0
-	data[data>1]=1
+		data = data * m + b
 
-	return data
+		data[data<0]=0
+		data[data>1]=1
+
+		return data
+	except:
+		return np.array([])
 
 def imSubarrayBoundaries(fullImageDataShape,xCenter,yCenter,halfSize):
 	#fullImageDataShape is the iData.shape
@@ -596,59 +610,63 @@ def imSubarrayBoundaries(fullImageDataShape,xCenter,yCenter,halfSize):
 	return (subArrayBottom,subArrayTop,subArrayLeft,subArrayRight)
 
 def grismBoundaries(grismStampShape,grismStampHeader):
-    # given the shape of the array and the fits header, calculate the minimum and maximum wavelengths and the vertical scale in arcseconds
-    iHdr = grismStampHeader
-    x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
-    y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
-    npixx,npixy=grismStampShape[1],grismStampShape[0] # get the number of pixels in each direction
-    l1,l2,y1,y2 = l0-(x0)*dl, l0+(float(npixx)-x0)*dl, a0-(y0)*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
-    return (l1,l2,y1,y2) # again, we will use these as the coordinate boundaries for the plots.
+	# given the shape of the array and the fits header, calculate the minimum and maximum wavelengths and the vertical scale in arcseconds
+	iHdr = grismStampHeader
+	x0,l0,dl=iHdr['CRPIX1'],iHdr['CRVAL1'],iHdr['CDELT1'] # Get the x-pixel coordinate - to - wavelength mapping
+	y0,a0,da=iHdr['CRPIX2'],iHdr['CRVAL2'],iHdr['CDELT2'] # Get the y-pixel coordinate - to - distance in arcsec map
+	npixx,npixy=grismStampShape[1],grismStampShape[0] # get the number of pixels in each direction
+	l1,l2,y1,y2 = l0-(x0)*dl, l0+(float(npixx)-x0)*dl, a0-(y0)*da, a0+(float(npixy)-y0)*da # set the min wavelength, max wavelength, min distance, max distance
+	return (l1,l2,y1,y2) # again, we will use these as the coordinate boundaries for the plots.
 
 
 #here, we create the image
 def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=True, redshift=0 ,xcircle=0, ycircle=0, color="Greys9",val=100, wavelenghts=None):
 	data = remapPixels(data)
 
-	img = figure(
-		title=title, 
-		plot_width=plot_width, 
-		plot_height=plot_height, 
-		tools=TOOLS, 
-		x_range=[dataBoundaries[0], dataBoundaries[1]],
-		y_range=[dataBoundaries[2], dataBoundaries[3]]
-	)
+	if data.size > 0:
+		img = figure(
+			title=title, 
+			plot_width=plot_width, 
+			plot_height=plot_height, 
+			tools=TOOLS, 
+			x_range=[dataBoundaries[0], dataBoundaries[1]],
+			y_range=[dataBoundaries[2], dataBoundaries[3]]
+		)
 
-	img.image(image=[data],
-		x=dataBoundaries[0], # x-coordinate of Origin of display 
-		y=dataBoundaries[2], # y-coordinate of Origin of display
-		dw=dataBoundaries[1]-dataBoundaries[0], # number of image pixels in x-range of display
-		dh=dataBoundaries[3]-dataBoundaries[2], # number of image pixels in y-range of display
-		palette=color,
-	)
+		img.image(image=[data],
+			x=dataBoundaries[0], # x-coordinate of Origin of display 
+			y=dataBoundaries[2], # y-coordinate of Origin of display
+			dw=dataBoundaries[1]-dataBoundaries[0], # number of image pixels in x-range of display
+			dh=dataBoundaries[3]-dataBoundaries[2], # number of image pixels in y-range of display
+			palette=color,
+		)
 
-	hold()
-	if type:
-		img.annulus([ycircle],xcircle,9.9,10,fill_color="#df1c1c", line_color="#df1c1c")
-	else:
-		y = [-3.2,3]
-		for wave in wavelenghts:
-			wave = float(wave)
-			img.line([wave, wave],y=y,color=crossColor,line_width=2, line_dash="dotted")
-		
-		#creation emition lines
-		for index, em in enumerate(emlineWavelengthsRest):
-			emlineWavelengths = em * (1.0 + float(redshift))
-			img.line([emlineWavelengths,emlineWavelengths],y,color=colors[index],line_width=2)
-			#text([emlineWavelengths+20],calculatePositionText(index),emlineNames[index],0,text_color=colors[index])	
+		hold()
+		if type:
+			img.annulus([ycircle], xcircle, 9.9, 10, fill_color="#df1c1c", line_color="#df1c1c")
+		else:
+			y = [-3.2,3]
+			for wave in wavelenghts:
+				wave = float(wave)
+				img.line([wave, wave],y=y,color=crossColor,line_width=2, line_dash="dotted")
 			
-	resources = Resources("inline")
+			#creation emition lines
+			for index, em in enumerate(emlineWavelengthsRest):
+				emlineWavelengths = em * (1.0 + float(redshift))
+				img.line([emlineWavelengths,emlineWavelengths],y,color=colors[index],line_width=2)
+				#text([emlineWavelengths+20],calculatePositionText(index),emlineNames[index],0,text_color=colors[index])	
+				
+		resources = Resources("inline")
 
-	plot_script, plot_div = components(img, resources)
+		plot_script, plot_div = components(img, resources)
 
-	html_script = mark_safe(encode_utf8(plot_script))
-	html_div = mark_safe(encode_utf8(plot_div))
+		html_script = mark_safe(encode_utf8(plot_script))
+		html_div = mark_safe(encode_utf8(plot_div))
 
-	return html_script, html_div
+		return html_script, html_div
+	else:
+		return None, None
+
 '''
 def calculatePositionText(value):
 	value = float(value)/5 + 0.5
@@ -1048,122 +1066,122 @@ def defineNumberCatFile(type):
 #------------------------------------------------------------------------------------------------------
 
 def genG102Wavelengths():
-    l = 7319.
-    ls=[]
-    while l<=12623.:
-        ls.append(l)
-        l=l+24.
-    return np.array(ls,dtype=np.float64)
+	l = 7319.
+	ls=[]
+	while l<=12623.:
+		ls.append(l)
+		l=l+24.
+	return np.array(ls,dtype=np.float64)
 
 def genG141Wavelengths():
-    l = 9449.
-    ls=[]
-    while l<=18516.5:
-        ls.append(l)
-        l=l+46.5
-    return np.array(ls,dtype=np.float64)
+	l = 9449.
+	ls=[]
+	while l<=18516.5:
+		ls.append(l)
+		l=l+46.5
+	return np.array(ls,dtype=np.float64)
 
 def trimSpec(wavelength,flux,minWavelength,maxWavelength):
-    filt = np.logical_and(wavelength >= minWavelength, wavelength <= maxWavelength)
-    return wavelength[filt],flux[filt]
+	filt = np.logical_and(wavelength >= minWavelength, wavelength <= maxWavelength)
+	return wavelength[filt],flux[filt]
 
 def smootheInterpolateSpec(wavelength,flux,newWavelength,npixBoxcar):
-    smootheFlux = convolve(flux,boxcar(npixBoxcar),mode="same")
-    finterp = interp1d(wavelength,smootheFlux,bounds_error=False,fill_value=0.0)
-    smootheFlux = finterp(newWavelength)
-    return smootheFlux/smootheFlux.max()
+	smootheFlux = convolve(flux,boxcar(npixBoxcar),mode="same")
+	finterp = interp1d(wavelength,smootheFlux,bounds_error=False,fill_value=0.0)
+	smootheFlux = finterp(newWavelength)
+	return smootheFlux/smootheFlux.max()
 
 def Gauss(l,l0,sigma,amp):
-    return amp * np.exp((-1.0*(l-l0)**2)/(2.0*sigma**2))
+	return amp * np.exp((-1.0*(l-l0)**2)/(2.0*sigma**2))
 
 def createGalaxySpectra(redshift,galaxyFullWidth=4.):
-    # Create three model spectra with different EW for emission lines,  
-    # Adapt to galaxy size and magnitude? Maybe size for now.
-    # Generate observed-frame spectra in X Angs. increments; 
-    # convolve with a gaussian to match galaxy size spread;
-    # smoothe and interpolate.
-    deltal = 2. # set the wavelength scale of the initial spectrum
-    lineFullWidth = deltal * 3. # nyquist sample the lines
-    wavelengths102 = genG102Wavelengths()
-    wavelengths141 = genG141Wavelengths()
-    wavelengthsInit = []
-    l=wavelengths102[0]
-    while l <= wavelengths141[-1]:
-        wavelengthsInit.append(l)
-        l = l + deltal
-    wavelengthsInit = np.array(wavelengthsInit,dtype=np.float64)
-    emlineWavelengths = emlineWavelengthsRest * (1.0 + redshift) # Given a redshift, calculate the wavelength coordinates of the vertical lines
-    emlineStrengths = np.array([5.,0.25,1.0,1.66,5.,4.,0.4,0.133,0.4,0.1],dtype=np.float64) # relative to Hbeta (?)
-    fluxesStrong = np.zeros(len(wavelengthsInit),dtype=np.float64) + 1.0 # Observed Ha EW = 500.
-    fluxesMiddle = np.zeros(len(wavelengthsInit),dtype=np.float64) + 1.0 # Observed Ha EW = 100
-    fluxesWeak = np.zeros(len(wavelengthsInit),dtype=np.float64) + 1.0 # Observed Ha EW = 50.
-    for i in range(len(wavelengthsInit)):
-        for j in range(len(emlineWavelengths)):
-            # EW*F_lambda = S F_lambda dlambda
-            ampFactor = 500. / (lineFullWidth/2.35 * np.sqrt(2.0*pi) * emlineStrengths[5])
-            fluxesStrong[i] = fluxesStrong[i] + Gauss(wavelengthsInit[i],emlineWavelengths[j],lineFullWidth/2.35,ampFactor*emlineStrengths[j])
-            ampFactor = 100. / (lineFullWidth/2.35 * np.sqrt(2.0*pi) * emlineStrengths[5])
-            fluxesMiddle[i] = fluxesMiddle[i] + Gauss(wavelengthsInit[i],emlineWavelengths[j],lineFullWidth/2.35,ampFactor*emlineStrengths[j])
-            ampFactor = 50. / (lineFullWidth/2.35 * np.sqrt(2.0*pi) * emlineStrengths[5])
-            fluxesWeak[i] = fluxesWeak[i] + Gauss(wavelengthsInit[i],emlineWavelengths[j],lineFullWidth/2.35,ampFactor*emlineStrengths[j])
-    # now convolve with the galaxy gaussian
-    nWin = 12
-    pixConvert102 = 24./deltal * galaxyFullWidth/2.35
-    pixConvert141, pixConvert102 = int(pixConvert102*46.5/24.), int(pixConvert102)
-    fStrong102 = convolve(fluxesStrong,gaussian(nWin*pixConvert102,std=pixConvert102),mode="same")
-    fMiddle102 = convolve(fluxesMiddle,gaussian(nWin*pixConvert102,std=pixConvert102),mode="same")
-    fWeak102 = convolve(fluxesWeak,gaussian(nWin*pixConvert102,std=pixConvert102),mode="same")
-    fStrong141 = convolve(fluxesStrong,gaussian(nWin*pixConvert141,std=pixConvert141),mode="same")
-    fMiddle141 = convolve(fluxesMiddle,gaussian(nWin*pixConvert141,std=pixConvert141),mode="same")
-    fWeak141 = convolve(fluxesWeak,gaussian(nWin*pixConvert141,std=pixConvert141),mode="same")
-    finterp = interp1d(wavelengthsInit,fStrong102,bounds_error=False,fill_value=0.0)
-    fStrong102 = finterp(wavelengths102)
-    finterp = interp1d(wavelengthsInit,fMiddle102,bounds_error=False,fill_value=0.0)
-    fMiddle102 = finterp(wavelengths102)
-    finterp = interp1d(wavelengthsInit,fWeak102,bounds_error=False,fill_value=0.0)
-    fWeak102 = finterp(wavelengths102)
-    finterp = interp1d(wavelengthsInit,fStrong141,bounds_error=False,fill_value=0.0)
-    fStrong141 = finterp(wavelengths141)
-    finterp = interp1d(wavelengthsInit,fMiddle141,bounds_error=False,fill_value=0.0)
-    fMiddle141 = finterp(wavelengths141)
-    finterp = interp1d(wavelengthsInit,fWeak141,bounds_error=False,fill_value=0.0)
-    fWeak141 = finterp(wavelengths141)
-    #return wavelengths102,wavelengths141,fStrong102,fMiddle102,fWeak102,fStrong141,fMiddle141,fWeak141
-    galSpec102 = np.zeros((len(wavelengths102),4),dtype=np.float64)
-    galSpec141 = np.zeros((len(wavelengths141),4),dtype=np.float64)
-    galSpec102[0:,0] = wavelengths102
-    galSpec102[0:,1] = fStrong102
-    galSpec102[0:,2] = fMiddle102
-    galSpec102[0:,3] = fWeak102
-    galSpec141[0:,0] = wavelengths141
-    galSpec141[0:,1] = fStrong141
-    galSpec141[0:,2] = fMiddle141
-    galSpec141[0:,3] = fWeak141
-    return galSpec102,galSpec141
+	# Create three model spectra with different EW for emission lines,  
+	# Adapt to galaxy size and magnitude? Maybe size for now.
+	# Generate observed-frame spectra in X Angs. increments; 
+	# convolve with a gaussian to match galaxy size spread;
+	# smoothe and interpolate.
+	deltal = 2. # set the wavelength scale of the initial spectrum
+	lineFullWidth = deltal * 3. # nyquist sample the lines
+	wavelengths102 = genG102Wavelengths()
+	wavelengths141 = genG141Wavelengths()
+	wavelengthsInit = []
+	l=wavelengths102[0]
+	while l <= wavelengths141[-1]:
+		wavelengthsInit.append(l)
+		l = l + deltal
+	wavelengthsInit = np.array(wavelengthsInit,dtype=np.float64)
+	emlineWavelengths = emlineWavelengthsRest * (1.0 + redshift) # Given a redshift, calculate the wavelength coordinates of the vertical lines
+	emlineStrengths = np.array([5.,0.25,1.0,1.66,5.,4.,0.4,0.133,0.4,0.1],dtype=np.float64) # relative to Hbeta (?)
+	fluxesStrong = np.zeros(len(wavelengthsInit),dtype=np.float64) + 1.0 # Observed Ha EW = 500.
+	fluxesMiddle = np.zeros(len(wavelengthsInit),dtype=np.float64) + 1.0 # Observed Ha EW = 100
+	fluxesWeak = np.zeros(len(wavelengthsInit),dtype=np.float64) + 1.0 # Observed Ha EW = 50.
+	for i in range(len(wavelengthsInit)):
+		for j in range(len(emlineWavelengths)):
+			# EW*F_lambda = S F_lambda dlambda
+			ampFactor = 500. / (lineFullWidth/2.35 * np.sqrt(2.0*pi) * emlineStrengths[5])
+			fluxesStrong[i] = fluxesStrong[i] + Gauss(wavelengthsInit[i],emlineWavelengths[j],lineFullWidth/2.35,ampFactor*emlineStrengths[j])
+			ampFactor = 100. / (lineFullWidth/2.35 * np.sqrt(2.0*pi) * emlineStrengths[5])
+			fluxesMiddle[i] = fluxesMiddle[i] + Gauss(wavelengthsInit[i],emlineWavelengths[j],lineFullWidth/2.35,ampFactor*emlineStrengths[j])
+			ampFactor = 50. / (lineFullWidth/2.35 * np.sqrt(2.0*pi) * emlineStrengths[5])
+			fluxesWeak[i] = fluxesWeak[i] + Gauss(wavelengthsInit[i],emlineWavelengths[j],lineFullWidth/2.35,ampFactor*emlineStrengths[j])
+	# now convolve with the galaxy gaussian
+	nWin = 12
+	pixConvert102 = 24./deltal * galaxyFullWidth/2.35
+	pixConvert141, pixConvert102 = int(pixConvert102*46.5/24.), int(pixConvert102)
+	fStrong102 = convolve(fluxesStrong,gaussian(nWin*pixConvert102,std=pixConvert102),mode="same")
+	fMiddle102 = convolve(fluxesMiddle,gaussian(nWin*pixConvert102,std=pixConvert102),mode="same")
+	fWeak102 = convolve(fluxesWeak,gaussian(nWin*pixConvert102,std=pixConvert102),mode="same")
+	fStrong141 = convolve(fluxesStrong,gaussian(nWin*pixConvert141,std=pixConvert141),mode="same")
+	fMiddle141 = convolve(fluxesMiddle,gaussian(nWin*pixConvert141,std=pixConvert141),mode="same")
+	fWeak141 = convolve(fluxesWeak,gaussian(nWin*pixConvert141,std=pixConvert141),mode="same")
+	finterp = interp1d(wavelengthsInit,fStrong102,bounds_error=False,fill_value=0.0)
+	fStrong102 = finterp(wavelengths102)
+	finterp = interp1d(wavelengthsInit,fMiddle102,bounds_error=False,fill_value=0.0)
+	fMiddle102 = finterp(wavelengths102)
+	finterp = interp1d(wavelengthsInit,fWeak102,bounds_error=False,fill_value=0.0)
+	fWeak102 = finterp(wavelengths102)
+	finterp = interp1d(wavelengthsInit,fStrong141,bounds_error=False,fill_value=0.0)
+	fStrong141 = finterp(wavelengths141)
+	finterp = interp1d(wavelengthsInit,fMiddle141,bounds_error=False,fill_value=0.0)
+	fMiddle141 = finterp(wavelengths141)
+	finterp = interp1d(wavelengthsInit,fWeak141,bounds_error=False,fill_value=0.0)
+	fWeak141 = finterp(wavelengths141)
+	#return wavelengths102,wavelengths141,fStrong102,fMiddle102,fWeak102,fStrong141,fMiddle141,fWeak141
+	galSpec102 = np.zeros((len(wavelengths102),4),dtype=np.float64)
+	galSpec141 = np.zeros((len(wavelengths141),4),dtype=np.float64)
+	galSpec102[0:,0] = wavelengths102
+	galSpec102[0:,1] = fStrong102
+	galSpec102[0:,2] = fMiddle102
+	galSpec102[0:,3] = fWeak102
+	galSpec141[0:,0] = wavelengths141
+	galSpec141[0:,1] = fStrong141
+	galSpec141[0:,2] = fMiddle141
+	galSpec141[0:,3] = fWeak141
+	return galSpec102,galSpec141
 
 def getModels(redshift,mode="star"):
-    if mode=="star":
-        modelSpectraData102=np.load("StellarSpectraG102.npy")
-        modelSpectraData141=np.load("StellarSpectraG141.npy")
-    elif mode=="quasar":
-        modelSpectraData=np.load("QuasarSpectrum.npy")
-        quasarWavelengths, quasarFlux = modelSpectraData[0:,0]*(1.0+redshift), modelSpectraData[0:,1]
-        l102 = genG102Wavelengths()
-        l141 = genG141Wavelengths()
-        dl = (quasarWavelengths[-1] - quasarWavelengths[0])/float(len(quasarWavelengths))
-        modelFlux102 = smootheInterpolateSpec(quasarWavelengths,quasarFlux,l102,int(24./dl))
-        modelFlux141 = smootheInterpolateSpec(quasarWavelengths,quasarFlux,l141,int(46.5/dl))
-        modelSpectraData102=np.zeros((len(l102),2),dtype=np.float64)
-        modelSpectraData141=np.zeros((len(l141),2),dtype=np.float64)
-        modelSpectraData102[0:,0] = l102
-        modelSpectraData102[0:,1] = modelFlux102
-        modelSpectraData141[0:,0] = l141
-        modelSpectraData141[0:,1] = modelFlux141
-    elif mode=="galaxy":
-        modelSpectraData102, modelSpectraData141 =  createGalaxySpectra(redshift)
-    else:
-        return None
-    return modelSpectraData102,modelSpectraData141
+	if mode=="star":
+		modelSpectraData102=np.load("StellarSpectraG102.npy")
+		modelSpectraData141=np.load("StellarSpectraG141.npy")
+	elif mode=="quasar":
+		modelSpectraData=np.load("QuasarSpectrum.npy")
+		quasarWavelengths, quasarFlux = modelSpectraData[0:,0]*(1.0+redshift), modelSpectraData[0:,1]
+		l102 = genG102Wavelengths()
+		l141 = genG141Wavelengths()
+		dl = (quasarWavelengths[-1] - quasarWavelengths[0])/float(len(quasarWavelengths))
+		modelFlux102 = smootheInterpolateSpec(quasarWavelengths,quasarFlux,l102,int(24./dl))
+		modelFlux141 = smootheInterpolateSpec(quasarWavelengths,quasarFlux,l141,int(46.5/dl))
+		modelSpectraData102=np.zeros((len(l102),2),dtype=np.float64)
+		modelSpectraData141=np.zeros((len(l141),2),dtype=np.float64)
+		modelSpectraData102[0:,0] = l102
+		modelSpectraData102[0:,1] = modelFlux102
+		modelSpectraData141[0:,0] = l141
+		modelSpectraData141[0:,1] = modelFlux141
+	elif mode=="galaxy":
+		modelSpectraData102, modelSpectraData141 =  createGalaxySpectra(redshift)
+	else:
+		return None
+	return modelSpectraData102,modelSpectraData141
 
 def plotModels(request, redshift, mode="star"):
 	modelSpectra102, modelSpectra141 = getModels(redshift, mode=mode)
@@ -1409,4 +1427,3 @@ def updateUserReview(request, rev_id):
 	return HttpResponseRedirect("/ds9s/account/reviews/")
 
 
-	
