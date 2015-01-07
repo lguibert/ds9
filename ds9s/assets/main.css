@@ -6,6 +6,10 @@ tfoot tr th {
     padding: 8px !important;
 }
 
+#scrollToViewAll{
+	margin-bottom: 15px;
+}
+
 #letsgo{
 	text-align: center;
 	font-size: 30px;

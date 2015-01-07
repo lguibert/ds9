@@ -313,8 +313,6 @@ def read1DSpectrum(pathToASCIISpectrum,minWavelength=None,maxWavelength=None):
 def plot1DSpectrum(request,wavelenghts,pathToFile,minWavelength, maxWavelength,title,redshift):
 	wl,f,u,c,z = read1DSpectrum(pathToFile, minWavelength, maxWavelength)
 
-	print wl
-
 	if wl.size > 0 and f.size > 0 and u.size > 0 and c.size > 0 and z.size > 0:
 		wlmax = max(wl) 
 		wlmin = min(wl) 
@@ -908,13 +906,7 @@ def uploadParFile(request, name=None):
 				ids1 = getUniqIdFromFile(name, findIn, expression)
 				ids2 = getUniqIdFromFile(name,findIn2,expression2)
 
-				print "ID1: ",ids1
-
-				print "IDS2: ",ids2
-
 				ids_final = checkFilesGtype(ids1,ids2)
-
-				print "FINAL: ",ids_final
 
 				try:
 					addFileDatabase(ids_final, par.id, getTypeSecondFiles(par.fieldId_par))
@@ -1186,11 +1178,17 @@ def getModels(redshift,mode="star"):
 def plotModels(request, redshift, mode="star"):
 	modelSpectra102, modelSpectra141 = getModels(redshift, mode=mode)
 
-	g102 = request.session['arrayG102dat']
-	g141 = request.session['arrayG141dat']
+	script102 = None
+	div102 = None
+	script141 = None
+	div141 = None	
 
-	script102, div102 = createReference(modelSpectra102,redshift, g102[0], g102[1])
-	script141, div141 = createReference(modelSpectra141,redshift, g141[0], g141[1])
+	if 'arrayG102dat' in request.session:
+		g102 = request.session['arrayG102dat']
+		script102, div102 = createReference(modelSpectra102,redshift, g102[0], g102[1])
+	if 'arrayG141dat' in request.session:
+		g141 = request.session['arrayG141dat']
+		script141, div141 = createReference(modelSpectra141,redshift, g141[0], g141[1])
 
 	return script102, div102, script141, div141
 

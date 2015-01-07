@@ -64,16 +64,20 @@ $(document).ready(function(){
         }
 	});
 
-	$(".legendLines").unbind().click(function(){
-		if ($(this).attr('type') == 0){
-        	$(this).attr('type','1');
-        	$(".legendLines").html('Hide legend');
+	function hideLegend(selector){
+		if ($(selector).attr('type') == 0){
+        	$(selector).attr('type','1');
+        	$(selector).html('Hide legend');
         	showSelector('.legendsLines', "slow");
         }else{
-        	$(this).attr('type','0');
-        	$(".legendLines").html('Show legend');
+        	$(selector).attr('type','0');
+        	$(selector).html('Show legend');
         	hideSelector('.legendsLines', "slow");
         }
+	}
+
+	$(".legendLine").unbind().click(function(){
+		hideLegend(this);
 	});
 
 	$("#removeSelec").unbind().click(function(){
@@ -93,5 +97,11 @@ $(document).ready(function(){
         	$(this).attr('type','0');
         	$("+ .speWaveValues", this).hide("slow");        	
         }
+	});
+
+	$("#scrollToViewAll").unbind().click(function(){
+		$(".legendLine").attr('type','1');
+		hideLegend($('.legendLine'));
+		$(document).scrollTop(300);
 	});
 })
