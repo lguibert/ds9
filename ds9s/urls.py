@@ -25,6 +25,7 @@ urlpatterns = patterns('ds9s.views',
 	url(r'^/saveReview/(?P<id>[0-9]+)/(?P<uniq_name>[0-9]+_[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})/(?P<next_uniq_name>None)/?$','saveUserReview'),
 	url(r'^/updateReview/(?P<rev_id>[0-9]+)/?$','updateUserReview'),
 	url(r'^/upload/','newParFile'),
+	url(r'^/reviews/export/','export'),
 	#url(r'^/zoom/(?P<id>[0-9]+)/?$','zoomFile')
 
 	url(r'^/account/reviews/?$','getReviewUser'),

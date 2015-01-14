@@ -77,7 +77,7 @@ redshiftDefault = 1 #default redshift's value. Will be use for the bokeh image
 scalingDefault = 150 #default zoom. Will be use for the bokeh image
 crossColor = "lime"
 
-databaseIdsRedshiftZero = [1, 5]
+databaseIdsRedshiftZero = [1, 5, 7]
 
 TOOLS="pan,wheel_zoom,box_zoom,reset" #all the tools for the bokeh images
 
@@ -1193,10 +1193,7 @@ def plotModels(request, redshift, mode="star"):
 	return script102, div102, script141, div141
 
 def createReference(data,redshift, xmin, xmax):
-	pcolors = ['black','red','blue']
-
-	#maxd = np.amax(data)
-	#mind = min(np.amin(data,axis=0)) #big problem here
+	pcolors = ['black','red','blue'] 
 
 	mul = figure(
 		plot_width=400,

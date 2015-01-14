@@ -12,6 +12,7 @@ from bokeh.plotting import figure, quad, ColumnDataSource
 from bokeh.embed import components
 from bokeh.resources import Resources
 from bokeh.utils import encode_utf8
+from bokeh.models import HoverTool
 
 import json
 
@@ -75,8 +76,9 @@ def createHistogram(data):
 		
 	)
 
-	#hover = plot.select(dict(type=HoverTool))
-	#hover.tooltips = [('index','$index')]
+	hover = plot.select(dict(type=HoverTool))	
+	hover.tooltips = [('index','$index')]
+	hover.snap_to_data = False
 
 	resources = Resources("inline")
 
@@ -88,3 +90,38 @@ def createHistogram(data):
 	figure()
 
 	return html_script, html_div
+
+
+@login_required
+@permission_required("ds9s.view_allIdentifications")
+@permission_required("ds9s.view_allAnalysis")
+def export(request):
+	idens = Identifications.objects.all()
+	featuresX = []
+	featuresY = []
+	done = [] #array who will contain uniq_id who was already x & y getted
+	#fluxs = []
+	#fluxerrs = []
+
+	for iden in idens:
+		id = iden.galaxy.uniq_id
+		idPar = iden.galaxy.parfolder_id
+
+		if [id,idPar] not in done:
+			x_space = GalaxyFeatures.objects.get(galaxy_id=iden.galaxy_id, galaxyfields_id=1)
+			y_space = GalaxyFeatures.objects.get(galaxy_id=iden.galaxy_id, galaxyfields_id=2)
+			#flux = Analysis.objects.get(galaxy_id=iden.galaxy_id, emissionlinefield_id=10)
+			#fluxerr = Analysis.objects.get(galaxy_id=iden.galaxy_id, emissionlinefield_id=11)
+
+			featuresX.append(x_space.value)
+			featuresY.append(y_space.value)	
+			#fluxs.append(flux)
+			#fluxerrs.append(fluxerr)
+			done.append([id,idPar])
+		else:
+			featuresX.append(None)
+			featuresY.append(None)	
+	
+	del done #deleting of done			
+
+	return render(request, 'export.html',locals())
