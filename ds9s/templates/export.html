@@ -53,6 +53,23 @@
 	</div>
 
 	<div class="controllerSearch">
+		<select id='selectGal' class="form-control">
+			<option value='base'></option>
+			{% for gal in gals %}
+				<option value='{{gal|keyvalue:0}}-{{gal|keyvalue:1}}'>
+					Uniq id: {{gal|keyvalue:0}} -- Field Id: {{gal|keyvalue:1}}
+				</option>
+			{% endfor %}
+		</select>
+		<a class='btn btn-default' id='submitSelectGal'>Go</a>
+
+		
+		<label for='galId'>Galaxy uniq Id :</label> <input min='0' type='number' name='galId' id='galId' class="searchController">
+		<label for='fieldId'>Field Id :</label> <input min='0' type='number' name='fieldId' id='fieldId' class="searchController">
+		<a class='btn btn-default' id='submitSelectGalPerso'>Go</a>		
+	</div>
+
+	<div class="controllerSearch">
 		<label for='minRedshift'>Min :</label> <input type='number' min='0' max='3' step='0.01' name='minRedshift' id='minRedshift' class="searchController">
 		<label for='maxRedshift'>Max :</label> <input type='number' min='0' max='3' step='0.01' name='maxRedshift' id='maxRedshift' class="searchController">
 		<a class='btn btn-default' id='submitIntervalRedshift'>Go</a>
@@ -103,8 +120,8 @@
 				{% for iden in idens %}
 					<tr class="lines" name='{{iden.galaxy.uniq_name}}'>
 						<td class="littleTd"><input type="checkbox" class='selectExport'/>   Select this line</td>
-						<td>{{iden.galaxy.uniq_id}}</td>
-						<td>{{iden.galaxy.parfolder.fieldId_par}}</td>
+						<td class='galsids' value='{{iden.galaxy.uniq_id}}'>{{iden.galaxy.uniq_id}}</td>
+						<td class='fieldsids' value='{{iden.galaxy.parfolder.fieldId_par}}'>{{iden.galaxy.parfolder.fieldId_par}}</td>
 						<td>{{iden.contaminated}}</td>
 						<td>{{iden.galaxytype}}</td> 
 						<td class='hutRedshift'>{{iden.redshift}}</td>

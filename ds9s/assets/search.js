@@ -6,22 +6,34 @@ $(document).ready(function(){
 		});
 	}
 
+	function selectCheckBox(checkbox, actual){
+		if(checkbox.prop("checked")){
+			checkbox.prop("checked",false);
+			actual.removeClass('background-selected');
+		}else{
+			checkbox.prop("checked",true);
+			actual.addClass('background-selected');
+		}
+	}
+
 	$('#removeAllFilters').click(function(){
 		removeHidden();
 		$('.searchController').val('');
+		$('#selectGal option[value="base"]').prop('selected',true);
+	});
+
+	//-------------------------------------- EXPORT --------------------------------------
+	$('.exportSelection').click(function(){
+		$('.selectExport:checked').each(function(){
+			alert($(this).parent().parent().attr("name"));			
+		});
 	});
 
 	//-------------------------------------- CHECK --------------------------------------
 	$('tbody').on('click', '.lines', function(){
 		var checkbox = $(this).find('.selectExport');
 		var that = $(this);
-		if(checkbox.prop("checked")){
-			checkbox.prop("checked",false);
-			that.removeClass('background-selected');
-		}else{
-			checkbox.prop("checked",true);
-			that.addClass('background-selected');
-		}
+		selectCheckBox(checkbox, that);
 	});
 
 	$('tbody').on('click', '.selectExport', function(){
@@ -85,15 +97,6 @@ $(document).ready(function(){
 		});
 	});
 
-	//-------------------------------------- EXPORT --------------------------------------
-	$('.exportSelection').click(function(){
-		$('.selectExport:checked').each(function(){
-			alert($(this).parent().parent().attr("name"));			
-		});
-	});
-
-
-
 	//-------------------------------------- headerSelector --------------------------------------
 	$("#headerSelector").click(function(){
 		var that = $(this);
@@ -116,4 +119,30 @@ $(document).ready(function(){
 			that.attr("type",'undone');
 		}
 	});
+
+	//-------------------------------------- SELECT PRECISE --------------------------------------
+	$("#submitSelectGalPerso").click(function(){
+		var galId = $('#galId').val();
+		var fieldId = $('#fieldId').val();
+
+		if(galId == null || fieldId == null){
+			alert('Both fields are required.');
+		}else{
+			$('tbody').find(".lines .galsids[value='"+galId+"'] + .fieldsids[value='"+fieldId+"']").each(function(){
+				selectCheckBox($(this).parent().find('.selectExport'),$(this).parent());
+			});
+		}
+	});
+
+	$("#submitSelectGal").click(function(){
+			var ids = $('#selectGal').val();
+			var splited = ids.split('-');
+
+			var galId = splited[0];
+			var fieldId = splited[1];
+
+			$('tbody').find(".lines .galsids[value='"+galId+"'] + .fieldsids[value='"+fieldId+"']").each(function(){
+				selectCheckBox($(this).parent().find('.selectExport'),$(this).parent());
+			});
+		});
 });

@@ -124,4 +124,21 @@ def export(request):
 	
 	del done #deleting of done			
 
+	gals = getGalaxyOnceFromIden(idens)
+
+	print gals
+
 	return render(request, 'export.html',locals())
+
+
+def getGalaxyOnceFromIden(idens):
+	gals = []
+
+	for iden in idens:
+		id = iden.galaxy.uniq_id
+		idPar = iden.galaxy.parfolder.fieldId_par
+
+		if [id,idPar] not in gals:
+			gals.append([id,idPar])
+
+	return gals

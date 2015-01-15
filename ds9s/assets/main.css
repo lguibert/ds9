@@ -483,3 +483,14 @@ input[type=number]::-webkit-outer-spin-button {
 	cursor: pointer;
 	font-style: italic;
 }
+
+#selectGal{
+	width: 315px;
+	font-size: 18px;
+	display: inline;
+	margin-right: 15px;
+}
+
+#submitSelectGal{
+	margin-bottom: 7px;
+}
