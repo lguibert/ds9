@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load ds9s_extras %}
+{%load static %}
 
 {% block flyJs %}
 	<script type="text/javascript" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js"></script>
@@ -10,7 +11,12 @@
 		        $(this).html( '<input type="text" placeholder="'+title+'" />' );
 		    });
 
-        	var table = $("#firstTable").DataTable();
+        	var table = $("#firstTable").DataTable({
+          	"columnDefs": [
+          		{ "orderable": false, "targets": 0 }
+          	],
+          	"aaSorting": [[1,'asc']]
+          });
 
 	        table.columns().eq( 0 ).each( function ( colIdx ) {
 		        $( 'input', table.column( colIdx ).footer() ).on( 'keyup change', function () {
@@ -27,6 +33,12 @@
 
 {% block flyCss %}
     <link rel="stylesheet" href="//cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css">
+    <style type="text/css">
+    	#root{
+    		width:1400px;
+    	}
+    </style>
+    
     {%load static %}
 	<link rel="stylesheet" href="{%static 'flyJumbo.css'%}"/>
 {% endblock %}
@@ -36,9 +48,36 @@
 {% endblock %}
 
 {% block content %}
+	<div class="controllerSearch">
+		<a class='btn btn-default' id='removeAllFilters'>Remove all filters</a>
+	</div>
+
+	<div class="controllerSearch">
+		<label for='minRedshift'>Min :</label> <input type='number' min='0' max='3' step='0.01' name='minRedshift' id='minRedshift' class="searchController">
+		<label for='maxRedshift'>Max :</label> <input type='number' min='0' max='3' step='0.01' name='maxRedshift' id='maxRedshift' class="searchController">
+		<a class='btn btn-default' id='submitIntervalRedshift'>Go</a>
+	</div>
+
+	<div class="controllerSearch">
+		<label for='minX'>Min X :</label> <input type='number' name='minX' id='minX' class="searchController">
+		<label for='minX'>Max X :</label> <input type='number' name='maxX' id='maxX' class="searchController">
+		<a class='btn btn-default' id='submitIntervalX'>Go</a>
+	</div>
+
+	<div class="controllerSearch">
+		<label for='minY'>Min Y :</label> <input type='number' name='minY' id='minY' class="searchController">
+		<label for='minY'>Max Y :</label> <input type='number' name='maxY' id='maxY' class="searchController">
+		<a class='btn btn-default' id='submitIntervalY'>Go</a>
+	</div>
+
+	<div class="controllerSearch">
+		<a class='btn btn-default exportSelection'>Export selection</a>
+	</div>
+
 	<table id="firstTable" class="table table-hover">
 			<thead>
 				<tr>
+					<th id='headerSelector' type="undone">Select everything</th>
 					<th>Unique id</th>
 					<th>Field id</th>
 					<th>Contaminated</th>
@@ -50,6 +89,7 @@
 			</thead>
 			<tfoot>
 	            <tr>
+	            	<th></th>
 	                <th>Unique id</th>
 					<th>Field id</th>
 					<th>Contaminated</th>
@@ -61,17 +101,27 @@
         	</tfoot>
 			<tbody>
 				{% for iden in idens %}
-					<tr class="firstLine">
+					<tr class="lines" name='{{iden.galaxy.uniq_name}}'>
+						<td class="littleTd"><input type="checkbox" class='selectExport'/>   Select this line</td>
 						<td>{{iden.galaxy.uniq_id}}</td>
 						<td>{{iden.galaxy.parfolder.fieldId_par}}</td>
 						<td>{{iden.contaminated}}</td>
 						<td>{{iden.galaxytype}}</td> 
-						<td>{{iden.redshift}}</td>
-						<td>{{featuresX|keyvalue:forloop.counter0}}</td> 
-						<td>{{featuresY|keyvalue:forloop.counter0}}</td>		
+						<td class='hutRedshift'>{{iden.redshift}}</td>
+						<td class='hutX'>{{featuresX|keyvalue:forloop.counter0}}</td> 
+						<td class='hutY'>{{featuresY|keyvalue:forloop.counter0}}</td>		
 					</tr>
 				{% endfor %}
 			</tbody>
 		</table>
 
+	<div class="controllerSearch">
+		<a class='btn btn-default exportSelection'>Export selection</a>
+	</div>
+
 {% endblock %}
+
+{% block js %}
+	{{block.super}}
+	<script type="text/javascript" src='{% static "search.js" %}'></script>
+{% endblock %}:3
