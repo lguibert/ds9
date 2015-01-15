@@ -126,9 +126,7 @@ def export(request):
 
 	gals = getGalaxyOnceFromIden(idens)
 
-	print gals
-
-	return render(request, 'export.html',locals())
+	return render(request, 'export.html', locals())
 
 
 def getGalaxyOnceFromIden(idens):
@@ -142,3 +140,10 @@ def getGalaxyOnceFromIden(idens):
 			gals.append([id,idPar])
 
 	return gals
+
+def selectedGalaxy(request):
+	names = request.POST.getlist('selectedGalaxy')
+
+	print names
+
+	return render(request, 'selectedGalaxy.html', locals())

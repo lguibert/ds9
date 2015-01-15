@@ -23,13 +23,24 @@ $(document).ready(function(){
 	});
 
 	//-------------------------------------- EXPORT --------------------------------------
-	$('.exportSelection').click(function(){
+	/*$('.exportSelection').click(function(){
 		$('.selectExport:checked').each(function(){
 			alert($(this).parent().parent().attr("name"));			
 		});
+	});*/
+
+	$('#galaxySelectioner').submit(function(){
+		$('.selectExport:checked').each(function(){
+			$('<input />').attr('type', 'hidden')
+		        .attr('value', $(this).parent().parent().attr("value"))
+		        .attr('name', 'selectedGalaxy')
+		        .appendTo('#galaxySelectioner');
+		});
+		
+		return true;
 	});
 
-	//-------------------------------------- CHECK --------------------------------------
+	//-------------------------------------- CHECK -- ------------------------------------
 	$('tbody').on('click', '.lines', function(){
 		var checkbox = $(this).find('.selectExport');
 		var that = $(this);

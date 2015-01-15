@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block flyCss %}    
+    {%load static %}
+	<link rel="stylesheet" href="{%static 'flyJumbo.css'%}"/>
+{% endblock %}
+
+{% block content %}
+	{% for name in names %}
+		<h1>{{name}}</h1>
+	{% endfor %}
+{% endblock %}

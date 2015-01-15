@@ -26,6 +26,7 @@ urlpatterns = patterns('ds9s.views',
 	url(r'^/updateReview/(?P<rev_id>[0-9]+)/?$','updateUserReview'),
 	url(r'^/upload/','newParFile'),
 	url(r'^/reviews/export/','export'),
+	url(r'^/reviews/selected/','selectedGalaxy'),
 	#url(r'^/zoom/(?P<id>[0-9]+)/?$','zoomFile')
 
 	url(r'^/account/reviews/?$','getReviewUser'),

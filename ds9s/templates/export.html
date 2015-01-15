@@ -87,54 +87,58 @@
 		<a class='btn btn-default' id='submitIntervalY'>Go</a>
 	</div>
 
-	<div class="controllerSearch">
-		<a class='btn btn-default exportSelection'>Export selection</a>
-	</div>
+	<form id='galaxySelectioner' action='/ds9s/reviews/selected/' method='post'>
+		{% csrf_token %}
+		<div class="controllerSearch">
+			<input type='submit' value="Export selection" class='btn btn-default exportSelection'/>
+		</div>
 
-	<table id="firstTable" class="table table-hover">
-			<thead>
-				<tr>
-					<th id='headerSelector' type="undone">Select everything</th>
-					<th>Unique id</th>
-					<th>Field id</th>
-					<th>Contaminated</th>
-					<th>Galaxy type</th>
-					<th>Redshift</th>
-					<th>X sky</th>
-					<th>Y sky</th>
-				</tr>
-			</thead>
-			<tfoot>
-	            <tr>
-	            	<th></th>
-	                <th>Unique id</th>
-					<th>Field id</th>
-					<th>Contaminated</th>
-					<th>Galaxy type</th>
-					<th>Redshift</th>
-					<th>X sky</th>
-					<th>Y sky</th>
-	            </tr>
-        	</tfoot>
-			<tbody>
-				{% for iden in idens %}
-					<tr class="lines" name='{{iden.galaxy.uniq_name}}'>
-						<td class="littleTd"><input type="checkbox" class='selectExport'/>   Select this line</td>
-						<td class='galsids' value='{{iden.galaxy.uniq_id}}'>{{iden.galaxy.uniq_id}}</td>
-						<td class='fieldsids' value='{{iden.galaxy.parfolder.fieldId_par}}'>{{iden.galaxy.parfolder.fieldId_par}}</td>
-						<td>{{iden.contaminated}}</td>
-						<td>{{iden.galaxytype}}</td> 
-						<td class='hutRedshift'>{{iden.redshift}}</td>
-						<td class='hutX'>{{featuresX|keyvalue:forloop.counter0}}</td> 
-						<td class='hutY'>{{featuresY|keyvalue:forloop.counter0}}</td>		
+		<table id="firstTable" class="table table-hover">
+				<thead>
+					<tr>
+						<th id='headerSelector' type="undone">Select everything</th>
+						<th>Unique id</th>
+						<th>Field id</th>
+						<th>Contaminated</th>
+						<th>Galaxy type</th>
+						<th>Redshift</th>
+						<th>X sky</th>
+						<th>Y sky</th>
 					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+				</thead>
+				<tfoot>
+		            <tr>
+		            	<th></th>
+		                <th>Unique id</th>
+						<th>Field id</th>
+						<th>Contaminated</th>
+						<th>Galaxy type</th>
+						<th>Redshift</th>
+						<th>X sky</th>
+						<th>Y sky</th>
+		            </tr>
+	        	</tfoot>
+				<tbody>
+					{% for iden in idens %}
+						<tr value='{{iden.id}}' class="lines" name='{{iden.galaxy.uniq_name}}'>
+							<td class="littleTd"><input type="checkbox" class='selectExport'/>   Select this line</td>
+							<td class='galsids' value='{{iden.galaxy.uniq_id}}'>{{iden.galaxy.uniq_id}}</td>
+							<td class='fieldsids' value='{{iden.galaxy.parfolder.fieldId_par}}'>{{iden.galaxy.parfolder.fieldId_par}}</td>
+							<td>{{iden.contaminated}}</td>
+							<td>{{iden.galaxytype}}</td> 
+							<td class='hutRedshift'>{{iden.redshift}}</td>
+							<td class='hutX'>{{featuresX|keyvalue:forloop.counter0}}</td> 
+							<td class='hutY'>{{featuresY|keyvalue:forloop.counter0}}</td>		
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
 
-	<div class="controllerSearch">
-		<a class='btn btn-default exportSelection'>Export selection</a>
-	</div>
+		<div class="controllerSearch">
+			<input type='submit' value="Export selection" class='btn btn-default exportSelection'/>
+		</div>
+
+	</form>
 
 {% endblock %}
 
