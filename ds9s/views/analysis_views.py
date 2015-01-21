@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-from ds9s.models import Galaxy, ParFolder, Analysis, EmissionLineFields, EmissionLine, GalaxyFeatures, GalaxyTypes, Identifications
+from ds9s.models import Galaxy, ParFolder, Analysis, EmissionLineFields, EmissionLine, GalaxyFeatures, GalaxyTypes, Identifications, GalaxyFields
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Count
@@ -142,8 +142,32 @@ def getGalaxyOnceFromIden(idens):
 	return gals
 
 def selectedGalaxy(request):
-	names = request.POST.getlist('selectedGalaxy')
+	postIdGal = request.POST.getlist('selectedGalaxy')
 
-	print names
+	galFields = GalaxyFields.objects.all()
+
+	emiFields = EmissionLineFields.objects.all()
+
+	emiLines = EmissionLine.objects.all()
+
+	#gals = Galaxy.objects.all()
 
 	return render(request, 'selectedGalaxy.html', locals())
+
+def createTxtFile(request, postIdsGal):
+	galFields = request.POST.getlist('galFields')
+
+	emiFields = request.POST.getlist('emiFields')
+
+	emiLines = request.POST.getlist('emiLines')
+
+	"""for galId in postIdsGal:
+		galFieldsValue = []
+		emiFields = []
+		emiLines = []
+		for field in galFields:"""
+
+
+
+	
+
