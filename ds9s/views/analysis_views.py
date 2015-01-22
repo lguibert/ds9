@@ -16,6 +16,12 @@ from bokeh.models import HoverTool
 
 import json
 
+from django.http import HttpResponse
+from django.utils.encoding import smart_str
+from django.core.servers.basehttp import FileWrapper
+
+import os
+
 
 TOOLS="pan,wheel_zoom,box_zoom,reset, hover"
 
@@ -141,8 +147,11 @@ def getGalaxyOnceFromIden(idens):
 
 	return gals
 
+@login_required
+@permission_required("ds9s.view_allIdentifications")
+@permission_required("ds9s.view_allAnalysis")
 def selectedGalaxy(request):
-	postIdGal = request.POST.getlist('selectedGalaxy')
+	request.session['postIdGal'] = request.POST.getlist('selectedGalaxy')
 
 	galFields = GalaxyFields.objects.all()
 
@@ -154,20 +163,54 @@ def selectedGalaxy(request):
 
 	return render(request, 'selectedGalaxy.html', locals())
 
-def createTxtFile(request, postIdsGal):
+@login_required
+@permission_required("ds9s.view_allIdentifications")
+@permission_required("ds9s.view_allAnalysis")
+def createTxtFile(request):
+	postIdsGal = request.session['postIdGal']
+
 	galFields = request.POST.getlist('galFields')
-
 	emiFields = request.POST.getlist('emiFields')
-
 	emiLines = request.POST.getlist('emiLines')
 
-	"""for galId in postIdsGal:
+	galFieldsValueFinal = []
+	emiFieldsFinal = []
+	emiLinesFinal = []
+	string = ''
+
+	#pdb.set_trace()
+
+	print postIdsGal
+
+	for galId in postIdsGal:
 		galFieldsValue = []
 		emiFields = []
 		emiLines = []
-		for field in galFields:"""
+		for field in galFields:
+			try:
+				feat = GalaxyFeatures.objects.get(galaxy_id=galId, galaxyfields_id=field)
+				galFieldsValue.append([feat.galaxyfields.name,feat.value])
+			except:
+				print "Error"
+			
+
+		galFieldsValueFinal = galFieldsValue
 
 
+	for value in galFieldsValueFinal:
+		string = string + value[0] + ':' + str(value[1]) + ','
 
-	
+	finalFile = open('tmp/export.txt','w')
+	finalFile.write(string)
+	finalFile.close()
+
+	f = 'tmp/export.txt'
+
+	wrapper = FileWrapper(file(f))
+	response = HttpResponse(wrapper, content_type='text/plain')
+	response['Content-Disposition'] = 'attachment; filename=export.txt'
+	response['Content-Length'] = os.path.getsize(f)
+
+
+	return response
 

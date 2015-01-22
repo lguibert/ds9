@@ -27,6 +27,7 @@ urlpatterns = patterns('ds9s.views',
 	url(r'^/upload/','newParFile'),
 	url(r'^/reviews/export/','export'),
 	url(r'^/reviews/selected/','selectedGalaxy'),
+	url(r'^/reviews/createFile/','createTxtFile'),
 	#url(r'^/zoom/(?P<id>[0-9]+)/?$','zoomFile')
 
 	url(r'^/account/reviews/?$','getReviewUser'),
