@@ -33,54 +33,58 @@ class = 'container-fuild'
 
 {% load staticfiles %}
 {% block content %}	
-	<a class='btn btn-default' id="scrollToViewAll">See all images on the screen</a><br>
-	<a class='btn btn-default' type='0' id='displayCatData'>See more information about this galaxy</a>
-	{% include 'seeMoreInfo.html' %}
 	<div id="rootFiles" class="container-fluid">
 		<div class="row">
 			<div id="fFiles" class="col-xs-6 col-md-6">
 				<div id="scaled">
-					<form class="unsubmitable inline-form formControl">
+					<form class="unsubmitable form-inline">
 						{% csrf_token %}
 						<div class="controllers">
-							<label for="scaling">Zoom =</label>
-							<input type="number" min="1" value="150" class="disableCharge" name="valScaling" id="valScaling" max="300"/>
-							<input type="range" class="disableCharge" id="scaling" name="scaling" min="1" step="1" max="300" value="150"/>
-						</div>
-						<select class="form-control colors" name="colors">
-							{% load ds9s_extras %}
-							{% for d in colors.colors %}
-								{% for val in d.values%}
-									<option value="{{d.name}}-{{val}}" 
+							<div class='col-xs-2 col-md-2'>
+								<select class="colors  form-control" name="colors">
+								{% load ds9s_extras %}
+								{% for d in colors.colors %}
+									{% for val in d.values%}
+										<option value="{{d.name}}-{{val}}" 
 
-									{% if request.session.colorName and request.session.colorVal %}
-										{% if d.name == request.session.colorName and val == request.session.colorVal|toInt %}selected{%endif%}
-									{%else%}
-										{% if d.name == "Greys" and val == 9 %}selected{%endif%}
-									{%endif%}
+										{% if request.session.colorName and request.session.colorVal %}
+											{% if d.name == request.session.colorName and val == request.session.colorVal|toInt %}selected{%endif%}
+										{%else%}
+											{% if d.name == "Greys" and val == 9 %}selected{%endif%}
+										{%endif%}
 
 
-									>{{d.name}} - {{val}}</option>	
+										>{{d.name}} - {{val}}</option>	
+									{% endfor %}
 								{% endfor %}
-							{% endfor %}
-						</select>
-						<input type="button" id="default" class="btn btn-default disableCharge" value="Default values"/>
-						
+								</select>
+							</div>
+							<div class='col-xs-2 col-md-2'>
+								<input type="button" id="default" class="btn btn-default disableCharge" value="Default values"/>
+							</div>
+							<div class='col-xs-2 col-md-2'>
+								<label for="scaling">Zoom =</label>
+								<input type="number" min="1" value="150" class="disableCharge" name="valScaling" id="valScaling" max="300"/>
+							</div>
+							<div class='col-xs-6 col-md-6'>
+								<input type="range" class="disableCharge" id="scaling" name="scaling" min="1" step="1" max="300" value="150"/>
+							</div>
+						</div>
 					</form>
 				</div>
-				<div contenteditable="false" class="">
-					<div id="f110" class='imageBokeh'>
+				<div class='clear'>
+					<div id="f110" class='col-xs-6 col-md-6'>
 						{{f110div}}
 					</div>
 					
-					<div id="f160140" class='imageBokeh imageSecond'>
+					<div id="f160140" class='col-xs-6 col-md-6'>
 						{{f160140div}}
 					</div>
 				</div>
 			</div>
 
 			<div id="lines" class="col-xs-6 col-md-6">
-				{% include "controlWave1d.html" %}
+				{% include "controlWave.html" %}
 				<div contenteditable="false" class="">
 					<div id="datG102" class="imageBokeh">
 						{{g102DatDiv}}
@@ -90,7 +94,17 @@ class = 'container-fuild'
 					</div>
 				</div>
 			</div>
-			<div class="row">				
+		</div>
+			<div id="gFiles" class="row">				
+				<div id="g102" class="imageBokeh col-xs-6 col-md-6">
+					{{g1div}}
+				</div>
+				<div id="g141" class="imageBokeh col-xs-6 col-md-6">
+					{{g2div}}
+				</div>
+			</div>
+		</div>
+		<div class="row">				
 				<div id="divRef" contenteditable="false" class="col-md-offset-6 col-xs-6 col-md-6">
 					<div id="divRef102" class="imageBokeh">
 					</div>
@@ -105,19 +119,11 @@ class = 'container-fuild'
 						<li><input class="disableCharge pointer" type="radio" id="galaxyRef" name="choiseRef" value="galaxy"/><label for="galaxyRef" class="pointer">Galaxy</label></li>
 					</ul>
 				</div>
-			</div>
+		</div>
 
-		</div>
-			<div id="gFiles" class="row">
-				{% include "controlWave2d.html" %}
-				<div id="g102" class="imageBokeh col-xs-6 col-md-6">
-					{{g1div}}
-				</div>
-				<div id="g141" class="imageBokeh col-xs-6 col-md-6">
-					{{g2div}}
-				</div>
-			</div>
-		</div>
+		<a class='btn btn-default' type='0' id='displayCatData'>See more information about this galaxy</a>
+		{% include 'seeMoreInfo.html' %}
+
 		{% if not check %}
 			<hr class="hrReview">
 			{% include "reviewChoise.html" %}

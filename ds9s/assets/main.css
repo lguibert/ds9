@@ -18,6 +18,10 @@ tfoot tr th {
 	margin-bottom: 15px;
 }
 
+.clear{
+	clear: both;
+}
+
 .controllerSearch{
 	margin-bottom: 15px;
 }
@@ -190,7 +194,11 @@ tfoot tr th {
 }
 
 #displayCatData, #hideCatData{
-	margin-bottom:20px;
+	margin-bottom:15px;
+}
+
+#displayCatData{
+	margin-left: 10px;
 }
 
 td[class='bk-plot-above bk-sidebar bk-toolbar-active'] a[class='bk-logo bk-logo-small']{
@@ -228,16 +236,6 @@ td[class='bk-plot-above bk-sidebar bk-toolbar-active'] a[class='bk-logo bk-logo-
 
 #refSpectra{
 	margin-bottom: 13px;
-}
-
-.colors{
-	width: auto;
-	display:inline-block;
-	margin-left: 20px;
-}
-
-#default, .defaultWave, .legendLines{
-	margin-left: 20px;
 }
 
 #divLegends{
@@ -433,12 +431,6 @@ input[type="number"]{
 
 .controllers input[type="range"]{
 	display: inline-block;
-	width: 700px;
-	margin-left: 30px
-}
-
-.formControl{
-	margin-bottom: 20px;
 }
 
 input[type="range"] {

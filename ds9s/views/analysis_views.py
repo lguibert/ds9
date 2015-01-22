@@ -19,6 +19,7 @@ import json
 from django.http import HttpResponse
 from django.utils.encoding import smart_str
 from django.core.servers.basehttp import FileWrapper
+import csv
 
 import os
 
@@ -196,7 +197,22 @@ def createTxtFile(request):
 
 		galFieldsValueFinal = galFieldsValue
 
+	response = HttpResponse(content_type='text/csv')
+	response['Content-Disposition'] = 'attachment; filename=export.csv'
+	writer = csv.writer(response, csv.excel)
+	writer.writerow([
+		smart_str(u"Name"),
+		smart_str(u"Value"),
+	])
+	for obj in galFieldsValueFinal:
+		writer.writerow([
+			smart_str(obj[0]),
+			smart_str(obj[1]),
+		])
+	
+	return response
 
+'''
 	for value in galFieldsValueFinal:
 		string = string + value[0] + ':' + str(value[1]) + ','
 
@@ -212,5 +228,4 @@ def createTxtFile(request):
 	response['Content-Length'] = os.path.getsize(f)
 
 
-	return response
-
+	return response'''
