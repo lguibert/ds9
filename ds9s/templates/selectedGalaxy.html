@@ -5,45 +5,65 @@
 	<link rel="stylesheet" href="{%static 'flyJumbo.css'%}"/>
 {% endblock %}
 
+{% block flyJs %}
+	<script type="text/javascript" src='{% static "checkboxsSelect.js" %}'></script>
+{% endblock %}
+
 {% block head %}
 	<h1 id="headGalaxy">Fields selection</h1>
 {% endblock %}
 
 {% block content %}
+<h1>You selected {{numGalSelected}} reviews.</h1>
+
 	<form method='post' action='/ds9s/reviews/createFile/'>
 		{% csrf_token %}
 		<div id='allFieldsSelect'>
 			<div class='containerFieldsSelect col-xs-4 col-md-4'>
-				<h2>Galaxy fields</h2>
-				{% for field in galFields %}		
-					<div class="checkbox fieldsSelect"> 
-						<label for="{{field.id}}{{field.shortname}}"> 
-							<input type="checkbox" id='{{field.id}}{{field.shortname}}' name='galFields' value="{{field.id}}"/> <strong>{{field}}</strong> 
-						</label> 
-					</div>		
-				{% endfor %}
+				<h2 class='controllerCheckboxs' title='select/unselect all'>Galaxy fields</h2>
+				<div class='checkboxsSelect'>
+					{% for field in galFields %}		
+						<div class="checkbox fieldsSelect"> 
+							<label for="{{field.id}}{{field.shortname}}"> 
+								<input type="checkbox" checked id='{{field.id}}{{field.shortname}}' name='galFields' value="{{field.id}}"/> <strong>{{field}}</strong> 
+							</label> 
+						</div>		
+					{% endfor %}
+				</div>
 			</div>
 
 			<div class='containerFieldsSelect col-xs-3 col-md-3 col-md-offset-1'>
-				<h2>Emission lines fields</h2>
-				{% for field in emiFields %}		
+				<h2 class='controllerCheckboxs' title='select/unselect all'>Reviews fields</h2>	
+				<div class='checkboxsSelect'>				
 					<div class="checkbox fieldsSelect"> 
-						<label for="{{field.id}}{{field.shortname}}"> 
-							<input type="checkbox" id='{{field.id}}{{field.shortname}}' name='emiFields' value="{{field.id}}"/> <strong>{{field}}</strong> 
+						<label for="contaminated"> 
+							<input type="checkbox" checked id='contaminated' name='contaminated' value="contaminated"/> <strong>contaminated</strong> 
 						</label> 
-					</div>		
-				{% endfor %}
+					</div>
+					<div class="checkbox fieldsSelect"> 
+						<label for="redshift"> 
+							<input type="checkbox" checked id='redshift' name='redshift' value="redshift"/> <strong>redshift</strong> 
+						</label> 
+					</div>
+					<div class="checkbox fieldsSelect"> 
+						<label for="galType"> 
+							<input type="checkbox" checked id='galType' name='galType' value="galType"/> <strong>Galaxy type</strong> 
+						</label> 
+					</div>
+				</div>
 			</div>
 
 			<div class='containerFieldsSelect col-xs-3 col-md-3 col-md-offset-1'>
-				<h2>Emission lines</h2>
-				{% for field in emiLines %}		
-					<div class="checkbox fieldsSelect"> 
-						<label for="{{field.id}}{{field.shortname}}"> 
-							<input type="checkbox" id='{{field.id}}{{field.shortname}}' name='emiLines' value="{{field.id}}"/> <strong>{{field}}</strong> 
-						</label> 
-					</div>		
-				{% endfor %}
+				<h2 class='controllerCheckboxs' title='select/unselect all'>Emission lines</h2>
+				<div class='checkboxsSelect'>
+					{% for field in emiLines %}		
+						<div class="checkbox fieldsSelect"> 
+							<label for="{{field.id}}{{field.shortname}}"> 
+								<input type="checkbox" checked id='{{field.id}}{{field.shortname}}' name='emiLines' value="{{field.id}}"/> <strong>{{field}}</strong> 
+							</label> 
+						</div>		
+					{% endfor %}
+				</div>
 			</div>
 		</div>
 		<input type='submit' class='btn btn-default' value='Export'/>

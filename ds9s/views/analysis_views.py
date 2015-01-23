@@ -152,7 +152,10 @@ def getGalaxyOnceFromIden(idens):
 @permission_required("ds9s.view_allIdentifications")
 @permission_required("ds9s.view_allAnalysis")
 def selectedGalaxy(request):
-	request.session['postIdGal'] = request.POST.getlist('selectedGalaxy')
+	selectedGalaxy = request.POST.getlist('selectedGalaxy')
+	request.session['postIdGal'] = selectedGalaxy
+
+	numGalSelected = len(selectedGalaxy)
 
 	galFields = GalaxyFields.objects.all()
 
@@ -173,6 +176,10 @@ def createTxtFile(request):
 	galFields = request.POST.getlist('galFields')
 	emiFields = request.POST.getlist('emiFields')
 	emiLines = request.POST.getlist('emiLines')
+	contaminated = request.POST.getlist('contaminated')
+	redshift = request.POST.getlist('redshift')
+	galType = request.POST.getlist('galType')
+	
 
 	galFieldsValueFinal = []
 	emiFieldsFinal = []

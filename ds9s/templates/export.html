@@ -35,7 +35,7 @@
     <link rel="stylesheet" href="//cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css">
     <style type="text/css">
     	#root{
-    		width:1400px;
+    		width:1600px;
     	}
     </style>
     
@@ -89,7 +89,7 @@
 
 	<form id='galaxySelectioner' action='/ds9s/reviews/selected/' method='post'>
 		{% csrf_token %}
-		<div class="controllerSearch">
+		<div class="controllerSearch btnExport">
 			<input type='submit' value="Export selection" class='btn btn-default exportSelection'/>
 		</div>
 
@@ -134,7 +134,7 @@
 				</tbody>
 			</table>
 
-		<div class="controllerSearch">
+		<div class="controllerSearch btnExport">
 			<input type='submit' value="Export selection" class='btn btn-default exportSelection'/>
 		</div>
 

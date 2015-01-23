@@ -77,7 +77,7 @@ redshiftDefault = 1 #default redshift's value. Will be use for the bokeh image
 scalingDefault = 150 #default zoom. Will be use for the bokeh image
 crossColor = "lime"
 
-databaseIdsRedshiftZero = [1, 5, 7]
+databaseIdsRedshiftZero = [1, 3, 5, 7]
 
 TOOLS="pan,wheel_zoom,box_zoom,reset" #all the tools for the bokeh images
 
