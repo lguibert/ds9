@@ -120,7 +120,7 @@
 	        	</tfoot>
 				<tbody>
 					{% for iden in idens %}
-						<tr value='{{iden.galaxy.id}}' class="lines" name='{{iden.galaxy.uniq_name}}'>
+						<tr value='{{iden.galaxy.id}}-{{iden.id}}' class="lines" name='{{iden.galaxy.uniq_name}}'>
 							<td class="littleTd"><input type="checkbox" class='selectExport'/>   Select this line</td>
 							<td class='galsids' value='{{iden.galaxy.uniq_id}}'>{{iden.galaxy.uniq_id}}</td>
 							<td class='fieldsids' value='{{iden.galaxy.parfolder.fieldId_par}}'>{{iden.galaxy.parfolder.fieldId_par}}</td>

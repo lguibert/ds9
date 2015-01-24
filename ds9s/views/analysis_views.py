@@ -23,6 +23,8 @@ import csv
 
 import os
 
+import pdb
+
 
 TOOLS="pan,wheel_zoom,box_zoom,reset, hover"
 
@@ -153,7 +155,7 @@ def getGalaxyOnceFromIden(idens):
 @permission_required("ds9s.view_allAnalysis")
 def selectedGalaxy(request):
 	selectedGalaxy = request.POST.getlist('selectedGalaxy')
-	request.session['postIdGal'] = selectedGalaxy
+	request.session['valueGals'] = selectedGalaxy
 
 	numGalSelected = len(selectedGalaxy)
 
@@ -167,43 +169,80 @@ def selectedGalaxy(request):
 
 	return render(request, 'selectedGalaxy.html', locals())
 
+def spliter(string,separator):
+	string = string.split(separator)		
+
+	return string[0], string[1]
+
+def calculateNumberType(array):
+	return None
+
+def calculateNumberContaminate(array):
+	return None
+
+def calculateNumberRedshift(array):
+	return None
+
+def calculateNumberReviews(array):
+	return None
+
+
 @login_required
 @permission_required("ds9s.view_allIdentifications")
 @permission_required("ds9s.view_allAnalysis")
 def createTxtFile(request):
-	postIdsGal = request.session['postIdGal']
+	valueGals = request.session['valueGals']
+
 
 	galFields = request.POST.getlist('galFields')
-	emiFields = request.POST.getlist('emiFields')
-	emiLines = request.POST.getlist('emiLines')
 	contaminated = request.POST.getlist('contaminated')
 	redshift = request.POST.getlist('redshift')
 	galType = request.POST.getlist('galType')
 	
-
-	galFieldsValueFinal = []
-	emiFieldsFinal = []
-	emiLinesFinal = []
+	
+	gals = []
+	galsDone = []
 	string = ''
 
 	#pdb.set_trace()
+	
+	for value in valueGals:
+		galId, idenId = spliter(value,'-')
 
-	print postIdsGal
-
-	for galId in postIdsGal:
 		galFieldsValue = []
-		emiFields = []
-		emiLines = []
+
+		
+		# ---------------- Identification values ----------------
+		iden = Identifications.objects.get(id=idenId)
+		contaminatedGal = iden.contaminated
+		redshiftGal = iden.redshift
+		typeGalId = iden.galaxytype.id
+		typeGalName = iden.galaxytype.name
+
+		# ---------------- Galaxy values ----------------
+		galUid = iden.galaxy.uniq_id
+		galFieldId = iden.galaxy.parfolder.fieldId_par
+
+
+		# ---------------- Feature Galaxy ----------------
 		for field in galFields:
 			try:
-				feat = GalaxyFeatures.objects.get(galaxy_id=galId, galaxyfields_id=field)
-				galFieldsValue.append([feat.galaxyfields.name,feat.value])
+				if galId not in galsDone:
+					feat = GalaxyFeatures.objects.get(galaxy_id=galId, galaxyfields_id=field)
+					galFieldsValue.append([feat.galaxyfields.name,feat.value])
+					galsDone.append(galId)
 			except:
-				print "Error"
-			
+				print 'Error'
 
-		galFieldsValueFinal = galFieldsValue
 
+		gals.append([galUid, galFieldId, contaminatedGal, redshiftGal, typeGalName, galFieldsValue])
+	
+	#now, we have all what we need. We need to change the array's structure
+	for gal in gals:
+		print gal
+
+
+	# ---------------- Create the cvs file ----------------
 	response = HttpResponse(content_type='text/csv')
 	response['Content-Disposition'] = 'attachment; filename=export.csv'
 	writer = csv.writer(response, csv.excel)
@@ -211,7 +250,7 @@ def createTxtFile(request):
 		smart_str(u"Name"),
 		smart_str(u"Value"),
 	])
-	for obj in galFieldsValueFinal:
+	for obj in gals:
 		writer.writerow([
 			smart_str(obj[0]),
 			smart_str(obj[1]),
@@ -219,20 +258,3 @@ def createTxtFile(request):
 	
 	return response
 
-'''
-	for value in galFieldsValueFinal:
-		string = string + value[0] + ':' + str(value[1]) + ','
-
-	finalFile = open('tmp/export.txt','w')
-	finalFile.write(string)
-	finalFile.close()
-
-	f = 'tmp/export.txt'
-
-	wrapper = FileWrapper(file(f))
-	response = HttpResponse(wrapper, content_type='text/plain')
-	response['Content-Disposition'] = 'attachment; filename=export.txt'
-	response['Content-Length'] = os.path.getsize(f)
-
-
-	return response'''
