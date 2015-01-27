@@ -247,33 +247,40 @@ def countValuesIden(array, contaminated, redshift, galType):
 	data = getDataIden(array, contaminated, redshift, galType)
 	final = [] #[idGal, numContaminated, [[galTypeId, number],[galTypeId, number]], redshiftStuff]
 
-	print data
-
 	if contaminated == True:
 		contaArray = calculateNumberContaminated(data) #[id, num]
 
-	'''if galType == True:
+	if galType == True:
 		typeArray = []
 		dataArray = []
 
 		for d in data:
 			dataArray.append([d[0],d[-1]])
 
-		act = dataArray[0][0]
+		#act = dataArray[0][0]
+
 		for d in dataArray:
+			#print act
 			base = [[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]]
-			while (act == d[0]):
-				for b in base:
-					if b[0] == d[0]:
-						b[1] += 1
-						break
-				else:
-					continue
-				break
+			
+			for b in base:
+				print 'b: ', b
+				if b[0] == d[1]:
+					#print 'increment'
+					b[1] += 1
+
+					#print 'b[0]: ', b[0]
+					#print 'd[0]: ',d[0]
+			#else:
+			#	act = d[0]
+
+					#print b
+				
 
 			typeArray.append(base)
 
-		print typeArray'''
+		for t in typeArray:
+			print t
 			
 			
 
