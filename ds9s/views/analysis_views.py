@@ -169,28 +169,171 @@ def selectedGalaxy(request):
 
 	return render(request, 'selectedGalaxy.html', locals())
 
-def spliter(string,separator):
-	string = string.split(separator)		
+def spliterArray(array,separator):
+	first = []
+	second = []
+
+	for entry in array:
+		entry = entry.split(separator)
+		first.append(entry[0])
+		second.append(entry[1])		
+
+	return first, second
+
+def spliterString(string,separator):
+	string = string.split(separator)
 
 	return string[0], string[1]
 
-def calculateNumberType(array):
-	return None
+def countReviews(array):	
+	final = []
 
-def calculateNumberContaminate(array):
-	return None
+	for entry in array:
+		done = False
 
-def calculateNumberRedshift(array):
-	return None
+		if final:
+			for f in final:
+				if f[0] == entry:
+					f[1] += 1
+					done = True
+					break
+		else:
+			final.append([entry,1])
+			done = True
 
-def calculateNumberReviews(array):
-	return None
+		if done == False:
+			final.append([entry,1])						
+
+	return final
+
+def getDataIden(array, contaminated, redshift, galType):
+	data = []
+
+	for id in array:	
+		result = [0, 0, 0, 0]
+		iden = Identifications.objects.get(id=id)
+
+		result[0] = str(iden.galaxy_id)
+
+		if contaminated == True:
+			result[1] = iden.contaminated
+		if redshift == True:
+			result[2] = iden.redshift
+		if galType == True:
+			result[3] = iden.galaxytype_id
+
+		data.append(result)
+
+	return data
+
+def calculateNumberContaminated(array):
+	final = []
+
+	for a in array:
+		done = False
+		for f in final:
+			if f[0] == a[0]:
+				if a[1] == True:
+					f[1] += 1
+				done = True
+				break
+
+		if done == False:
+			final.append([a[0],boolToInt(a[1])])	
+
+	return final
+
+def countValuesIden(array, contaminated, redshift, galType):
+	data = getDataIden(array, contaminated, redshift, galType)
+	final = [] #[idGal, numContaminated, [[galTypeId, number],[galTypeId, number]], redshiftStuff]
+
+	print data
+
+	if contaminated == True:
+		contaArray = calculateNumberContaminated(data) #[id, num]
+
+	'''if galType == True:
+		typeArray = []
+		dataArray = []
+
+		for d in data:
+			dataArray.append([d[0],d[-1]])
+
+		act = dataArray[0][0]
+		for d in dataArray:
+			base = [[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]]
+			while (act == d[0]):
+				for b in base:
+					if b[0] == d[0]:
+						b[1] += 1
+						break
+				else:
+					continue
+				break
+
+			typeArray.append(base)
+
+		print typeArray'''
+			
+			
+
+
+
+
+
+
+		'''for d in data:
+			done = False
+			for t in typeArray:
+				if t[0] == d[-1]:
+					t[1] += 1
+					done = True
+					break;
+
+			if done == False:
+				typeArray.append([d[-1],1])'''
+
+		#print typeArray
+
+
+
+	#if redshift == True:
+
+
+	'''for d in data:
+		print d'''
+
+	
+
+	return final
+
+def boolToInt(value):
+	if value == True:
+		return 1
+	elif value == False:
+		return 0
+	else:
+		return 0
+
+def toBoolean(value):
+	correctTrue = [1,'true',True,'True','1']
+	correctFalse  = [0, 'false', False, 'False','0']
+
+	if value in correctFalse:
+		end = False
+	elif value in correctTrue:
+		end = True
+	else:
+		end = False
+
+	return end
+
 
 
 @login_required
 @permission_required("ds9s.view_allIdentifications")
 @permission_required("ds9s.view_allAnalysis")
-def createTxtFile(request):
+def createTxtFileOLD(request):
 	valueGals = request.session['valueGals']
 
 
@@ -257,4 +400,37 @@ def createTxtFile(request):
 		])
 	
 	return response
+
+def createTxtFile(request):
+	valueGalsIdens = request.session['valueGals']
+	galFields = request.POST.getlist('galFields')
+	
+	contaminated = toBoolean(request.POST.get('contaminated',False))
+	redshift = toBoolean(request.POST.get('redshift',False))
+	galType = toBoolean(request.POST.get('galType',False))
+	
+
+	galAndFolderIds, idenIds = spliterArray(valueGalsIdens, '-')
+
+	final = countReviews(galAndFolderIds) #count number of review(s) per galaxy
+
+	idens = countValuesIden(idenIds, contaminated, redshift, galType)
+
+
+	
+
+
+
+	# ---------------- Create the cvs file ----------------
+	response = HttpResponse(content_type='text/csv')
+	response['Content-Disposition'] = 'attachment; filename=export.csv'
+	writer = csv.writer(response, csv.excel)
+	writer.writerow([
+		smart_str(u"Name"),
+		smart_str(u"Value"),
+	])
+	
+	return response
+
+
 

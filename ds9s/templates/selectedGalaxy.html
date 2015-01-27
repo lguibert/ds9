@@ -14,7 +14,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>You selected {{numGalSelected}} reviews.</h1>
+<h1>You have selected {{numGalSelected}} reviews.</h1>
 
 	<form method='post' action='/ds9s/reviews/createFile/'>
 		{% csrf_token %}
@@ -37,23 +37,23 @@
 				<div class='checkboxsSelect'>				
 					<div class="checkbox fieldsSelect"> 
 						<label for="contaminated"> 
-							<input type="checkbox" checked id='contaminated' name='contaminated' value="contaminated"/> <strong>contaminated</strong> 
+							<input type="checkbox" checked id='contaminated' name='contaminated' value="1"/> <strong>contaminated</strong> 
 						</label> 
 					</div>
 					<div class="checkbox fieldsSelect"> 
 						<label for="redshift"> 
-							<input type="checkbox" checked id='redshift' name='redshift' value="redshift"/> <strong>redshift</strong> 
+							<input type="checkbox" checked id='redshift' name='redshift' value="1"/> <strong>redshift</strong> 
 						</label> 
 					</div>
 					<div class="checkbox fieldsSelect"> 
 						<label for="galType"> 
-							<input type="checkbox" checked id='galType' name='galType' value="galType"/> <strong>Galaxy type</strong> 
+							<input type="checkbox" checked id='galType' name='galType' value="1"/> <strong>Galaxy type</strong> 
 						</label> 
 					</div>
 				</div>
 			</div>
 
-			<div class='containerFieldsSelect col-xs-3 col-md-3 col-md-offset-1'>
+			<!--<div class='containerFieldsSelect col-xs-3 col-md-3 col-md-offset-1'>
 				<h2 class='controllerCheckboxs' title='select/unselect all'>Emission lines</h2>
 				<div class='checkboxsSelect'>
 					{% for field in emiLines %}		
@@ -64,8 +64,8 @@
 						</div>		
 					{% endfor %}
 				</div>
-			</div>
+			</div>-->
 		</div>
-		<input type='submit' class='btn btn-default' value='Export'/>
+		<input type='submit' id='btnExport' class='btn btn-default' value='Export'/>
 	</form>
 {% endblock %}
