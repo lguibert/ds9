@@ -252,10 +252,10 @@ def countValuesIden(array, contaminated, redshift, galType):
 		contaArray = calculateNumberContaminated(data) #[id, num]
 
 	if galType == True:
-		typeArray = []
+		typeArray = [] #[[id,[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]],[id,[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]],...]
 
 		act = data[0][0]
-		base = newBase()
+		base = newBase(act)
 		for d in data:
 			if d[0] == act:				
 				for b in base:
@@ -263,7 +263,7 @@ def countValuesIden(array, contaminated, redshift, galType):
 						b[1] += 1
 			else:					
 				typeArray.append(base)		
-				base = newBase()
+				base = newBase(d[0])
 				act = d[0]		
 				for b in base:
 					if b[0] == d[-1]:
@@ -272,16 +272,18 @@ def countValuesIden(array, contaminated, redshift, galType):
 		else:
 			typeArray.append(base)
 
+	for t in typeArray:
+		print t
+
+	#if redshift == True:
 
 
-
-		for t in typeArray:
-			print t
+	# here, we put all array in one
 
 	return final
 
-def newBase():
-	return [[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]]
+def newBase(id):
+	return [id,[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]]
 
 def boolToInt(value):
 	if value == True:
