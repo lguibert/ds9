@@ -245,6 +245,7 @@ def calculateNumberContaminated(array):
 
 def countValuesIden(array, contaminated, redshift, galType):
 	data = getDataIden(array, contaminated, redshift, galType)
+
 	final = [] #[idGal, numContaminated, [[galTypeId, number],[galTypeId, number]], redshiftStuff]
 
 	if contaminated == True:
@@ -252,67 +253,35 @@ def countValuesIden(array, contaminated, redshift, galType):
 
 	if galType == True:
 		typeArray = []
-		dataArray = []
 
+		act = data[0][0]
+		base = newBase()
 		for d in data:
-			dataArray.append([d[0],d[-1]])
-
-		#act = dataArray[0][0]
-
-		for d in dataArray:
-			#print act
-			base = [[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]]
+			if d[0] == act:				
+				for b in base:
+					if b[0] == d[-1]:
+						b[1] += 1
+			else:					
+				typeArray.append(base)		
+				base = newBase()
+				act = d[0]		
+				for b in base:
+					if b[0] == d[-1]:
+						b[1] += 1
 			
-			for b in base:
-				print 'b: ', b
-				if b[0] == d[1]:
-					#print 'increment'
-					b[1] += 1
-
-					#print 'b[0]: ', b[0]
-					#print 'd[0]: ',d[0]
-			#else:
-			#	act = d[0]
-
-					#print b
-				
-
+		else:
 			typeArray.append(base)
+
+
+
 
 		for t in typeArray:
 			print t
-			
-			
-
-
-
-
-
-
-		'''for d in data:
-			done = False
-			for t in typeArray:
-				if t[0] == d[-1]:
-					t[1] += 1
-					done = True
-					break;
-
-			if done == False:
-				typeArray.append([d[-1],1])'''
-
-		#print typeArray
-
-
-
-	#if redshift == True:
-
-
-	'''for d in data:
-		print d'''
-
-	
 
 	return final
+
+def newBase():
+	return [[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]]
 
 def boolToInt(value):
 	if value == True:
