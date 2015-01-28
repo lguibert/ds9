@@ -243,47 +243,76 @@ def calculateNumberContaminated(array):
 
 	return final
 
+def incrementBase(base, data):
+	save = base[0]
+	del base[0]
+
+	for b in base:
+		if b[0][0] == data[-1]:
+			b[0][1] += 1
+
+	base.insert(0,save)
+
+	return base
+
+def calculateNumberGalaxyType(data):
+	typeArray = [] #[[id,[1,0,name],[2,0,name],[3,0,name],[4,0,name],[5,0,name],[6,0,name],[7,0,name],[8,0,name]],...]
+
+	act = data[0][0]
+	base = newBase(act)
+	for d in data:
+		if d[0] == act:	
+			base = incrementBase(base,d)		
+
+		else:					
+			typeArray.append(base)		
+			base = newBase(d[0])
+			act = d[0]		
+
+			base = incrementBase(base,d)
+		
+	else:
+		typeArray.append(base)
+
+	return typeArray
+
 def countValuesIden(array, contaminated, redshift, galType):
 	data = getDataIden(array, contaminated, redshift, galType)
 
+	#if contaminated == True:
+	#	contaArray = calculateNumberContaminated(data) #[id, num]
+
+	#if galType == True:
+	#	typeArray = calculateNumberGalaxyType(data)
+
+
+	#count how redshift there is between 0 and 3 with 0.01 step (default values)
+	if redshift == True:
+		possibleValuesRedshift = newRedshiftArray()
+
+		
+
+
+	#here, we put all array in one
 	final = [] #[idGal, numContaminated, [[galTypeId, number],[galTypeId, number]], redshiftStuff]
-
-	if contaminated == True:
-		contaArray = calculateNumberContaminated(data) #[id, num]
-
-	if galType == True:
-		typeArray = [] #[[id,[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]],[id,[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]],...]
-
-		act = data[0][0]
-		base = newBase(act)
-		for d in data:
-			if d[0] == act:				
-				for b in base:
-					if b[0] == d[-1]:
-						b[1] += 1
-			else:					
-				typeArray.append(base)		
-				base = newBase(d[0])
-				act = d[0]		
-				for b in base:
-					if b[0] == d[-1]:
-						b[1] += 1
-			
-		else:
-			typeArray.append(base)
-
-	for t in typeArray:
-		print t
-
-	#if redshift == True:
-
-
-	# here, we put all array in one
 
 	return final
 
+def newRedshiftArray(start = 0, end = 3.01, step = 0.01):
+	return np.arange(start,end,step)
+
+
+
 def newBase(id):
-	return [id,[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]]
+	types = GalaxyTypes.objects.all()
+	base = [id]
+
+	for t in types:
+		array = []
+		array.append([t.id,0,t.name])
+		base.append(array)
+
+	return base
 
 def boolToInt(value):
 	if value == True:
