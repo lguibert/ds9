@@ -255,6 +255,7 @@ def incrementBase(base, data):
 
 	return base
 
+
 def calculateNumberGalaxyType(data):
 	typeArray = [] #[[id,[1,0,name],[2,0,name],[3,0,name],[4,0,name],[5,0,name],[6,0,name],[7,0,name],[8,0,name]],...]
 
@@ -275,11 +276,42 @@ def calculateNumberGalaxyType(data):
 
 	return typeArray
 
+def incrementInterval(intervals, redshift):
+	save = intervals[0]
+	del intervals[0]
+
+	for i in intervals[0]:
+		if redshift > i[0] and redshift < i[1]:
+			i[2] += 1
+
+	intervals.insert(0,save)
+	return intervals
+
+def calculateRedshiftInterval(data):
+	invertalArray = []
+	act = data[0][0]	
+	intervalRedshift = newRedshiftIntervalArray(act) #[id,[[0,0.01,0],[0.01,0.02,0],...]]		
+		
+	for d in data:
+		if d[0] == act:
+			intervalRedshift = incrementInterval(intervalRedshift, d[2])
+		else:
+			invertalArray.append(intervalRedshift)
+			intervalRedshift = newRedshiftIntervalArray(d[0])
+			act = d[0]
+
+			intervalRedshift = incrementInterval(intervalRedshift, d[2])
+	else:
+		invertalArray.append(intervalRedshift)
+
+	return invertalArray
+			
+
 def countValuesIden(array, contaminated, redshift, galType):
 	data = getDataIden(array, contaminated, redshift, galType)
 
-	#if contaminated == True:
-	#	contaminatedArray = calculateNumberContaminated(data) #[id, num]
+	if contaminated == True:
+		contaminatedArray = calculateNumberContaminated(data) #[id, num]
 
 	if galType == True:
 		typesArray = calculateNumberGalaxyType(data)
@@ -287,32 +319,8 @@ def countValuesIden(array, contaminated, redshift, galType):
 
 	#count how redshift there is between 0 and 3 with 0.01 step (default values)
 	if redshift == True:
-		act = data[0][0]
-		intervalRedshift = newRedshiftIntervalArray(data[0][0]) #[[0,0.01,0],[0.01,0.02,0],...]	
-		
-		print intervalRedshift
+		redshiftInvertal = calculateRedshiftInterval(data)
 
-
-		'''for d in data:
-			if d[0] == act:	
-				base = incrementBase(base,d)		
-
-			else:					
-				typeArray.append(base)		
-				base = newBase(d[0])
-				act = d[0]		
-
-				base = incrementBase(base,d)
-			
-		else:
-			typeArray.append(base)'''
-
-		#print intervalRedshift
-
-		
-
-
-		
 
 
 	#here, we put all array in one
