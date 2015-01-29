@@ -247,12 +247,9 @@ def incrementBase(base, data):
 	save = base[0]
 	del base[0]
 
-	for b in base:
-		print 'b00: ', b[0][0]
-		print 'b01: ', b[0][0]
-		print 'data-1: ', data[-1]
-		if b[0][0] == data[-1]:
-			b[0][1] += 1
+	for b in base[0]:
+		if b[0] == data[-1]:
+			b[1] += 1
 
 	base.insert(0,save)
 
@@ -264,10 +261,9 @@ def calculateNumberGalaxyType(data):
 	act = data[0][0]
 	base = newBase(act)
 	for d in data:
-		if d[0] == act:	
-			base = incrementBase(base,d)		
-
-		else:					
+		if d[0] == act:
+			base = incrementBase(base,d)
+		else:				
 			typeArray.append(base)		
 			base = newBase(d[0])
 			act = d[0]		
@@ -288,14 +284,15 @@ def countValuesIden(array, contaminated, redshift, galType):
 	if galType == True:
 		typesArray = calculateNumberGalaxyType(data)
 
-		
-
-
 
 	#count how redshift there is between 0 and 3 with 0.01 step (default values)
-	#if redshift == True:
-		#act = data[0][0]
-	#	intervalRedshift = newRedshiftIntervalArray(data[0][0]) #[[0,0.01,0],[0.01,0.02,0],...]	
+	if redshift == True:
+		act = data[0][0]
+		intervalRedshift = newRedshiftIntervalArray(data[0][0]) #[[0,0.01,0],[0.01,0.02,0],...]	
+		
+		print intervalRedshift
+
+
 		'''for d in data:
 			if d[0] == act:	
 				base = incrementBase(base,d)		
