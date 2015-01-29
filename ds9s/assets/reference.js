@@ -3,12 +3,13 @@ $(document).ready(function(){
 		var selecChecked = "input[name='typeObject']:checked"
 		var value = $(selecChecked).val();
 
-		if(value == "quasar"){
+		/*if(value == "quasar"){
 			$("#divCheckRef").html("<h1>"+value.toUpperCase()+"</h1>");
 		} 
 		else if(value == "galaxyLines"){
 			$("#divCheckRef").html("<h1>"+value.toUpperCase()+"</h1>");
-		}else if(value == "oneLine"){
+		}*/
+		if(value == "oneLine"){
 			$("#divCheckRef").html("<h3>We selected Halpha by default. But you can change it below.</h3>");
 			oneLining();
 		}else{

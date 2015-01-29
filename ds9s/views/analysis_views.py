@@ -208,10 +208,15 @@ def countReviews(array):
 
 def getDataIden(array, contaminated, redshift, galType):
 	data = []
+	ids = []
 
 	for id in array:	
 		result = [0, 0, 0, 0]
 		iden = Identifications.objects.get(id=id)
+
+		galId = str(iden.galaxy_id)
+		if galId not in ids:
+			ids.append(galId)
 
 		result[0] = str(iden.galaxy_id)
 
@@ -224,7 +229,7 @@ def getDataIden(array, contaminated, redshift, galType):
 
 		data.append(result)
 
-	return data
+	return data, ids
 
 def calculateNumberContaminated(array):
 	final = []
@@ -280,8 +285,11 @@ def incrementInterval(intervals, redshift):
 	save = intervals[0]
 	del intervals[0]
 
+	if redshift == None:
+		redshift = 0.0
+
 	for i in intervals[0]:
-		if redshift > i[0] and redshift < i[1]:
+		if redshift >= i[0] and redshift < i[1]:
 			i[2] += 1
 
 	intervals.insert(0,save)
@@ -306,28 +314,45 @@ def calculateRedshiftInterval(data):
 
 	return invertalArray
 			
+def mergeTwoArray(first, second):
+	for f in first:
+		for s in second:
+			if s[0] == f[0]:
+				s[1].append(f[1])
+				break
 
-def countValuesIden(array, contaminated, redshift, galType):
-	data = getDataIden(array, contaminated, redshift, galType)
+	return second
+
+def countValuesIden(idenIds, contaminated, redshift, galType):
+	data, ids = getDataIden(idenIds , contaminated, redshift, galType)
 
 	if contaminated == True:
-		contaminatedArray = calculateNumberContaminated(data) #[id, num]
+		contaminatedArray = calculateNumberContaminated(data) #[[id, num],...]
 
 	if galType == True:
 		typesArray = calculateNumberGalaxyType(data)
-
 
 	#count how redshift there is between 0 and 3 with 0.01 step (default values)
 	if redshift == True:
 		redshiftInvertal = calculateRedshiftInterval(data)
 
 
-
 	#here, we put all array in one
-	final = [] #[idGal, numContaminated, [[galTypeId, number],[galTypeId, number]], redshiftStuff]
+	final = [] #[[id, []],...]
+
+	for id in ids:
+		final.append([id, []])
+
+	if contaminatedArray:
+		final = mergeTwoArray(contaminatedArray, final)
+
+	if typesArray:
+		final = mergeTwoArray(typesArray, final)
+
+	#if redshiftInvertal:
+	#	final = mergeTwoArray(redshiftInvertal, final)
 
 	return final
-
 
 def newRedshiftIntervalArray(id, start = 0, end = 3, step = 0.01):
 	allValues = np.arange(start, end+step, step)
@@ -348,6 +373,22 @@ def newRedshiftIntervalArray(id, start = 0, end = 3, step = 0.01):
 
 	return final
 
+def createRefRedshiftIntervalArray(start = 0, end = 3, step = 0.01):
+	allValues = np.arange(start, end+step, step)
+
+	final = []
+
+	for i, a in enumerate(allValues):
+		if a != allValues[-1]:
+			low = a
+			high = allValues[i+1]
+
+			interval = smart_str('['+ str(low) +','+ str(high) +']')
+
+			if interval not in final:
+				final.append(interval)
+
+	return final
 
 def newBase(id):
 	types = GalaxyTypes.objects.all()
@@ -382,79 +423,23 @@ def toBoolean(value):
 
 	return end
 
+def splitPointData(data):
+	data = data.split('.')
+	return data[0], data[1], data[2]
+
+def rebuildArray(array):
+	final = []
+
+	for a in array:
+		splited = splitPointData(a[0])
+		final.append([splited[0],[splited[1], splited[2], a[1]]])
+
+	return final
 
 
 @login_required
 @permission_required("ds9s.view_allIdentifications")
 @permission_required("ds9s.view_allAnalysis")
-def createTxtFileOLD(request):
-	valueGals = request.session['valueGals']
-
-
-	galFields = request.POST.getlist('galFields')
-	contaminated = request.POST.getlist('contaminated')
-	redshift = request.POST.getlist('redshift')
-	galType = request.POST.getlist('galType')
-	
-	
-	gals = []
-	galsDone = []
-	string = ''
-
-	#pdb.set_trace()
-	
-	for value in valueGals:
-		galId, idenId = spliter(value,'-')
-
-		galFieldsValue = []
-
-		
-		# ---------------- Identification values ----------------
-		iden = Identifications.objects.get(id=idenId)
-		contaminatedGal = iden.contaminated
-		redshiftGal = iden.redshift
-		typeGalId = iden.galaxytype.id
-		typeGalName = iden.galaxytype.name
-
-		# ---------------- Galaxy values ----------------
-		galUid = iden.galaxy.uniq_id
-		galFieldId = iden.galaxy.parfolder.fieldId_par
-
-
-		# ---------------- Feature Galaxy ----------------
-		for field in galFields:
-			try:
-				if galId not in galsDone:
-					feat = GalaxyFeatures.objects.get(galaxy_id=galId, galaxyfields_id=field)
-					galFieldsValue.append([feat.galaxyfields.name,feat.value])
-					galsDone.append(galId)
-			except:
-				print 'Error'
-
-
-		gals.append([galUid, galFieldId, contaminatedGal, redshiftGal, typeGalName, galFieldsValue])
-	
-	#now, we have all what we need. We need to change the array's structure
-	for gal in gals:
-		print gal
-
-
-	# ---------------- Create the cvs file ----------------
-	response = HttpResponse(content_type='text/csv')
-	response['Content-Disposition'] = 'attachment; filename=export.csv'
-	writer = csv.writer(response, csv.excel)
-	writer.writerow([
-		smart_str(u"Name"),
-		smart_str(u"Value"),
-	])
-	for obj in gals:
-		writer.writerow([
-			smart_str(obj[0]),
-			smart_str(obj[1]),
-		])
-	
-	return response
-
 def createTxtFile(request):
 	valueGalsIdens = request.session['valueGals']
 	galFields = request.POST.getlist('galFields')
@@ -466,23 +451,53 @@ def createTxtFile(request):
 
 	galAndFolderIds, idenIds = spliterArray(valueGalsIdens, '-')
 
-	final = countReviews(galAndFolderIds) #count number of review(s) per galaxy
+	#[id,number]
+	numberReviews = countReviews(galAndFolderIds) #count number of review(s) per galaxy
+	numberReviewsWithIds = rebuildArray(numberReviews)
 
+	#[idGal, numContaminated, [[galTypeId, number],[galTypeId, number],...], [[0,0.01,number],...]]
 	idens = countValuesIden(idenIds, contaminated, redshift, galType)
 
+	final = []
 
-	
+	for review in numberReviewsWithIds:
+		for i in idens:
+			if review[0] == i[0]:
+				save = i[1]
+				del i
+				save.insert(0,review[1][2])	
+				save.insert(0,review[1][1])	
+				save.insert(0,review[1][0])	
+				final.append(save)
+				break
 
 
+	#print final
 
+	refArray = createRefRedshiftIntervalArray()
+	refArray.insert(0,smart_str(u"Possible emission line"))
+	refArray.insert(0,smart_str(u"Not real"))
+	refArray.insert(0,smart_str(u"Galaxy with one emission line"))
+	refArray.insert(0,smart_str(u"Nothing"))
+	refArray.insert(0,smart_str(u"Galaxy with emission line"))
+	refArray.insert(0,smart_str(u"Galaxy without emission line"))
+	refArray.insert(0,smart_str(u"Quasar"))
+	refArray.insert(0,smart_str(u"Star"))
+	refArray.insert(0,smart_str(u"Contaminated"))
+	refArray.insert(0,smart_str(u"Number of reviews"))
+	refArray.insert(0,smart_str(u"Field Id"))
+	refArray.insert(0,smart_str(u"Uniq Id"))
+
+		
 	# ---------------- Create the cvs file ----------------
 	response = HttpResponse(content_type='text/csv')
 	response['Content-Disposition'] = 'attachment; filename=export.csv'
 	writer = csv.writer(response, csv.excel)
-	writer.writerow([
-		smart_str(u"Name"),
-		smart_str(u"Value"),
-	])
+	writer.writerow(refArray)
+
+	
+	writer.writerows(final)	
+		
 	
 	return response
 

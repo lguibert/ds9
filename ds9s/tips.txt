@@ -527,3 +527,69 @@ def viewHomeGalaxy(request):
             }
       ]
 }
+
+def createTxtFileOLD(request):
+      valueGals = request.session['valueGals']
+
+
+      galFields = request.POST.getlist('galFields')
+      contaminated = request.POST.getlist('contaminated')
+      redshift = request.POST.getlist('redshift')
+      galType = request.POST.getlist('galType')
+      
+      
+      gals = []
+      galsDone = []
+      string = ''
+
+      #pdb.set_trace()
+      
+      for value in valueGals:
+            galId, idenId = spliter(value,'-')
+
+            galFieldsValue = []
+
+            
+            # ---------------- Identification values ----------------
+            iden = Identifications.objects.get(id=idenId)
+            contaminatedGal = iden.contaminated
+            redshiftGal = iden.redshift
+            typeGalId = iden.galaxytype.id
+            typeGalName = iden.galaxytype.name
+
+            # ---------------- Galaxy values ----------------
+            galUid = iden.galaxy.uniq_id
+            galFieldId = iden.galaxy.parfolder.fieldId_par
+
+
+            # ---------------- Feature Galaxy ----------------
+            for field in galFields:
+                  try:
+                        if galId not in galsDone:
+                              feat = GalaxyFeatures.objects.get(galaxy_id=galId, galaxyfields_id=field)
+                              galFieldsValue.append([feat.galaxyfields.name,feat.value])
+                              galsDone.append(galId)
+                  except:
+                        print 'Error'
+
+
+            gals.append([galUid, galFieldId, contaminatedGal, redshiftGal, typeGalName, galFieldsValue])
+      
+      #now, we have all what we need. We need to change the array's structure
+
+
+      # ---------------- Create the cvs file ----------------
+      response = HttpResponse(content_type='text/csv')
+      response['Content-Disposition'] = 'attachment; filename=export.csv'
+      writer = csv.writer(response, csv.excel)
+      writer.writerow([
+            smart_str(u"Name"),
+            smart_str(u"Value"),
+      ])
+      for obj in gals:
+            writer.writerow([
+                  smart_str(obj[0]),
+                  smart_str(obj[1]),
+            ])
+      
+      return response
