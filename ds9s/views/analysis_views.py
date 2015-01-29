@@ -248,6 +248,9 @@ def incrementBase(base, data):
 	del base[0]
 
 	for b in base:
+		print 'b00: ', b[0][0]
+		print 'b01: ', b[0][0]
+		print 'data-1: ', data[-1]
 		if b[0][0] == data[-1]:
 			b[0][1] += 1
 
@@ -280,15 +283,37 @@ def countValuesIden(array, contaminated, redshift, galType):
 	data = getDataIden(array, contaminated, redshift, galType)
 
 	#if contaminated == True:
-	#	contaArray = calculateNumberContaminated(data) #[id, num]
+	#	contaminatedArray = calculateNumberContaminated(data) #[id, num]
 
-	#if galType == True:
-	#	typeArray = calculateNumberGalaxyType(data)
+	if galType == True:
+		typesArray = calculateNumberGalaxyType(data)
+
+		
+
 
 
 	#count how redshift there is between 0 and 3 with 0.01 step (default values)
-	if redshift == True:
-		possibleValuesRedshift = newRedshiftArray()
+	#if redshift == True:
+		#act = data[0][0]
+	#	intervalRedshift = newRedshiftIntervalArray(data[0][0]) #[[0,0.01,0],[0.01,0.02,0],...]	
+		'''for d in data:
+			if d[0] == act:	
+				base = incrementBase(base,d)		
+
+			else:					
+				typeArray.append(base)		
+				base = newBase(d[0])
+				act = d[0]		
+
+				base = incrementBase(base,d)
+			
+		else:
+			typeArray.append(base)'''
+
+		#print intervalRedshift
+
+		
+
 
 		
 
@@ -298,19 +323,36 @@ def countValuesIden(array, contaminated, redshift, galType):
 
 	return final
 
-def newRedshiftArray(start = 0, end = 3.01, step = 0.01):
-	return np.arange(start,end,step)
 
+def newRedshiftIntervalArray(id, start = 0, end = 3, step = 0.01):
+	allValues = np.arange(start, end+step, step)
+	final = [id]
+	intervals = []
+
+	for i, a in enumerate(allValues):
+		if a != allValues[-1]:
+			low = a
+			high = allValues[i+1]
+
+			interval = [low, high, 0]
+
+			if interval not in intervals:
+				intervals.append(interval)
+
+	final.append(intervals)
+
+	return final
 
 
 def newBase(id):
 	types = GalaxyTypes.objects.all()
 	base = [id]
+	array = []
 
-	for t in types:
-		array = []
+	for t in types:		
 		array.append([t.id,0,t.name])
-		base.append(array)
+
+	base.append(array)
 
 	return base
 
