@@ -260,7 +260,6 @@ def incrementBase(base, data):
 
 	return base
 
-
 def calculateNumberGalaxyType(data):
 	typeArray = [] #[[id,[1,0,name],[2,0,name],[3,0,name],[4,0,name],[5,0,name],[6,0,name],[7,0,name],[8,0,name]],...]
 
@@ -349,8 +348,8 @@ def countValuesIden(idenIds, contaminated, redshift, galType):
 	if typesArray:
 		final = mergeTwoArray(typesArray, final)
 
-	#if redshiftInvertal:
-	#	final = mergeTwoArray(redshiftInvertal, final)
+	if redshiftInvertal:
+		final = mergeTwoArray(redshiftInvertal, final)
 
 	return final
 
@@ -396,7 +395,7 @@ def newBase(id):
 	array = []
 
 	for t in types:		
-		array.append([t.id,0,t.name])
+		array.append([t.id,0])
 
 	base.append(array)
 
@@ -436,6 +435,23 @@ def rebuildArray(array):
 
 	return final
 
+def createRefArray():
+	refArray = createRefRedshiftIntervalArray()
+	refArray.insert(0,smart_str(u"Possible emission line"))
+	refArray.insert(0,smart_str(u"Not real"))
+	refArray.insert(0,smart_str(u"Galaxy with one emission line"))
+	refArray.insert(0,smart_str(u"Nothing"))
+	refArray.insert(0,smart_str(u"Galaxy with emission line"))
+	refArray.insert(0,smart_str(u"Galaxy without emission line"))
+	refArray.insert(0,smart_str(u"Quasar"))
+	refArray.insert(0,smart_str(u"Star"))
+	refArray.insert(0,smart_str(u"Contaminated"))
+	refArray.insert(0,smart_str(u"Number of reviews"))
+	refArray.insert(0,smart_str(u"Field Id"))
+	refArray.insert(0,smart_str(u"Uniq Id"))
+
+	return refArray
+
 
 @login_required
 @permission_required("ds9s.view_allIdentifications")
@@ -471,35 +487,54 @@ def createTxtFile(request):
 				final.append(save)
 				break
 
+	#unarray data for galaxy types
+	for f in final:	
+		where = f.index(f[4]) 
+		f[4] = unarrayArray(f[4])
+		save = f[4][::-1]
+		del f[4]
+		for val in save:
+			f.insert(where,val)
 
-	#print final
+	#unarray data for redshift intervals
+	for f in final:
+		where = f.index(f[12])
+		f[12] = unarrayInterval(f[12])
+		save = f[12][::-1]
+		del f[12]
+		for val in save:
+			f.insert(where,val)
 
-	refArray = createRefRedshiftIntervalArray()
-	refArray.insert(0,smart_str(u"Possible emission line"))
-	refArray.insert(0,smart_str(u"Not real"))
-	refArray.insert(0,smart_str(u"Galaxy with one emission line"))
-	refArray.insert(0,smart_str(u"Nothing"))
-	refArray.insert(0,smart_str(u"Galaxy with emission line"))
-	refArray.insert(0,smart_str(u"Galaxy without emission line"))
-	refArray.insert(0,smart_str(u"Quasar"))
-	refArray.insert(0,smart_str(u"Star"))
-	refArray.insert(0,smart_str(u"Contaminated"))
-	refArray.insert(0,smart_str(u"Number of reviews"))
-	refArray.insert(0,smart_str(u"Field Id"))
-	refArray.insert(0,smart_str(u"Uniq Id"))
+	
 
-		
+	refArray = createRefArray()	
 	# ---------------- Create the cvs file ----------------
 	response = HttpResponse(content_type='text/csv')
 	response['Content-Disposition'] = 'attachment; filename=export.csv'
 	writer = csv.writer(response, csv.excel)
-	writer.writerow(refArray)
 
-	
+	writer.writerow(refArray)	
 	writer.writerows(final)	
 		
 	
 	return response
+
+def unarrayArray(array):
+	values = []
+	for a in array:
+		values.append(a[1])
+
+	return values
+
+def unarrayInterval(interval):
+	values = []
+
+	for i in interval:
+		values.append(i[2])
+
+	return values
+	
+
 
 
 
