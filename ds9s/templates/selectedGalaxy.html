@@ -14,12 +14,12 @@
 {% endblock %}
 
 {% block content %}
-<h1>You have selected {{numGalSelected}} reviews.</h1>
+<h1>You selected {{numGalSelected}} reviews.</h1>
 
 	<form method='post' action='/ds9s/reviews/createFile/'>
 		{% csrf_token %}
 		<div id='allFieldsSelect'>
-			<div class='containerFieldsSelect col-xs-4 col-md-4'>
+			<div class='containerFieldsSelect col-xs-6 col-md-6'>
 				<h2 class='controllerCheckboxs' title='select/unselect all'>Galaxy fields</h2>
 				<div class='checkboxsSelect'>
 					{% for field in galFields %}		
@@ -32,7 +32,7 @@
 				</div>
 			</div>
 
-			<div class='containerFieldsSelect col-xs-3 col-md-3 col-md-offset-1'>
+			<div class='containerFieldsSelect col-xs-5 col-md-5 col-md-offset-1'>
 				<h2 class='controllerCheckboxs' title='select/unselect all'>Reviews fields</h2>	
 				<div class='checkboxsSelect'>				
 					<div class="checkbox fieldsSelect"> 

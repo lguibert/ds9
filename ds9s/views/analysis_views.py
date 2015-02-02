@@ -539,23 +539,3 @@ def unArray(array):
 		values.append(a[out])
 
 	return values
-
-def unarrayArray(array):
-	values = []
-	for a in array:
-		values.append(a[1])
-
-	return values
-
-def unarrayInterval(interval):
-	values = []
-
-	for i in interval:
-		values.append(i[2])
-
-	return values
-	
-
-
-
-
