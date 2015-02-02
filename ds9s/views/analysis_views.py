@@ -342,13 +342,13 @@ def countValuesIden(idenIds, contaminated, redshift, galType):
 	for id in ids:
 		final.append([id, []])
 
-	if contaminatedArray:
+	if "contaminatedArray" in locals():
 		final = mergeTwoArray(contaminatedArray, final)
 
-	if typesArray:
+	if "typesArray" in locals():
 		final = mergeTwoArray(typesArray, final)
 
-	if redshiftInvertal:
+	if "redshiftInvertal" in locals():
 		final = mergeTwoArray(redshiftInvertal, final)
 
 	return final
@@ -435,17 +435,23 @@ def rebuildArray(array):
 
 	return final
 
-def createRefArray():
-	refArray = createRefRedshiftIntervalArray()
-	refArray.insert(0,smart_str(u"Possible emission line"))
-	refArray.insert(0,smart_str(u"Not real"))
-	refArray.insert(0,smart_str(u"Galaxy with one emission line"))
-	refArray.insert(0,smart_str(u"Nothing"))
-	refArray.insert(0,smart_str(u"Galaxy with emission line"))
-	refArray.insert(0,smart_str(u"Galaxy without emission line"))
-	refArray.insert(0,smart_str(u"Quasar"))
-	refArray.insert(0,smart_str(u"Star"))
-	refArray.insert(0,smart_str(u"Contaminated"))
+def createRefArray(contaminated, redshift, galType):
+	refArray = []
+
+	if redshift == True:
+		refArray = createRefRedshiftIntervalArray()
+	if galType == True:
+		refArray.insert(0,smart_str(u"Possible emission line"))
+		refArray.insert(0,smart_str(u"Not real"))
+		refArray.insert(0,smart_str(u"Galaxy with one emission line"))
+		refArray.insert(0,smart_str(u"Nothing"))
+		refArray.insert(0,smart_str(u"Galaxy with emission line"))
+		refArray.insert(0,smart_str(u"Galaxy without emission line"))
+		refArray.insert(0,smart_str(u"Quasar"))
+		refArray.insert(0,smart_str(u"Star"))
+	if contaminated == True:
+		refArray.insert(0,smart_str(u"Contaminated"))
+
 	refArray.insert(0,smart_str(u"Number of reviews"))
 	refArray.insert(0,smart_str(u"Field Id"))
 	refArray.insert(0,smart_str(u"Uniq Id"))
@@ -489,25 +495,28 @@ def createTxtFile(request):
 
 	#unarray data for galaxy types
 	for f in final:	
-		where = f.index(f[4]) 
-		f[4] = unarrayArray(f[4])
-		save = f[4][::-1]
-		del f[4]
-		for val in save:
-			f.insert(where,val)
+		#print f
+		toDo = []
+		for value in f:
+			if type(value) == list:
+				toDo.append(f.index(value))
 
-	#unarray data for redshift intervals
-	for f in final:
-		where = f.index(f[12])
-		f[12] = unarrayInterval(f[12])
-		save = f[12][::-1]
-		del f[12]
-		for val in save:
-			f.insert(where,val)
+		saves = []
+		for do in toDo:
+			save = unArray(f[do])
+			for val in save:
+				saves.insert(0,val)
+		else:
+			for do in toDo[::-1]:
+				del f[do]
+
+		length = len(f)
+		for val in saves:
+			f.insert(length,val)
 
 	
 
-	refArray = createRefArray()	
+	refArray = createRefArray(contaminated, redshift, galType)	
 	# ---------------- Create the cvs file ----------------
 	response = HttpResponse(content_type='text/csv')
 	response['Content-Disposition'] = 'attachment; filename=export.csv'
@@ -518,6 +527,18 @@ def createTxtFile(request):
 		
 	
 	return response
+
+def unArray(array):
+	values = []
+	out = 1
+
+	if len(array[0]) > 2:
+		out = 2
+
+	for a in array:	
+		values.append(a[out])
+
+	return values
 
 def unarrayArray(array):
 	values = []
