@@ -84,7 +84,7 @@
       </div>
   </header>
     <div id="root"  {% block classPage%} class="container" {% endblock %}>
-      <div id="main" class="row">
+      <div id="main">
         {% if messages %}
         <ul class="messages">
             {% for message in messages %}
@@ -101,7 +101,7 @@
       
       <hr>
 
-      <footer>
+      <footer class='container-fuild'>
         <h4>DS9 Web Application</h4>
         <ul class="list-inline list-unstyled">
           <li><a class="btn btn-primary btn-lg" href="/ds9s/information/">Information</a></li>

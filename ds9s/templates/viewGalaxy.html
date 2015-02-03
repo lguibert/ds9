@@ -40,7 +40,7 @@ class = 'container-fuild'
 					<form class="unsubmitable form-inline">
 						{% csrf_token %}
 						<div class="controllers">
-							<div class='col-xs-2 col-md-2'>
+							<div class='col-xs-3 col-md-3'>
 								<select class="colors  form-control" name="colors">
 								{% load ds9s_extras %}
 								{% for d in colors.colors %}
@@ -59,10 +59,10 @@ class = 'container-fuild'
 								{% endfor %}
 								</select>
 							</div>
-							<div class='col-xs-2 col-md-2'>
+							<!--<div class='col-xs-2 col-md-2'>
 								<input type="button" id="default" class="btn btn-default disableCharge" value="Default values"/>
-							</div>
-							<div class='col-xs-2 col-md-2'>
+							</div>-->
+							<div class='col-xs-3 col-md-3'>
 								<label for="scaling">Zoom =</label>
 								<input type="number" min="1" value="150" class="disableCharge" name="valScaling" id="valScaling" max="300"/>
 							</div>
@@ -73,11 +73,11 @@ class = 'container-fuild'
 					</form>
 				</div>
 				<div class='clear'>
-					<div id="f110" class='col-xs-6 col-md-6'>
+					<div id="f110" class='imageBokeh '>
 						{{f110div}}
 					</div>
 					
-					<div id="f160140" class='col-xs-6 col-md-6'>
+					<div id="f160140" class='imageBokeh imageSecond'>
 						{{f160140div}}
 					</div>
 				</div>
@@ -96,29 +96,29 @@ class = 'container-fuild'
 			</div>
 		</div>
 			<div id="gFiles" class="row">				
-				<div id="g102" class="imageBokeh col-xs-6 col-md-6">
+				<div id="g102" class="col-xs-5 col-md-5">
 					{{g1div}}
 				</div>
-				<div id="g141" class="imageBokeh col-xs-6 col-md-6">
+				<div id="g141" class="col-md-offset-2 col-xs-5 col-md-5">
 					{{g2div}}
 				</div>
 			</div>
 		</div>
-		<div class="row">				
-				<div id="divRef" contenteditable="false" class="col-md-offset-6 col-xs-6 col-md-6">
-					<div id="divRef102" class="imageBokeh">
-					</div>
-					<div id="divRef141" class="imageBokeh imageSecond">
-					</div>
+		<div class="container-fuild">			
+			<div id="refSpectra" class="col-xs-12 col-md-12">
+				<ul id="ulRefSpec">
+					<li><label id="removeSelec" title="Click here to remove selection" class="pointer"><span class="removeImage"><img src="{% static 'images/close.png'%}" alt="Close"/></span>Reference: </label></li>
+					<li><input class="disableCharge pointer" type="radio" id="starRef" name="choiseRef" value="star"/><label for="starRef" class="pointer">Star</label></li>
+					<li><input class="disableCharge pointer" type="radio" id="quadarRef" name="choiseRef" value="quasar"/><label for="quadarRef" class="pointer">Quasar</label></li>
+					<li><input class="disableCharge pointer" type="radio" id="galaxyRef" name="choiseRef" value="galaxy"/><label for="galaxyRef" class="pointer">Galaxy</label></li>
+				</ul>
+			</div>
+			<div id="divRef" class='col-xs-12 col-md-12'>
+				<div id="divRef102" class="imageBokeh col-xs-6 col-md-6">
 				</div>
-				<div id="refSpectra" class="col-md-offset-6 col-xs-6 col-md-6">
-					<ul id="ulRefSpec">
-						<li><label id="removeSelec" title="Click here to remove selection" class="pointer"><span class="removeImage"><img src="{% static 'images/close.png'%}" alt="Close"/></span>Reference: </label></li>
-						<li><input class="disableCharge pointer" type="radio" id="starRef" name="choiseRef" value="star"/><label for="starRef" class="pointer">Star</label></li>
-						<li><input class="disableCharge pointer" type="radio" id="quadarRef" name="choiseRef" value="quasar"/><label for="quadarRef" class="pointer">Quasar</label></li>
-						<li><input class="disableCharge pointer" type="radio" id="galaxyRef" name="choiseRef" value="galaxy"/><label for="galaxyRef" class="pointer">Galaxy</label></li>
-					</ul>
+				<div id="divRef141" class="imageBokeh imageSecond col-xs-6 col-md-6">
 				</div>
+			</div>
 		</div>
 
 		<a class='btn btn-default' type='0' id='displayCatData'>See more information about this galaxy</a>
