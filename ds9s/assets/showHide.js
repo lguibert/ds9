@@ -104,4 +104,12 @@ $(document).ready(function(){
 		hideLegend($('.legendLine'));
 		$(document).scrollTop(300);
 	});
+
+	hideMessages();
+	function hideMessages(){
+		$('#main').find(".messages li.success").each(function(){
+			$(this).delay(5000).fadeOut('slow');
+		});
+	}	
+
 })
