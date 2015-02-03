@@ -433,6 +433,7 @@ input[type="number"]{
 
 .controllers{
 	margin-bottom: 20px;
+	padding-bottom: 30px;
 }
 
 .controllers input[type="range"]{
@@ -515,4 +516,22 @@ input[type=number]::-webkit-outer-spin-button {
 
 .plotdiv .bk-plot-wrapper table{
 	margin:auto !important;
+}
+
+@media (max-width: 1745px) {
+	.col-md-5{
+		width:100%;
+	}
+	.col-md-offset-1{
+		margin-left: 0;
+	}
+	.bothLittle{
+		width:100%;
+	}
+}
+
+@media (min-width: 1745px){
+	.bothLittle{
+		width:50%;
+	}
 }
