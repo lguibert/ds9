@@ -105,7 +105,7 @@ def createHistogram(data):
 @permission_required("ds9s.view_allIdentifications")
 @permission_required("ds9s.view_allAnalysis")
 def export(request):
-	idens = Identifications.objects.all()
+	idens = Identifications.objects.all().order_by('galaxy_id')
 	featuresX = []
 	featuresY = []
 	done = [] #array who will contain uniq_id who was already x & y getted
@@ -128,8 +128,8 @@ def export(request):
 			#fluxerrs.append(fluxerr)
 			done.append([id,idPar])
 		else:
-			featuresX.append(None)
-			featuresY.append(None)	
+			featuresX.append(featuresX[len(featuresX)-1])
+			featuresY.append(featuresY[len(featuresY)-1])	
 	
 	del done #deleting of done			
 
