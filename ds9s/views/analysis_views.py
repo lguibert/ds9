@@ -511,6 +511,7 @@ def getFieldsValues(idsGal, idsFields):
 @permission_required("ds9s.view_allIdentifications")
 @permission_required("ds9s.view_allAnalysis")
 def createTxtFile(request):
+	request.session['download_state'] = False
 	valueGalsIdens = request.session['valueGals']
 	galFields = request.POST.getlist('galFields')
 	
@@ -582,5 +583,12 @@ def createTxtFile(request):
 	writer.writerow(refArray)	
 	writer.writerows(final)	
 		
-	
+	request.session['download_state'] = True
 	return response
+
+@login_required
+@permission_required("ds9s.view_allIdentifications")
+@permission_required("ds9s.view_allAnalysis")
+def getStateDownload(request):
+	print request.session['download_state']
+	return HttpResponse(json.dumps(request.session['download_state']))
