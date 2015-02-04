@@ -6,6 +6,39 @@ tfoot tr th {
     padding: 8px !important;
 }
 
+.center{
+	text-align: center;
+	vertical-align: top;
+	margin-bottom: 15px;
+}
+
+.center h1{
+	font-size: 45px;
+}
+
+.note{
+	font-style: italic;
+}
+
+#linkBottom{
+	margin: 35px;
+}
+
+.imgLegend{
+	font-size: 12px;
+	width: 600px;
+	margin: auto;
+	text-align: justify;
+}
+
+.container-img{
+	margin: 15px 0 15px 0;
+}
+
+.container-text{
+	text-align: justify;
+}
+
 .background-selected{
 	background-color: darkgrey !important;
 }

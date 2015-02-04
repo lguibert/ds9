@@ -1,4 +1,107 @@
 {% extends "base.html" %}
+{% load staticfiles %}
+
+{% block flyCss %}
+	<link rel="stylesheet" href="{%static 'flyJumbo.css'%}"/>
+{% endblock %}
+
+{% block head %}
+	<div class='center'>
+		<h1>An Introduction to the WISP Emission-Line Galaxy Hunt</h1>
+		<h2>by Nathaniel R. Ross</h2>
+		<h3>UCLA Department of Physics & Astronomy</h3>
+	</div>
+{% endblock %}
+
+
 {% block content %}	
-<h1>Information: Comming soon... </h1>
+<div class='container-text'>	
+	<div class='note'>
+		<p>
+			Note: As part of my dissertation work, I have been developing a “citizen science” project -- in which members of the general public can contribute in a meaningful way to the advancement of science -- that will identify and classify the images and spectra of thousands of galaxies observed with the Hubble Space Telescope. The following is a draft of an introduction to the project, which will be made public online in the coming months.
+		</p>
+	</div>
+
+	<h3><strong>Motivation:</strong></h3>
+	<div>
+		<p>
+			One of the outstanding questions in astronomy is exactly how galaxies and their constituent parts (stars, gas, dust, black holes, dark matter) form and grow over the history of the universe. The broad strokes are as follows:
+		</p>
+		<ul>
+			<li>
+				The universe began in a hot big bang about 14 billion years ago. It has been expanding and cooling down ever since.
+			</li> 
+			<li>
+				The first galaxies began to form stars a within a few hundred million years.
+			</li>
+			<li>
+				Galaxies were most rapidly forming new stars between roughly 5-10 billion years after the big bang.
+			</li>
+			<li>
+				Galaxies have been forming new stars at a declining rate ever since.
+			</li>
+		</ul>
+	</div>
+
+	<div>
+		<p>
+			In order to understand the details of the universe we see around us, it is useful to study how galaxies form and evolve over time, especially during the period of cosmic history in which they were growing most rapidly. The challenges presented in identifying and studying these galaxies are two-fold:
+		</p>
+		<ol>
+			<li>
+				The reason that we can see galaxies as they existed billions of years ago is because they are very, very distant from us. The light that their stars produced billions of years ago has traveled through space ever since to reach our telescope today. But this great distance of travel causes the light we see to appear extremely faint. This is the same effect (although taken to the extreme) as how the headlights of an approaching car appear much fainter when the car is a mile away as opposed to when it is on the verge of passing you.
+			</li>
+			<li>
+				Due to the expansion of the universe, the light from the stars in these galaxies, which we would normally be able to see in the optical part of the light spectrum, is shifted into the near-infrared. Water in the Earth’s atmosphere will absorb much of the light in this part of the light spectrum before it can reach our telescopes on the ground. We refer to this change in the galaxy’s light as a “redshift”.
+			</li>
+		</ol>
+		<p>
+			The solution to these challenges is to use the Hubble Space Telescope which is both extraordinarily sensitive to faint and distant objects and orbits above the Earth’s atmosphere, where there is no interference with the near infrared light from very distant galaxies.
+		</p>
+	</div>
+
+	<div>
+		<p>
+			stronomers use two different types of data to delve into the physical processes that control the growth of galaxies and their constituents: Images and Spectra. The images give astronomers an idea of how the stars and gas of a galaxy are distributed in space. The spectra -- a measure of how much of a galaxy’s light comes from each part of the light spectrum -- can provide a great deal of information about the state of a galaxy: How many hot, young, stars are in a galaxy? How many cool, older stars? What is the chemical mixture of the gas in galaxies? How distant are the galaxies, as measured by the redshift in their spectra?
+		</p>
+	</div>
+
+	<h3><strong>The WISP Survey:</strong></h3>
+	<div>
+		<p>
+			The WISP Survey has been using the Hubble Space Telescope to obtain images and spectra of thousands of galaxies in the near-infrared part of the light spectrum over the last five years. In many cases, these galaxies are so faint that they have never been seen by any telescope before. But extracting the useful physical information out of these data is a real challenge. This is where you come in: You will help astronomers classify galaxies and their spectra using the Hubble Space Telescope data.
+		</p>
+		<div class='container-img center'>
+			<img src="{% static 'images/imgInformation.png'%}" alt=""/>
+			<p class='imgLegend'>
+				An example of what a galaxy spectrum might look like in the WISP Hubble Space Telescope data. The flatter parts of the spectrum come from starlight and the small wiggles come from noise in the spectrum -- essentially from imperfections in the camera and a degree of randomness inherent in the arrival of the light itself. The spikes that rise above the flat part of the spectrum are the emission lines from Oxygen, Hydrogen, and Helium. They provide a chemical fingerprint of each galaxy. Identifying these emission lines in each galaxy will tell us about the physical environment of the galaxy.
+			</p>
+		</div>
+	</div>
+
+	<div>
+		<p>
+			Most of a galaxy’s spectrum appears to be relatively flat. What you will be looking for are “emission lines”, which appear as bright spikes in the galaxy spectrum. These emission lines are a chemical fingerprint of the gas clouds of a galaxy. By measuring where they fall in the spectrum, and using our knowledge of where they should actually appear, we can measure the redshift of the galaxy. The primary chemical elements that produce the emission lines you will see are Hydrogen, Oxygen, and Sulfur. For example, the most common emission line we will see comes from Hydrogen. In nearby galaxies, this line would appear in the optical part of the spectrum as a pink-ish/red-ish color. But in the distant galaxies we will examine, the expansion of the universe has distorted the color of this line so that it will appear in the infrared, outside of the range of colors that your eye can see.
+		</p>
+	</div>
+
+	<div>
+		<p>
+			Because these galaxies are so faint, their spectra can be a bit messy and so automated computer methods may fail to properly find and classify these emission lines. The human eye (and mind), however is remarkably adept at finding patterns. But any individual human can make mistakes. This is why we need you, and many others like you, to help us classify these galaxies together. The more people who agree on a galaxy’s classification, the more confidence we have that it is correct. Some galaxies will not have any emission lines at all and we will not be able to classify them.
+		</p>
+	</div>
+
+	<h3>Thank you for helping us in our quest to understand the universe!</h3>
+
+	{% if not user.is_authenticated %} 
+	<div id='linkBottom'>
+		<p class='center'>
+			<a class='btn btn-default btn-lg' href="/ds9s/newUser/">Go create my account ! </a>
+		</p>
+	</div>
+	{% endif %}
+	
+
+
+</div>
 {% endblock %}
