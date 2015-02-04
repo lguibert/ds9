@@ -8,7 +8,9 @@
         $(document).ready(function(){
         	$('#firstTable tfoot th').each( function () {
 		    	var title = $('#firstTable thead th').eq( $(this).index() ).text();
-		        $(this).html( '<input type="text" placeholder="'+title+'" />' );
+
+		    	$(this).html( '<input type="text" placeholder="'+title+'" />' );
+
 		    });
 
         	var table = $("#firstTable").DataTable({
@@ -108,7 +110,7 @@
 				</thead>
 				<tfoot>
 		            <tr>
-		            	<th></th>
+		            	<th class='displayChildNone'></th>
 		                <th>Unique id</th>
 						<th>Field id</th>
 						<th>Contaminated</th>
@@ -121,7 +123,7 @@
 				<tbody>
 					{% for iden in idens %}
 						<tr value='{{iden.galaxy.id}}.{{iden.galaxy.uniq_id}}.{{iden.galaxy.parfolder.fieldId_par}}-{{iden.id}}' class="lines" name='{{iden.galaxy.uniq_name}}'>
-							<td class="littleTd"><input type="checkbox" class='selectExport'/>   Select this line</td>
+							<td class="littleTd"><input type="checkbox" class='selectExport'/>   Select this</td>
 							<td class='galsids' value='{{iden.galaxy.uniq_id}}'>{{iden.galaxy.uniq_id}}</td>
 							<td class='fieldsids' value='{{iden.galaxy.parfolder.fieldId_par}}'>{{iden.galaxy.parfolder.fieldId_par}}</td>
 							<td>{{iden.contaminated}}</td>
