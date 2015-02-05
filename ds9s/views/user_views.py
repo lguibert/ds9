@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 
+from fits_views import getIdActuelFolder
+
 import pdb
 
 
@@ -101,6 +103,7 @@ def connect(request):
 				user = authenticate(username=email, password=password)
 				if user:
 					login(request, user)
+					request.session['default_folder'] = getIdActuelFolder()
 					if next == '':
 						return HttpResponseRedirect("/ds9s/")
 					else:

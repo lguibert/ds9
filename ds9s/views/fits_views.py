@@ -15,6 +15,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Count
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -55,6 +56,7 @@ import json
 
 #-------------------------------- GLOBAL VARIABLES --------------------------------
 basePath = "/home/lguibert/test/" #folder where all the ParXXX are
+settingsFile = '/opt/lampp/www/ds9/ds9s/settings.json'
 
 findIn = "/G102_DRIZZLE/"
 findIn2 = "/G141_DRIZZLE/"
@@ -1420,5 +1422,46 @@ def updateUserReview(request, rev_id):
 			messages.error(request, "Error during saving.")
 
 	return HttpResponseRedirect("/ds9s/account/reviews/")
+
+
+def getFoldersForUpdate(request):
+	actualFolderId = request.session['default_folder']
+	availableFolders = ParFolder.objects.all().order_by('date_upload')
+
+	return actualFolderId, availableFolders
+
+def getIdActuelFolder():
+	settings = json.load(open(settingsFile))
+	return settings['default_folder']
+
+@login_required(login_url="/ds9s/")
+@user_passes_test(lambda u: u.is_staff)
+def settings(request):
+	actualFolderId, availableFolders = getFoldersForUpdate(request)
+
+	
+
+
+	return render(request, 'settings.html',locals())
+
+@login_required(login_url="/ds9s/")
+@user_passes_test(lambda u: u.is_staff)
+def changeDefaultFolder(request):
+	new = int(request.POST['defaultFolderChoise'])
+	request.session['default_folder'] = new	
+
+	with open(settingsFile, 'r+') as outfile:
+		settings = json.load(outfile)
+		settings['default_folder'] = new
+		outfile.seek(0)
+		outfile.write(json.dumps(settings, indent=4))
+		outfile.truncate()
+		
+	messages.success(request, "You successfully updated the default folder.")
+
+	actualFolderId, availableFolders = getFoldersForUpdate(request)
+
+	return render(request, 'settings.html',locals())
+
 
 

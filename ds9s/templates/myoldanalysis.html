@@ -12,7 +12,11 @@
         	var table = $("#firstTable").DataTable({
           	"columnDefs": [
           		{ "orderable": false, "targets": 6 }
-          	]
+          	],
+          	"aLengthMenu": [
+				[10, 25, 50, 100, -1],
+				[10, 25, 50, 100, "All"],
+			],     	
           });
 
 	        table.columns().eq( 0 ).each( function ( colIdx ) {
@@ -41,7 +45,7 @@
 
 {% block content %}
 	{% if identifications %}
-		<table id="firstTable" class="table table-hover">
+		<table id="firstTable" class="table table-hover compact">
 			<thead>
 				<tr>
 					<th>Unique id</th>

@@ -244,7 +244,7 @@ td[class='bk-plot-above bk-sidebar bk-toolbar-active'] a[class='bk-logo bk-logo-
 }
 
 @media (min-width: 1500px) {
-	.container-fuild{
+	#all {
 		width:1800px;
 		margin: auto;
 	}

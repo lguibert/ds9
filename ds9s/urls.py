@@ -29,6 +29,9 @@ urlpatterns = patterns('ds9s.views',
 	url(r'^/reviews/selected/','selectedGalaxy'),
 	url(r'^/reviews/getStateDownload/?$','getStateDownload'),
 	url(r'^/reviews/createFile/?$','createTxtFile'),
+
+	url(r'^/settings/?$','settings'),
+	url(r'^/changeDefaultFolder/?$','changeDefaultFolder'),
 	#url(r'^/zoom/(?P<id>[0-9]+)/?$','zoomFile')
 
 	url(r'^/account/reviews/?$','getReviewUser'),

@@ -33,6 +33,7 @@ class = 'container-fuild'
 
 {% load staticfiles %}
 {% block content %}	
+<div id='all' class='screenable'>
 	<div id="rootFiles" class="container-fluid">
 		<div class="row">
 			<div id="fFiles" class="col-xs-6 col-md-6">
@@ -104,7 +105,7 @@ class = 'container-fuild'
 				</div>
 			</div>
 		</div>
-		<div class="container-fuild">			
+		<div class="screenable container-fuild">			
 			<div id="refSpectra" class="col-xs-12 col-md-12">
 				<ul id="ulRefSpec">
 					<li><label id="removeSelec" title="Click here to remove selection" class="pointer"><span class="removeImage"><img src="{% static 'images/close.png'%}" alt="Close"/></span>Reference: </label></li>
@@ -139,6 +140,7 @@ class = 'container-fuild'
 	{% if not next %}
 		<h1>Last object of this list.</h1>
 	{% endif %}
+</div>
 	
 
 	{% block js %}

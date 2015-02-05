@@ -4,6 +4,7 @@
 
 {% block flyJs %}
 	<script type="text/javascript" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="//cdn.datatables.net/responsive/1.0.3/js/dataTables.responsive.js"></script>
       <script type="text/javascript">
         $(document).ready(function(){
         	$('#firstTable tfoot th').each( function () {
@@ -14,10 +15,16 @@
 		    });
 
         	var table = $("#firstTable").DataTable({
-          	"columnDefs": [
-          		{ "orderable": false, "targets": 0 }
+        	'responsive': true,
+		    "columnDefs": [
+          		{ "orderable": false, "targets": 0 },
           	],
-          	"aaSorting": [[1,'asc']]
+          	"aaSorting": [[1,'asc']],
+          	"aLengthMenu": [
+				[10, 25, 50, 100, -1],
+				[10, 25, 50, 100, "All"],
+			],
+             
           });
 
 	        table.columns().eq( 0 ).each( function ( colIdx ) {
@@ -28,6 +35,8 @@
 		                .draw();
 		        } );
 		    });
+
+		    table.columns.adjust().draw();
         });        
           
       </script>
@@ -35,9 +44,10 @@
 
 {% block flyCss %}
     <link rel="stylesheet" href="//cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/responsive/1.0.3/css/dataTables.responsive.css">
     <style type="text/css">
     	#root{
-    		width:1600px;
+    		width:initial;
     	}
     </style>
     
@@ -95,7 +105,7 @@
 			<input type='submit' value="Export selection" class='btn btn-default exportSelection'/>
 		</div>
 
-		<table id="firstTable" class="table table-hover">
+		<table id="firstTable" class="table table-hover compact">
 				<thead>
 					<tr>
 						<th id='headerSelector' type="undone">Select everything</th>

@@ -13,7 +13,11 @@
         	var table = $("#allReviewsTab").DataTable({
 	          	"columnDefs": [
 	          		{ "orderable": false, "targets": 3 }
-	          	]
+	          	],
+	          	"aLengthMenu": [
+			        [10, 25, 50, 100, -1],
+			        [10, 25, 50, 100, "All"],
+			    ],
           	});
 
 	        table.columns().eq( 0 ).each( function ( colIdx ) {

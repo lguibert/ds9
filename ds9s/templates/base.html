@@ -31,6 +31,10 @@
               <a class="navbar-brand unbindClick" href="/ds9s/view/">Let's go !</a>
               <a class="navbar-brand" href="/ds9s/account/reviews/">My previous reviews</a>
             {% endif %}
+
+            {% if user.is_superuser %}
+              <a class="navbar-brand navbar-right" href="/ds9s/settings/">Settings</a>
+            {% endif %}
             
             {% if perms.ds9s.view_allIdentifications and perms.ds9s.view_allAnalysis %}
             <a class="navbar-brand navbar-right" href="/ds9s/reviews/export/">Export</a>  
@@ -101,7 +105,7 @@
       
       <hr>
 
-      <footer class='container-fuild'>
+      <footer class='screenable container-fuild'>
         <h4>DS9 Web Application</h4>
         <ul class="list-inline list-unstyled">
           <li><a class="btn btn-primary btn-lg" href="/ds9s/information/">Information</a></li>

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block flyCss %}
+    {%load static %}
+	<link rel="stylesheet" href="{%static 'flyJumbo.css'%}"/>
+{% endblock %}
+
+{% block head %}
+	<h1 id="headGalaxy">Settings</h1>
+{% endblock %}
+
+{% block content %}
+
+	<form action="/ds9s/changeDefaultFolder/" method='post'>
+		{% csrf_token %}
+		<div class='form-group'>
+			<label for='defaultFolderChoise'>Select the default folder for all user</label>
+			<select class="form-control" name='defaultFolderChoise' id='defaultFolderChoise'>
+				{% for folder in availableFolders %}					
+					<option value='{{folder.id}}' 
+						{% if actualFolderId == folder.id %}selected{% endif %}
+					>
+						{{folder.name_par}}
+					</option>
+				{% endfor %}
+			</select>
+		</div>
+
+		<input type='submit' class='btn btn-default' id='btnUpdateDefaultFolder' value='Validate'/>
+	</form>
+
+{% endblock %}

@@ -33,7 +33,7 @@ TOOLS="pan,wheel_zoom,box_zoom,reset, hover"
 def getReviewUser(request):
 	identifications = Identifications.objects.filter(user_id=request.user.id)
 
-	return render(request, 'analysis.html',locals()) 
+	return render(request, 'myoldanalysis.html',locals()) 
 
 @login_required
 @permission_required("ds9s.view_allIdentifications")
@@ -41,7 +41,7 @@ def getReviewUser(request):
 def viewAllReviews(request):
 	idens = Identifications.objects.raw("SELECT COUNT(`galaxy_id`) as reviews, i.* FROM ds9s_identifications  i group by `galaxy_id`")
 
-	return render(request, 'reviews.html',locals())
+	return render(request, 'allReviews.html',locals())
 
 @login_required
 @permission_required("ds9s.view_allIdentifications")
