@@ -203,30 +203,54 @@ def getNextIndexQueue(objects, act):
 #More informations with the comments in the function
 @login_required
 def viewGalaxy(request, name=None): #name is in default at none because we need a begging for the queue.
+	idFolderAdmined, fieldIdFolderAdmined = splitValueFolder(request.session['default_folder'])
 	if name == None:
 		parfolder, act = getNextParFolder(request.user.id) #we take the older folder
 		if parfolder == None:
 			messages.error(request,"You did all the available galaxy.")
 			return redirect("/ds9s/account/reviews/")
 		else:
-			objects = openQueueFile(parfolder.fieldId_par)#open the relative file
+			folderFieldId = parfolder.fieldId_par
+			folderId = parfolder.id
+
+			print "b id: ", folderId
+			print "b field: ",folderFieldId
+
+			print "admin id: ",idFolderAdmined
+			print "admin field: ",fieldIdFolderAdmined
+
+
+			if long(idFolderAdmined) > long(folderId):
+				folderFieldId = fieldIdFolderAdmined
+				folderId = idFolderAdmined
+
+			print "a id: ", folderId
+			print "a field: ",folderFieldId
+
+			objects = openQueueFile(folderFieldId)#open the relative file
 			#get all what we need to display the page
 			if act == None:
-				act = firstObjectInFile(request, objects, parfolder.fieldId_par, parfolder.id)
+				act = firstObjectInFile(request, objects, folderFieldId, folderId)
 			else:
 				act = getNextIndexQueue(objects, act)
 
-			gal, next, wavelenghts = queue(request, objects, parfolder.fieldId_par, parfolder.id, act=act)
+			gal, next, wavelenghts = queue(request, objects, folderFieldId, folderId, act=act)
 	else:
-		uid, parfolderId, parId = getGalaxyInfodByUniqName(name) #get the galaxy with the name
-		if uid != None and parfolderId != None: #if we have something
-			objects = openQueueFile(parfolderId) #open the queue file
+		uid, folderFieldId, folderId = getGalaxyInfodByUniqName(name) #get the galaxy with the name
+		if uid != None and folderFieldId != None: #if we have something
+			if long(idFolderAdmined) > long(folderId):
+				folderFieldId = fieldIdFolderAdmined
+				folderId = idFolderAdmined
+
+			objects = openQueueFile(folderFieldId) #open the queue file
 			act = getIndexObjectById(objects, uid) #get the index in the file for the uniq_id
 			if act == None: #if we don't have a index
+				messages.error(request,"Error during the process (Galaxy not in file)")
 				return HttpResponseRedirect("/ds9s/") #redirect the user on home page
 			else:
-				gal, next, wavelenghts = queue(request, objects, parfolderId, parId, act=act)#else, get the galaxy in the queue
+				gal, next, wavelenghts = queue(request, objects, folderFieldId, folderId, act=act)#else, get the galaxy in the queue
 		else:
+			messages.error(request,"Error during the process.")
 			return HttpResponseRedirect("/ds9s/")
 
 	check = getIdentificationUser(gal.id, request.user.id) #here, we just take the user's previous review on this galaxy
@@ -1425,21 +1449,26 @@ def updateUserReview(request, rev_id):
 
 
 def getFoldersForUpdate(request):
-	actualFolderId = request.session['default_folder']
+	actualFolderId, actualFolderFieldId = splitValueFolder(request.session['default_folder'])
 	availableFolders = ParFolder.objects.all().order_by('date_upload')
 
-	return actualFolderId, availableFolders
+	return int(actualFolderId), actualFolderFieldId, availableFolders
 
 def getIdActuelFolder():
 	settings = json.load(open(settingsFile))
 	return settings['default_folder']
 
+def splitValueFolder(value):
+	data = value.split('-')
+
+	return data[0], data[1]
+
 @login_required(login_url="/ds9s/")
 @user_passes_test(lambda u: u.is_staff)
 def settings(request):
-	actualFolderId, availableFolders = getFoldersForUpdate(request)
+	actualFolderId, actualFolderFieldId, availableFolders = getFoldersForUpdate(request)
 
-	
+
 
 
 	return render(request, 'settings.html',locals())
@@ -1447,7 +1476,7 @@ def settings(request):
 @login_required(login_url="/ds9s/")
 @user_passes_test(lambda u: u.is_staff)
 def changeDefaultFolder(request):
-	new = int(request.POST['defaultFolderChoise'])
+	new = request.POST['defaultFolderChoise']
 	request.session['default_folder'] = new	
 
 	with open(settingsFile, 'r+') as outfile:
@@ -1459,7 +1488,7 @@ def changeDefaultFolder(request):
 		
 	messages.success(request, "You successfully updated the default folder.")
 
-	actualFolderId, availableFolders = getFoldersForUpdate(request)
+	actualFolderId, actualFolderFieldId, availableFolders = getFoldersForUpdate(request)
 
 	return render(request, 'settings.html',locals())
 

@@ -17,7 +17,7 @@
 			<label for='defaultFolderChoise'>Select the default folder for all user</label>
 			<select class="form-control" name='defaultFolderChoise' id='defaultFolderChoise'>
 				{% for folder in availableFolders %}					
-					<option value='{{folder.id}}' 
+					<option value='{{folder.id}}-{{folder.fieldId_par}}' 
 						{% if actualFolderId == folder.id %}selected{% endif %}
 					>
 						{{folder.name_par}}
