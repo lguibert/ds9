@@ -8,6 +8,7 @@ urlpatterns = patterns('ds9s.views',
 	url(r'^/account/update/?$','updateUser'),
 	url(r'^/information/?$','information'),
 	url(r'^/started/?$','gettingStarted'),
+	url(r'^/contact/?$','contact'),
 	url(r'^/account/?$','myAccount'),
 	
 	#url(r'^/$','viewHomeGalaxy'),

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block flyCss %}
+    {%load static %}
+	<link rel="stylesheet" href="{%static 'flyJumbo.css'%}"/>
+{% endblock %}
+
+{% block head %}
+	<h1 id="headGalaxy">Contact</h1>
+{% endblock %}
+
+{% block content %}
+
+	<div>
+		<h3>For any bug:</h3>
+		<p>
+			If you have any bugs or bad experience, please send a mail to <a href='mailto:debugwebapp@gmail.com' title="Send a mail.">debugwebapp@gmail.com</a> 
+		</p>
+	</div>
+
+	<div>
+		<h3>Creation:</h3>
+		<p>
+			Please contact me if you have any question about the website: 
+			<a href='mailto:lucas.guibert@viacesi.fr' title="Send me a mail !">lucas.guibert@viacesi.fr</a> 
+		</p>
+	</div>
+
+
+
+{% endblock %}

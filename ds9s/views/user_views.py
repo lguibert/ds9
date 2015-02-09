@@ -22,6 +22,9 @@ def myAccount(request):
 	user = User.objects.get(id=request.user.id)
 	return render(request, 'myaccount.html',locals())
 
+def contact(request):
+	return render(request, 'contact.html',locals())
+
 def information(request):
 	return render(request, 'information.html',locals())
 
