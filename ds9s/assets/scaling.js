@@ -70,7 +70,6 @@ $(document).ready(function(){
 		    }).complete(function(){
 		    	$(".disableCharge").prop("disabled",false);
 		    	deleteStyle();
-
 		    	//$("*").css("cursor","initial");
 		    }).error(function(xhr, err){
 		    	//alert("readyState: "+xhr.readyState+"\nstatus: "+xhr.status);

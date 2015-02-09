@@ -239,6 +239,10 @@ tfoot tr th {
 	margin-left: 10px;
 }
 
+#footer{
+	margin-top: 10px;
+}
+
 td[class='bk-plot-above bk-sidebar bk-toolbar-active'] a[class='bk-logo bk-logo-small']{
 	display: none !important;
 }
@@ -249,8 +253,9 @@ td[class='bk-plot-above bk-sidebar bk-toolbar-active'] a[class='bk-logo bk-logo-
 		margin: auto;
 	}
 
-	footer{
+	#footer{
 		padding-left: 25px;
+		padding-right: 25px;
 	}
 }
 

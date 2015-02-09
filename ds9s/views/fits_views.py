@@ -259,9 +259,9 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 		if check.redshift: #if the review has a redshift value
 			redshift = check.redshift #we take the value for the galaxy's redshift
 		else:
-			redshift = redshiftDefault #else, we take the default value
+			redshift =  calculateRedshiftFormWave(wavelenghts[0]) #else, we take the default value
 	else:
-		redshift = redshiftDefault #same thing
+		redshift = calculateRedshiftFormWave(wavelenghts[0]) #same thing
 
 	request.session['unameGal'] = gal.uniq_name #set in session the value of the galaxy's unique name
 
@@ -270,11 +270,6 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 	colors = getColors() #get all colors to display them in the combobox
 
 	features = GalaxyFeatures.objects.filter(galaxy_id = gal.id) # we take the galaxy's features (values from the .cat files)
-
-	'''try:
-		analysis = Analysis.objects.filter(user_id=request.user, galaxy_id=gal.id)
-	except ObjectDoesNotExist:
-		messages.info(request,'No analysis yet.')'''
 
 	checked, checked_short = checkAllFiles(gal.uniq_id, gal.parfolder.name_par, gal.parfolder.fieldId_par) #if all files exists
 	
@@ -308,6 +303,10 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 		messages.error(request, 'Error for this galaxy. Please go an other one.')
 
 	return render(request, 'viewGalaxy.html',locals())
+
+def calculateRedshiftFormWave(wave):
+	redshift = round((float(wave)/6563) -1,2)
+	return redshift
 
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
@@ -690,14 +689,6 @@ def createBokehImage(data, dataBoundaries, plot_width, plot_height, title, type=
 		return html_script, html_div
 	else:
 		return None, None
-
-'''
-def calculatePositionText(value):
-	value = float(value)/5 + 0.5
-	if value > 1.0:
-		value = value - 1
-	return value
-'''
 
 #return a string with the path to the .lines file
 def createPathParDat(fieldId):
