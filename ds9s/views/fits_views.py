@@ -305,8 +305,7 @@ def viewGalaxy(request, name=None): #name is in default at none because we need 
 	return render(request, 'viewGalaxy.html',locals())
 
 def calculateRedshiftFormWave(wave):
-	redshift = round((float(wave)/6563) -1,2)
-	return redshift
+	return round((float(wave)/6563) -1, 2)#the last 2 is for only 2 number after the coma
 
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------

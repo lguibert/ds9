@@ -18,9 +18,4 @@ $(document).ready(function(){
 			}			
 		}
 	}
-
-	$("#root").change(function(){
-		console.log("RESIZE");
-		placeFooter();
-	})
 });
