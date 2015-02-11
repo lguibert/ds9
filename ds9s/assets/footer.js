@@ -1,9 +1,7 @@
 $(document).ready(function(){
 	placeFooter();
 
-	function placeFooter(){		
-		console.log("Welcome in the function about the footer !");
-		console.log($('#root').height());
+	function placeFooter(){
 		var header = $('header .jumbotron');
 		var footer = $("#footer");
 		var body = $('body');
@@ -13,7 +11,6 @@ $(document).ready(function(){
 			console.log("First if validated");
 			var margin = body.outerHeight() - root.outerHeight() - header.outerHeight() - 10;
 			if (margin > 0){
-				console.log("Changed");
 				footer.css('margin-top',margin);
 			}			
 		}
